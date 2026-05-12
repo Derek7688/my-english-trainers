@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ultimate Cafe Trainer Pro</title>
     
-    <!-- 폰트: Pretendard Variable 적용 (모든 기기에서 애플 스타일로 보임) -->
+    <!-- 폰트: Pretendard Variable 적용 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -46,7 +46,7 @@
         h1 { 
             color: var(--primary-coffee); 
             font-size: 22px !important; 
-            margin-bottom: 20px; 
+            margin-bottom: 30px; /* 제목 아래 간격을 충분히 넓힘 */
             font-weight: 800; 
             letter-spacing: -0.04em; 
             line-height: 1.2;
@@ -90,7 +90,7 @@
         #korean-task { 
             font-size: 20px; 
             font-weight: 700; 
-            margin: 30px 0; 
+            margin: 20px 0; 
             min-height: 90px; 
             color: #2c3e50; 
             line-height: 1.55; 
@@ -101,24 +101,29 @@
             letter-spacing: -0.02em;
         }
 
+        /* 정답창 영역 고정: 정답이 없을 때도 공간을 차지하게 하여 버튼 위치 유지 */
         #english-answer { 
             font-size: 17px; 
             color: #2e7d32; 
-            margin-bottom: 30px; 
-            min-height: 60px; 
-            display: none; 
+            margin-bottom: 25px; 
+            min-height: 80px; /* 높이 고정 */
+            display: flex; /* 숨김 방식 변경: opacity 제어용 */
+            align-items: center;
+            justify-content: center;
             padding: 18px; 
             background: #f1fbf3; 
             border-radius: 16px; 
             border: 1px solid #c8e6c9; 
             font-weight: 600;
             line-height: 1.5;
-            animation: fadeIn 0.3s ease;
+            visibility: hidden; /* 초기 상태는 보이지 않지만 공간은 차지함 */
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
+        #english-answer.show {
+            visibility: visible;
+            opacity: 1;
         }
 
         .main-controls { display: flex; justify-content: center; gap: 10px; }
@@ -179,6 +184,7 @@
     </div>
     
     <div id="korean-task">원하시는 난이도를 선택해 주세요!</div>
+    <!-- 정답이 없을 때도 공간을 유지하도록 변경 -->
     <div id="english-answer"></div>
     
     <div id="action-area" class="control-group hidden">
@@ -272,15 +278,15 @@
 
     function updateDisplay() {
         document.getElementById('korean-task').innerText = currentTask.kr;
-        document.getElementById('english-answer').style.display = 'none';
-        document.getElementById('english-answer').innerText = currentTask.en;
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
     }
 
     function showAnswer() {
-        document.getElementById('english-answer').style.display = 'block';
+        document.getElementById('english-answer').classList.add('show');
     }
 
-    // 배너 로테이션
     const bannerMsgs = [
         { icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" },
         { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }
