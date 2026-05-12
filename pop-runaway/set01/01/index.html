@@ -33,7 +33,7 @@
 
         .card { 
             background: white; 
-            padding: 35px 25px; 
+            padding: 30px 25px; 
             border-radius: 28px; 
             box-shadow: 0 15px 35px rgba(75, 54, 33, 0.08); 
             text-align: center; 
@@ -41,9 +41,12 @@
             max-width: 480px; 
             border: 1px solid rgba(0,0,0,0.03);
             position: relative; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* 🚀 제목 스타일 */
+        /* 🚀 제목 스타일: 상단 여백을 줄이고 하단 여백을 유지 */
         h1 { 
             color: var(--primary-coffee); 
             font-size: 24px !important; 
@@ -51,26 +54,27 @@
             font-weight: 900; 
             letter-spacing: -0.05em; 
             line-height: 1.2;
+            order: 2; /* 버튼 다음으로 오도록 순서 고정 */
         }
 
-        /* 🚀 모드 선택 컨테이너: 반응형 레이아웃 */
+        /* 🚀 모드 선택 컨테이너: 절대 위치 해제 및 상단 배치 */
         .level-selector { 
-            display: flex;
-            justify-content: flex-end; /* 모바일: 우측 정렬 */
-            margin-bottom: 15px;
+            display: inline-flex; 
+            justify-content: center; 
+            gap: 8px; 
+            margin-bottom: 10px; /* 제목과의 간격 */
             background: #f1f3f5;
             padding: 4px;
             border-radius: 12px;
-            display: inline-flex; /* 너비를 내용에 맞게 */
+            order: 1; /* 최상단에 오도록 순서 고정 */
+            width: fit-content;
         }
 
-        /* PC 환경: 카드 내부 우측 상단 고정 */
+        /* 🚀 PC 버전에서의 겹침 방지를 위해 absolute 제거 */
         @media (min-width: 640px) {
             .level-selector {
-                position: absolute;
-                top: 25px;
-                right: 25px;
-                margin-bottom: 0;
+                position: static; /* 절대 위치 해제 */
+                margin-top: 5px;
             }
         }
 
@@ -110,6 +114,7 @@
             align-items: center; 
             justify-content: center;
             letter-spacing: -0.02em;
+            order: 3;
         }
 
         #english-answer { 
@@ -129,12 +134,15 @@
             visibility: hidden; 
             opacity: 0;
             transition: opacity 0.3s ease;
+            order: 4;
         }
 
         #english-answer.show {
             visibility: visible;
             opacity: 1;
         }
+
+        #action-area { order: 5; width: 100%; }
 
         .main-controls { display: flex; justify-content: center; gap: 10px; }
         
@@ -180,12 +188,15 @@
         }
 
         .hidden { display: none !important; }
+
+        /* PSE 광고 배너 순서 고정 */
+        #banner-container { order: 6; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <!-- 모드 선택 버튼 (반응형 위치 적용) -->
+    <!-- 모드 선택 버튼 (최상단 고정) -->
     <div class="level-selector">
         <button id="btn-beg" class="lvl-btn" onclick="setMode('beginner')">초급 모드</button>
         <button id="btn-adv" class="lvl-btn" onclick="setMode('advanced')">고급 모드</button>
@@ -244,12 +255,6 @@
         generate();
     }
 
-    function getRandom(obj) {
-        const keys = Object.keys(obj);
-        return { kr: keys[Math.floor(Math.random() * keys.length)], en: obj[keys[Math.floor(Math.random() * keys.length)]] };
-    }
-    
-    // getRandom 버그 수정 (키와 값이 매칭되도록)
     function getRandomFixed(obj) {
         const keys = Object.keys(obj);
         const randomKey = keys[Math.floor(Math.random() * keys.length)];
