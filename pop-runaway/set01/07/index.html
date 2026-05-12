@@ -23,26 +23,66 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        .card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; width: 95%; max-width: 500px; border: 1px solid #e2e8f0; position: relative; }
+        .card { 
+            background: white; 
+            padding: 30px 25px; 
+            border-radius: 24px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            text-align: center; 
+            width: 95%; 
+            max-width: 500px; 
+            border: 1px solid #e2e8f0; 
+            position: relative; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
         
-        /* 🚀 제목: 폰트 교체와 자간 조절로 프리패스 자신감 상승 */
+        /* 🚀 제목 스타일: 더 굵게 강조 및 순서 조정 */
         h1 { 
             color: #0f172a; 
-            font-size: 18px !important; 
-            margin-bottom: 15px; 
-            font-weight: 800; 
-            letter-spacing: -0.04em; 
+            font-size: 20px !important; 
+            margin: 10px 0 25px 0; 
+            font-weight: 900; 
+            letter-spacing: -0.05em; 
             line-height: 1.2; 
+            order: 2; /* 버튼 다음으로 배치 */
         }
 
-        .level-selector { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px; }
-        .lvl-btn { background: #1e293b; color: white; border: 2px solid transparent; padding: 10px 20px; border-radius: 50px; font-size: 14px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        /* 🚀 시작/다시섞기 버튼 컨테이너: 상단 독립 공간 확보 */
+        .level-selector { 
+            display: inline-flex; 
+            justify-content: center; 
+            margin-bottom: 10px;
+            order: 1; /* 최상단 배치 */
+        }
+
+        /* PC와 모바일 모두 동일하게 최상단 독립 공간을 쓰도록 static 설정 */
+        @media (min-width: 640px) {
+            .level-selector {
+                position: static; 
+                margin-top: 5px;
+            }
+        }
+        
+        .lvl-btn { 
+            background: #1e293b; 
+            color: white; 
+            border: none; 
+            padding: 6px 16px; 
+            border-radius: 50px; 
+            font-size: 13px; 
+            cursor: pointer; 
+            font-weight: 800; 
+            transition: all 0.2s; 
+            box-shadow: 0 2px 8px rgba(30, 41, 59, 0.2);
+        }
         .lvl-btn:active { transform: scale(0.95); }
         
         #korean-task { 
             font-size: 19px; 
             font-weight: 700; 
-            margin: 25px 0; 
+            margin: 20px 0 15px 0; 
             min-height: 100px; 
             color: #1e293b; 
             line-height: 1.6; 
@@ -52,38 +92,75 @@
             justify-content: center; 
             padding: 0 10px;
             letter-spacing: -0.02em;
+            order: 3;
+        }
+        
+        /* 🚀 정답창 영역 고정: 버튼 출렁임 방지 */
+        .answer-container {
+            min-height: 90px; 
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            order: 4;
         }
 
-        #english-answer { font-size: 16px; color: #15803d; margin-bottom: 25px; min-height: 60px; display: none; padding: 15px; background: #f0fdf4; border-radius: 12px; border: 1px solid #dcfce7; font-weight: 500; line-height: 1.5; }
+        #english-answer { 
+            font-size: 16px; 
+            color: #15803d; 
+            width: 100%;
+            padding: 15px; 
+            background: #f0fdf4; 
+            border-radius: 12px; 
+            border: 1px solid #dcfce7; 
+            font-weight: 600; 
+            line-height: 1.5; 
+            visibility: hidden; 
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        #english-answer.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        #action-area { order: 5; width: 100%; }
         .main-controls { display: flex; justify-content: center; gap: 8px; }
-        .ans-btn { background: #1e293b; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; border:none; font-size: 15px; }
-        .next-btn { background: #64748b; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; border:none; font-size: 15px; }
-        .back-btn { background: #f1f5f9; color: #475569; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border:none; font-size: 13px; margin-top: 10px; width: 100%; }
+        .ans-btn { background: #1e293b; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #64748b; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #475569; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #dee2e6; font-size: 13px; margin-top: 15px; width: 100%; }
+        
         .hidden { display: none !important; }
+        #banner-container { order: 6; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h1>🛂 실전 입국 심사 & 세관 신고 트레이너</h1>
-
     <div class="level-selector">
         <button id="btn-start" class="lvl-btn" onclick="startTrainer()">트레이닝 시작</button>
     </div>
+
+    <h1>🛂 실전 입국 심사 & 세관 신고 트레이너</h1>
     
     <div id="korean-task">식은땀 흘리지 말고 당당하게 프리패스! 💦</div>
-    <div id="english-answer"></div>
+    
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
     
     <div id="action-area" class="control-group hidden">
         <div class="main-controls">
             <button class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
             <button class="next-btn" onclick="generate()">다음 상황 🎲</button>
         </div>
-        <button class="back-btn" onclick="goBack()">이전 문장으로 ↩️</button>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
     </div>
 
     <!-- PSE 광고 배너 -->
-    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-8 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
          onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
         <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
             <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
@@ -97,7 +174,6 @@
 
 <script>
     const allClaims = [
-        // [패턴 1] I’m here + [방문 목적]
         { kr: "관광하러 왔어요.", en: "I’m here for sightseeing." },
         { kr: "출장으로 왔습니다.", en: "I’m here on business." },
         { kr: "휴가차 왔습니다.", en: "I’m here on vacation." },
@@ -109,8 +185,6 @@
         { kr: "컨퍼런스(학회) 때문에 왔어요.", en: "I’m here for a conference." },
         { kr: "친구를 보러 왔습니다.", en: "I’m here to see my friend." },
         { kr: "일하러 왔습니다.", en: "I’m here to work." },
-
-        // [패턴 2] I’ll be staying + [for 기간] + [at 숙소]
         { kr: "힐튼 호텔에서 10일 동안 머무를 거에요.", en: "I’ll be staying for 10 days at the Hilton." },
         { kr: "에어비앤비에서 일주일 동안 머물 거에요.", en: "I’ll be staying for a week at an Airbnb." },
         { kr: "친구 집에서 5일 동안 머물 거에요.", en: "I’ll be staying for 5 days at my friend’s place." },
@@ -121,8 +195,6 @@
         { kr: "메리어트에서 4박 동안 머무를 거에요.", en: "I’ll be staying for 4 nights at the Marriott." },
         { kr: "친척 집에서 며칠 동안 머무를 거에요.", en: "I’ll be staying for a few days at my relative’s place." },
         { kr: "오늘 밤 공항 호텔에서 머무를 거에요.", en: "I’ll be staying for tonight at the airport hotel." },
-
-        // [패턴 3] I have [물품] to declare. / I have nothing to declare.
         { kr: "신고할 게 아무것도 없습니다.", en: "I have nothing to declare." },
         { kr: "가공 식품이 있습니다.", en: "I have some processed food to declare." },
         { kr: "위스키 3병이 있습니다.", en: "I have 3 bottles of whiskey to declare." },
@@ -149,7 +221,6 @@
     function generate() {
         if (currentTask.kr) history.push({...currentTask});
         if (history.length > 50) history.shift();
-
         const randomIndex = Math.floor(Math.random() * allClaims.length);
         currentTask = allClaims[randomIndex];
         updateDisplay();
@@ -163,18 +234,16 @@
 
     function updateDisplay() {
         document.getElementById('korean-task').innerText = currentTask.kr;
-        document.getElementById('english-answer').style.display = 'none';
-        document.getElementById('english-answer').innerText = currentTask.en;
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
     }
 
     function showAnswer() {
-        document.getElementById('english-answer').style.display = 'block';
+        document.getElementById('english-answer').classList.add('show');
     }
 
-    const bannerMsgs = [
-        { icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" },
-        { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }
-    ];
+    const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
     let currentBannerIdx = 0;
     function rotateBanner() {
         currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
