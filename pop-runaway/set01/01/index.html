@@ -43,19 +43,18 @@
             position: relative; 
         }
 
-        /* 🚀 제목: 두께를 900(Black)으로 높여 제목답게 강조하고 하단 여백 추가 */
+        /* 🚀 제목: 하단 여백을 대폭 늘려 버튼과 확실히 분리 */
         h1 { 
             color: var(--primary-coffee); 
             font-size: 24px !important; 
-            margin-bottom: 45px; /* 모드 선택 버튼과 더 멀리 떨어트림 */
-            font-weight: 900; /* 훨씬 굵게 표시 */
+            margin-bottom: 60px; /* 요청하신 대로 간격을 아주 넓게 조정 */
+            font-weight: 900; 
             letter-spacing: -0.05em; 
             line-height: 1.2;
         }
 
-        /* 🚀 모드 선택: 버튼 크기를 줄이고 간결하게 정렬 */
         .level-selector { 
-            display: inline-flex; /* 너비를 내용에 맞게 조정 */
+            display: inline-flex; 
             justify-content: center; 
             gap: 8px; 
             margin-bottom: 30px; 
@@ -65,9 +64,9 @@
         }
 
         .lvl-btn { 
-            padding: 6px 16px; /* 높이와 너비를 줄임 */
+            padding: 6px 16px; 
             border-radius: 9px; 
-            font-size: 13px; /* 글자 크기 축소 */
+            font-size: 13px; 
             background: transparent; 
             color: #868e96; 
             border: none;
@@ -165,7 +164,7 @@
             cursor: pointer; 
             border: 1px dashed #dee2e6; 
             font-size: 13px; 
-            margin-top: 15px; 
+            margin-top: 15px; /* 하단 컨트롤 버튼들과의 간격 */
             width: 100%; 
         }
 
