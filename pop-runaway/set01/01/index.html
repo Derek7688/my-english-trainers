@@ -33,7 +33,7 @@
 
         .card { 
             background: white; 
-            padding: 30px 25px; 
+            padding: 35px 25px; 
             border-radius: 28px; 
             box-shadow: 0 15px 35px rgba(75, 54, 33, 0.08); 
             text-align: center; 
@@ -43,48 +43,49 @@
             position: relative; 
         }
 
+        /* 🚀 제목: 두께를 900(Black)으로 높여 제목답게 강조하고 하단 여백 추가 */
         h1 { 
             color: var(--primary-coffee); 
-            font-size: 22px !important; 
-            margin-bottom: 30px; /* 제목 아래 간격을 충분히 넓힘 */
-            font-weight: 800; 
-            letter-spacing: -0.04em; 
+            font-size: 24px !important; 
+            margin-bottom: 45px; /* 모드 선택 버튼과 더 멀리 떨어트림 */
+            font-weight: 900; /* 훨씬 굵게 표시 */
+            letter-spacing: -0.05em; 
             line-height: 1.2;
         }
 
+        /* 🚀 모드 선택: 버튼 크기를 줄이고 간결하게 정렬 */
         .level-selector { 
-            display: flex; 
+            display: inline-flex; /* 너비를 내용에 맞게 조정 */
             justify-content: center; 
-            gap: 10px; 
-            margin-bottom: 25px; 
+            gap: 8px; 
+            margin-bottom: 30px; 
             background: #f1f3f5;
-            padding: 5px;
-            border-radius: 16px;
+            padding: 4px;
+            border-radius: 12px;
         }
 
         .lvl-btn { 
-            flex: 1;
+            padding: 6px 16px; /* 높이와 너비를 줄임 */
+            border-radius: 9px; 
+            font-size: 13px; /* 글자 크기 축소 */
             background: transparent; 
             color: #868e96; 
             border: none;
-            padding: 10px; 
-            border-radius: 12px; 
-            font-size: 14px; 
             cursor: pointer; 
             font-weight: 700; 
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+            transition: all 0.2s ease; 
         }
 
         .lvl-btn.active-blue { 
             background: white; 
             color: var(--accent-blue); 
-            box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.12);
         }
 
         .lvl-btn.active-orange { 
             background: white; 
             color: var(--accent-orange); 
-            box-shadow: 0 4px 12px rgba(245, 124, 0, 0.15);
+            box-shadow: 0 2px 8px rgba(245, 124, 0, 0.12);
         }
 
         #korean-task { 
@@ -101,13 +102,12 @@
             letter-spacing: -0.02em;
         }
 
-        /* 정답창 영역 고정: 정답이 없을 때도 공간을 차지하게 하여 버튼 위치 유지 */
         #english-answer { 
             font-size: 17px; 
             color: #2e7d32; 
             margin-bottom: 25px; 
-            min-height: 80px; /* 높이 고정 */
-            display: flex; /* 숨김 방식 변경: opacity 제어용 */
+            min-height: 80px; 
+            display: flex; 
             align-items: center;
             justify-content: center;
             padding: 18px; 
@@ -116,7 +116,7 @@
             border: 1px solid #c8e6c9; 
             font-weight: 600;
             line-height: 1.5;
-            visibility: hidden; /* 초기 상태는 보이지 않지만 공간은 차지함 */
+            visibility: hidden; 
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -170,7 +170,6 @@
         }
 
         .hidden { display: none !important; }
-        .banner-inner { transition: all 0.5s ease; }
     </style>
 </head>
 <body>
@@ -184,7 +183,6 @@
     </div>
     
     <div id="korean-task">원하시는 난이도를 선택해 주세요!</div>
-    <!-- 정답이 없을 때도 공간을 유지하도록 변경 -->
     <div id="english-answer"></div>
     
     <div id="action-area" class="control-group hidden">
