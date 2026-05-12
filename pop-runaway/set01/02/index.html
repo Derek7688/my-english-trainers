@@ -24,26 +24,33 @@
         
         .card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; width: 95%; max-width: 500px; border: 1px solid #eee; position: relative; }
         
-        /* 🚀 제목 스타일 */
+        /* 🚀 제목 스타일: 더 굵고 선명하게 */
         h1 { 
             color: #4b3621; 
-            font-size: 18px !important; 
-            margin-bottom: 25px; 
-            font-weight: 800; 
-            letter-spacing: -0.04em; 
+            font-size: 20px !important; 
+            margin: 10px 0 25px 0; 
+            font-weight: 900; 
+            letter-spacing: -0.05em; 
             line-height: 1.2; 
-            text-align: center;
         }
 
-        /* 🚀 버튼을 구석으로 이동 (우측 상단) */
+        /* 🚀 시작/다시섞기 버튼 컨테이너: 모바일 대응 */
         .level-selector { 
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 10;
+            display: flex;
+            justify-content: flex-end; /* 기본은 우측 정렬 */
+            margin-bottom: 10px;
+        }
+
+        /* PC 환경: 카드 내부 우측 상단 고정 */
+        @media (min-width: 640px) {
+            .level-selector {
+                position: absolute;
+                top: 25px;
+                right: 25px;
+                margin-bottom: 0;
+            }
         }
         
-        /* 구석 버튼 크기 최적화 */
         .lvl-btn { 
             background: #4b3621; 
             color: white; 
@@ -52,17 +59,16 @@
             border-radius: 50px; 
             font-size: 12px; 
             cursor: pointer; 
-            font-weight: bold; 
-            transition: 0.2s; 
-            opacity: 0.8;
+            font-weight: 800; 
+            transition: all 0.2s; 
+            box-shadow: 0 2px 8px rgba(75, 54, 33, 0.15);
         }
-        .lvl-btn:hover { opacity: 1; }
         .lvl-btn:active { transform: scale(0.95); }
         
         #korean-task { 
             font-size: 19px; 
             font-weight: 700; 
-            margin: 35px 0 15px 0; 
+            margin: 20px 0 15px 0; 
             min-height: 100px; 
             color: #2c3e50; 
             line-height: 1.6; 
@@ -74,9 +80,9 @@
             letter-spacing: -0.02em;
         }
         
-        /* 🚀 정답창 영역 고정: 공간을 미리 차지하여 버튼 위치 고정 */
+        /* 🚀 정답창 영역 고정 */
         .answer-container {
-            min-height: 90px; /* 정답창의 높이를 미리 확보 */
+            min-height: 90px; 
             margin-bottom: 20px;
             display: flex;
             align-items: center;
@@ -91,31 +97,28 @@
             background: #f0fff4; 
             border-radius: 12px; 
             border: 1px solid #c6f6d5; 
-            font-weight: 500; 
+            font-weight: 600; 
             line-height: 1.5; 
-            /* 기본적으로 투명하게 설정하여 공간만 차지 */
             visibility: hidden; 
             opacity: 0;
             transition: opacity 0.3s ease;
         }
         
-        /* 정답 확인 시 클래스 추가로 노출 */
         #english-answer.show {
             visibility: visible;
             opacity: 1;
         }
 
         .main-controls { display: flex; justify-content: center; gap: 8px; }
-        .ans-btn { background: #4b3621; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; border:none; font-size: 15px; }
-        .next-btn { background: #6f4e37; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; border:none; font-size: 15px; }
-        .back-btn { background: #dee2e6; color: #495057; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border:none; font-size: 13px; margin-top: 10px; width: 100%; }
+        .ans-btn { background: #4b3621; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #6f4e37; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #adb5bd; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #dee2e6; font-size: 13px; margin-top: 15px; width: 100%; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <!-- 구석으로 옮겨진 시작/다시섞기 버튼 -->
     <div class="level-selector">
         <button id="btn-start" class="lvl-btn" onclick="startTrainer()">트레이닝 시작</button>
     </div>
@@ -124,7 +127,6 @@
     
     <div id="korean-task">잘못 나온 음료, 그냥 마실 건가요? 😤</div>
     
-    <!-- 고정된 정답 영역 -->
     <div class="answer-container">
         <div id="english-answer"></div>
     </div>
@@ -134,11 +136,10 @@
             <button class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
             <button class="next-btn" onclick="generate()">다음 상황 🎲</button>
         </div>
-        <button class="back-btn" onclick="goBack()">이전 문장으로 ↩️</button>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
     </div>
 
-    <!-- PSE 광고 배너 -->
-    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-8 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
          onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
         <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
             <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
@@ -152,15 +153,12 @@
 
 <script>
     const allClaims = [
-        // [패턴 1] This isn’t what I ordered. Could you [Action]?
         { kr: "제가 주문한 건 이게 아니에요. 제 주문 다시 확인해 줄래요?", en: "This isn’t what I ordered. Could you check my order again?" },
         { kr: "제가 주문한 건 이게 아니에요. 이거 다시 만들어 줄래요?", en: "This isn’t what I ordered. Could you make this again?" },
         { kr: "제가 주문한 건 이게 아니에요. 이거 아이스로 바꿔 줄래요?", en: "This isn’t what I ordered. Could you change this to an iced one?" },
         { kr: "제가 주문한 건 이게 아니에요. 이거 라떼로 바꿔 줄래요?", en: "This isn’t what I ordered. Could you replace this with a latte?" },
         { kr: "제가 주문한 건 이게 아니에요. 이거 아메리카노로 바꿔 줄래요?", en: "This isn’t what I ordered. Could you replace this with an americano?" },
         { kr: "제가 주문한 건 이게 아니에요. 이거 베이글로 바꿔 줄래요?", en: "This isn’t what I ordered. Could you replace this with a bagel?" },
-
-        // [패턴 2] This is supposed to be [State]. Could you [Action]?
         { kr: "이거 아주 뜨거운 거여야 하는데. 데워 줄래요?", en: "This is supposed to be extra hot. Could you heat it up?" },
         { kr: "이거 디카페인이어야 하는데. 다시 한번 확인해 줄래요?", en: "This is supposed to be decaf. Could you double-check it?" },
         { kr: "이거 덜 단 거여야 하는데. 다시 만들어 줄래요?", en: "This is supposed to be less sweet. Could you remake it?" },
@@ -171,8 +169,6 @@
         { kr: "이거 얼음 없는 거여야 하는데. 이것 좀 고쳐 줄래요?", en: "This is supposed to be without ice. Could you fix it?" },
         { kr: "이거 오트 우유여야 하는데. 다시 만들어 줄래요?", en: "This is supposed to be with oat milk. Could you remake it?" },
         { kr: "이거 두유여야 하는데. 다시 확인해 줄래요?", en: "This is supposed to be with soy milk. Could you double-check it?" },
-
-        // [패턴 3] My order hasn’t come out yet. Could you [Action]?
         { kr: "제 것이 아직 안 나왔어요. 확인 좀 해 줄래요?", en: "My order hasn’t come out yet. Could you check on it for me?" },
         { kr: "제 것이 아직 안 나왔어요. 서둘러 줄래요?", en: "My order hasn’t come out yet. Could you speed it up for me?" },
         { kr: "제 것이 아직 안 나왔어요. 얼마나 더 걸릴지 알려 줄래요?", en: "My order hasn’t come out yet. Could you tell me how much longer it'll take?" },
@@ -191,7 +187,6 @@
     function generate() {
         if (currentTask.kr) history.push({...currentTask});
         if (history.length > 30) history.shift();
-
         const randomIndex = Math.floor(Math.random() * allClaims.length);
         currentTask = allClaims[randomIndex];
         updateDisplay();
@@ -206,18 +201,15 @@
     function updateDisplay() {
         document.getElementById('korean-task').innerText = currentTask.kr;
         const ans = document.getElementById('english-answer');
-        ans.classList.remove('show'); // 정답 숨기기
+        ans.classList.remove('show');
         ans.innerText = currentTask.en;
     }
 
     function showAnswer() {
-        document.getElementById('english-answer').classList.add('show'); // 정답 보이기
+        document.getElementById('english-answer').classList.add('show');
     }
 
-    const bannerMsgs = [
-        { icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" },
-        { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }
-    ];
+    const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
     let currentBannerIdx = 0;
     function rotateBanner() {
         currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
