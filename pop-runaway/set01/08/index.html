@@ -4,15 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Transportation Trainer v7.0</title>
+    <!-- Pretendard 폰트 불러오기 (CDN) -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100vh; background-color: #fffbeb; margin: 0; padding: 40px 0; color: #333; }
+        /* 폰트 적용 및 기본 스타일 최적화 */
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: flex-start; 
+            min-height: 100vh; 
+            background-color: #fffbeb; 
+            margin: 0; 
+            padding: 40px 0; 
+            color: #333; 
+            -webkit-font-smoothing: antialiased;
+        }
+
         .card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; width: 95%; max-width: 500px; border: 1px solid #fef3c7; position: relative; }
-        h1 { color: #92400e; font-size: 18px !important; margin-bottom: 15px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
+        
+        /* 🚀 제목: 폰트 교체와 자간 조절로 세련된 느낌 강조 */
+        h1 { 
+            color: #92400e; 
+            font-size: 18px !important; 
+            margin-bottom: 15px; 
+            font-weight: 800; 
+            letter-spacing: -0.04em; 
+            line-height: 1.2; 
+        }
+
         .level-selector { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #fef3c7; padding-bottom: 20px; }
         .lvl-btn { background: #d97706; color: white; border: 2px solid transparent; padding: 10px 20px; border-radius: 50px; font-size: 14px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .lvl-btn:active { transform: scale(0.95); }
-        #korean-task { font-size: 19px; font-weight: 700; margin: 25px 0; min-height: 100px; color: #451a03; line-height: 1.6; word-break: keep-all; display: flex; align-items: center; justify-content: center; padding: 0 10px; }
+        
+        #korean-task { 
+            font-size: 19px; 
+            font-weight: 700; 
+            margin: 25px 0; 
+            min-height: 100px; 
+            color: #451a03; 
+            line-height: 1.6; 
+            word-break: keep-all; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 0 10px;
+            letter-spacing: -0.02em;
+        }
+
         #english-answer { font-size: 16px; color: #059669; margin-bottom: 25px; min-height: 60px; display: none; padding: 15px; background: #ecfdf5; border-radius: 12px; border: 1px solid #a7f3d0; font-weight: 500; line-height: 1.5; }
         .main-controls { display: flex; justify-content: center; gap: 8px; }
         .ans-btn { background: #d97706; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; border:none; font-size: 15px; }
@@ -42,7 +83,7 @@
     </div>
 
     <!-- PSE 광고 배너 -->
-    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-8 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-8 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-sm mx-auto" 
          onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
         <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
             <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
