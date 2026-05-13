@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daily English Trainer</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-amber: #92400e;
+            --btn-amber: #d97706;
+            --accent-green: #059669;
+            --bg-gray: #fffbeb;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #333; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            text-align: center; width: 95%; max-width: 500px; border: 1px solid #fef3c7; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 15px;
+        }
+        .top-controls.active { display: flex; }
+
+        h1 { 
+            color: var(--primary-amber); font-size: 20px !important; margin: 10px 0 25px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2;
+        }
+
+        #korean-task { 
+            font-size: 19px; font-weight: 700; margin: 20px 0 15px 0; min-height: 100px; 
+            color: #451a03; line-height: 1.6; word-break: keep-all; display: flex; align-items: center; justify-content: center; 
+            padding: 0 10px; letter-spacing: -0.02em;
+        }
+
+        .start-container { margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--btn-amber); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(146, 64, 14, 0.2);
+        }
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(146, 64, 14, 0.15); }
+        .lvl-btn:active { transform: scale(0.95); }
+
+        .auto-toggle {
+            display: flex; align-items: center; gap: 5px; background: #fef3c7; padding: 4px; border-radius: 12px;
+        }
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: #92400e;
+        }
+        .toggle-btn.active { background: var(--primary-amber); color: white; }
+        
+        .answer-container {
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%;
+        }
+
+        #english-answer { 
+            font-size: 16px; color: var(--accent-green); width: 100%; padding: 15px; 
+            background: #ecfdf5; border-radius: 12px; border: 1px solid #a7f3d0; font-weight: 600; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 8px; }
+        .ans-btn { background: var(--btn-amber); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #78350f; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #92400e; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #fef3c7; font-size: 13px; margin-top: 15px; width: 100%; }
+        
+        .hidden { display: none !important; }
+
+        .promo-banner { margin-top: 30px; width: 100%; }
+
+        #auto-progress {
+            width: 0%; height: 4px; background: #f59e0b; position: absolute; top: 0; left: 0; border-radius: 24px 24px 0 0; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini">
+            <button class="lvl-btn" onclick="generate()">다시 섞기 🎲</button>
+        </div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
+    </div>
+
+    <h1>✨ "I might as well" 실전 트레이너</h1>
+    
+    <div id="korean-task">이왕 이렇게 된 거, 이거라도 하는 게 낫겠어요! 💁‍♂️</div>
+    
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작 🎲</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
+            <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+            <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center">
+                <h3 id="banner-title" class="font-black text-slate-800 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const allClaims = [
+        // 핵심 문장 (Q1-Q5)
+        { kr: "기다리는 김에, 그냥 여기서 저녁이나 먹고 가자. 🍴", en: "I might as well have dinner here while waiting." },
+        { kr: "시작한 김에, 그냥 이거 오늘 다 끝내버리는 게 속 편해. 🔥", en: "I might as well finish this today since I started." },
+        { kr: "비도 오는데, 그냥 집에서 배달이나 시켜 먹자. 🌧️", en: "I might as well stay home and order in." },
+        { kr: "이왕 여기까지 온 거, 그냥 줄 서서라도 기다리자. ⏳", en: "I might as well wait in line since I’m here." },
+        { kr: "그냥 커피 한 잔 사서 천천히 가자. ☕", en: "I might as well grab a coffee and take my time." },
+
+        // 일상 및 여가 상황
+        { kr: "나가지 말고 그냥 집에서 영화나 보자.", en: "I might as well stay home and watch a movie." },
+        { kr: "잠도 안 오는데 그냥 책이나 읽어야겠다.", en: "I might as well read a book since I can't sleep." },
+        { kr: "이왕 옷 입은 김에 산책이나 나갈까?", en: "I might as well go for a walk since I'm dressed." },
+        { kr: "버스 놓친 김에 그냥 걸어가자.", en: "I might as well walk since I missed the bus." },
+        { kr: "세일 중인데 그냥 이것도 사자.", en: "I might as well buy this too since it's on sale." },
+        { kr: "배고픈데 그냥 지금 점심 먹자.", en: "I might as well eat lunch now since I'm hungry." },
+        { kr: "심심한데 그냥 게임이나 할까?", en: "I might as well play some games since I'm bored." },
+        { kr: "비가 그칠 때까지 여기서 기다리지 뭐.", en: "I might as well wait here until the rain stops." },
+        { kr: "이왕 온 거 사진이나 찍자.", en: "I might as well take some photos since I'm here." },
+        { kr: "남은 김에 내가 다 먹을게.", en: "I might as well eat it all since it's left over." },
+
+        // 업무 및 자기계발
+        { kr: "사무실에 남은 김에 일이나 더 하지 뭐.", en: "I might as well do some more work since I'm at the office." },
+        { kr: "노트북 켠 김에 이메일 확인이나 하자.", en: "I might as well check my emails since I turned on my laptop." },
+        { kr: "어차피 하는 거 제대로 하자.", en: "I might as well do it right since I'm doing it anyway." },
+        { kr: "시간 남는 김에 영어 공부나 할까?", en: "I might as well study English since I have some free time." },
+        { kr: "일찍 도착한 김에 서류나 미리 읽어두자.", en: "I might as well read the documents since I arrived early." },
+        { kr: "회의 늦어진 김에 커피나 마시러 가자.", en: "I might as well go grab a coffee since the meeting is delayed." },
+        { kr: "어차피 나가는 길에 쓰레기 버려줄게.", en: "I might as well take out the trash since I'm heading out anyway." },
+        { kr: "연락한 김에 그것도 물어보자.", en: "I might as well ask about that too since I'm calling anyway." },
+        { kr: "이왕 하는 거 한 번에 다 해치우자.", en: "I might as well get it all done at once." },
+        { kr: "배우는 김에 열심히 배우자.", en: "I might as well learn it properly since I'm learning it." },
+
+        // 사회적 상황 및 기타
+        { kr: "취소된 김에 그냥 집에서 쉴래.", en: "I might as well rest at home since it's canceled." },
+        { kr: "가까운 김에 들러서 얼굴이나 보자.", en: "I might as well drop by and see you since I'm close." },
+        { kr: "어차피 공짠데 그냥 가져가자.", en: "I might as well take it since it's free anyway." },
+        { kr: "다들 가는데 나도 가지 뭐.", en: "I might as well go since everyone else is going." },
+        { kr: "이왕 늦은 거 천천히 가자.", en: "I might as well take my time since I'm already late." },
+        { kr: "질문 있는 김에 다 물어봐.", en: "You might as well ask everything since you have questions." },
+        { kr: "기다려야 한다면 그냥 앉아 있자.", en: "I might as well sit down if I have to wait." },
+        { kr: "어차피 고장 난 거 새로 사지 뭐.", en: "I might as well buy a new one since it's broken anyway." },
+        { kr: "안 쓸 거면 그냥 나 줘.", en: "You might as well give it to me if you're not going to use it." },
+        { kr: "할 일 없으면 그냥 도와줘.", en: "You might as well help me if you have nothing to do." },
+
+        // 추가 상황 응용
+        { kr: "이왕 요리한 김에 많이 먹어.", en: "You might as well eat a lot since I cooked anyway." },
+        { kr: "청소 시작한 김에 화장실도 하자.", en: "I might as well clean the bathroom since I started cleaning." },
+        { kr: "차 빌린 김에 마트나 다녀오자.", en: "I might as well go to the mart since I borrowed the car." },
+        { kr: "넷플릭스 결제한 김에 정주행하자.", en: "I might as well binge-watch since I paid for Netflix." },
+        { kr: "운동복 입은 김에 헬스장 가자.", en: "I might as well go to the gym since I'm in my workout clothes." },
+        { kr: "휴가 낸 김에 여행이나 갈까?", en: "I might as well go on a trip since I took some time off." },
+        { kr: "불 켠 김에 거실도 치우자.", en: "I might as well tidy up the living room since the light is on." },
+        { kr: "펜 잡은 김에 일기도 쓰자.", en: "I might as well write in my diary since I have a pen." },
+        { kr: "물 끓이는 김에 내 차도 타줄게.", en: "I might as well make some tea for myself since I'm boiling water." },
+        { kr: "여기까지 온 김에 구경이나 더 하자.", en: "I might as well look around more since I'm all the way here." },
+        { kr: "어차피 젖은 거 그냥 비 맞고 가자.", en: "I might as well walk in the rain since I'm already wet." },
+        { kr: "말 나온 김에 지금 결정하자.", en: "I might as well decide now since we're talking about it." },
+        { kr: "가방 챙긴 김에 보조 배터리도 넣자.", en: "I might as well pack a power bank since I'm packing my bag." },
+        { kr: "기다릴 거면 그냥 여기서 쉬어.", en: "You might as well rest here if you're going to wait." },
+        { kr: "어차피 다시 해야 한다면 지금 하자.", en: "I might as well do it now if I have to do it again anyway." }
+    ];
+
+    let currentTask = { kr: '', en: '' };
+    let history = [];
+    let playMode = 'manual';
+    let autoTimer = null;
+
+    function startTrainer() {
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        generate();
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+
+        if (isAuto) {
+            generate();
+        } else {
+            clearTimeout(autoTimer);
+            updateProgressBar(0, 0);
+        }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        if (currentTask.kr) history.push({...currentTask});
+        if (history.length > 50) history.shift();
+        const randomIndex = Math.floor(Math.random() * allClaims.length);
+        currentTask = allClaims[randomIndex];
+        updateDisplay();
+
+        if (playMode === 'auto') {
+            runAutoCycle();
+        }
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000); 
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000); 
+            autoTimer = setTimeout(() => {
+                generate();
+            }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        currentTask = history.pop();
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.kr;
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() {
+        document.getElementById('english-answer').classList.add('show');
+    }
+
+    const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
+    let currentBannerIdx = 0;
+    setInterval(() => {
+        currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+        const msg = bannerMsgs[currentBannerIdx];
+        document.getElementById('banner-icon').innerText = msg.icon;
+        document.getElementById('banner-title').innerText = msg.text;
+    }, 4000);
+</script>
+
+</body>
+</html>
