@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daily English Trainer</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-amber: #92400e;
+            --btn-amber: #d97706;
+            --accent-green: #059669;
+            --bg-gray: #fffbeb;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #333; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            text-align: center; width: 95%; max-width: 500px; border: 1px solid #fef3c7; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 15px;
+        }
+        .top-controls.active { display: flex; }
+
+        h1 { 
+            color: var(--primary-amber); font-size: 20px !important; margin: 10px 0 25px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2;
+        }
+
+        #korean-task { 
+            font-size: 19px; font-weight: 700; margin: 20px 0 15px 0; min-height: 100px; 
+            color: #451a03; line-height: 1.6; word-break: keep-all; display: flex; align-items: center; justify-content: center; 
+            padding: 0 10px; letter-spacing: -0.02em;
+        }
+
+        .start-container { margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--btn-amber); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(146, 64, 14, 0.2);
+        }
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(146, 64, 14, 0.15); }
+        .lvl-btn:active { transform: scale(0.95); }
+
+        .auto-toggle {
+            display: flex; align-items: center; gap: 5px; background: #fef3c7; padding: 4px; border-radius: 12px;
+        }
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: #92400e;
+        }
+        .toggle-btn.active { background: var(--primary-amber); color: white; }
+        
+        .answer-container {
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%;
+        }
+
+        #english-answer { 
+            font-size: 16px; color: var(--accent-green); width: 100%; padding: 15px; 
+            background: #ecfdf5; border-radius: 12px; border: 1px solid #a7f3d0; font-weight: 600; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 8px; }
+        .ans-btn { background: var(--btn-amber); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #78350f; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #92400e; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #fef3c7; font-size: 13px; margin-top: 15px; width: 100%; }
+        
+        .hidden { display: none !important; }
+
+        .promo-banner { margin-top: 30px; width: 100%; }
+
+        #auto-progress {
+            width: 0%; height: 4px; background: #f59e0b; position: absolute; top: 0; left: 0; border-radius: 24px 24px 0 0; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini">
+            <button class="lvl-btn" onclick="generate()">다시 섞기 🎲</button>
+        </div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
+    </div>
+
+    <h1>✨ "As long as" 실전 트레이너</h1>
+    
+    <div id="korean-task">조건만 충족된다면 뭐든지 가능해요! 강한 전제를 말해봐요. 💡</div>
+    
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작 🎲</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
+            <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+            <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center">
+                <h3 id="banner-title" class="font-black text-slate-800 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const allClaims = [
+        // 핵심 문장 (Q1-Q5)
+        { kr: "네가 행복하기만 하다면, 난 괜찮아. 😊", en: "As long as you're happy, I'm fine." },
+        { kr: "공짜이기만 하면, 난 좋아. 🙄", en: "As long as it's free, I'm in." },
+        { kr: "비만 안 오면, 우린 내일 출발할 거야. 🌦️", en: "As long as it doesn't rain, we'll leave tomorrow." },
+        { kr: "네가 최선을 다하기만 한다면, 결과는 상관없어. 🏊‍♀️", en: "As long as you do your best, the result doesn't matter." },
+        { kr: "여기 있는 한, 넌 안전해. ☠️", en: "As long as you stay here, you're safe." },
+
+        // 관계 및 감정 (Relationship)
+        { kr: "네가 나를 사랑하기만 한다면, 난 무엇이든 할 수 있어.", en: "As long as you love me, I can do anything." },
+        { kr: "네가 정직하기만 하면, 난 널 믿을 거야.", en: "As long as you're honest, I'll trust you." },
+        { kr: "네가 내 곁에 있는 한, 난 두렵지 않아.", en: "As long as you're by my side, I'm not afraid." },
+        { kr: "우리가 함께인 한, 우린 이겨낼 수 있어.", en: "As long as we're together, we can overcome it." },
+        { kr: "네가 약속을 지키기만 하면, 우린 괜찮을 거야.", en: "As long as you keep your promise, we'll be fine." },
+        { kr: "네가 사과하기만 하면, 널 용서할게.", en: "As long as you apologize, I'll forgive you." },
+        { kr: "네가 노력하는 한, 난 널 지지할 거야.", en: "As long as you try, I'll support you." },
+        { kr: "네가 비밀을 지키는 한, 널 믿겠어.", en: "As long as you keep the secret, I'll trust you." },
+        { kr: "네가 건강하기만 하면, 바랄 게 없어.", en: "As long as you're healthy, I have nothing more to ask." },
+        { kr: "네가 나를 이해해주는 한, 난 괜찮아.", en: "As long as you understand me, I'm okay." },
+
+        // 일상 및 행동 (Daily Life)
+        { kr: "음식이 맛있기만 하면, 난 어디든 갈 수 있어.", en: "As long as the food is good, I can go anywhere." },
+        { kr: "가격이 저렴하기만 하면, 그걸 살게.", en: "As long as the price is low, I'll buy it." },
+        { kr: "날씨가 맑기만 하면, 산책 나가자.", en: "As long as the weather is clear, let's go for a walk." },
+        { kr: "재미있기만 하면, 난 그 영화 볼 거야.", en: "As long as it's fun, I'll watch that movie." },
+        { kr: "길만 안 막히면, 제시간에 도착할 거야.", en: "As long as there's no traffic, I'll arrive on time." },
+        { kr: "방이 깨끗하기만 하면, 난 만족해.", en: "As long as the room is clean, I'm satisfied." },
+        { kr: "인터넷만 빠르면, 난 여기서 일할 수 있어.", en: "As long as the internet is fast, I can work here." },
+        { kr: "조용하기만 하면, 난 공부할 수 있어.", en: "As long as it's quiet, I can study." },
+        { kr: "커피가 뜨겁기만 하면, 난 좋아.", en: "As long as the coffee is hot, I'm good." },
+        { kr: "그가 오기만 하면, 우린 시작할 수 있어.", en: "As long as he comes, we can start." },
+
+        // 직장 및 비즈니스 (Work)
+        { kr: "월급만 제때 나오면, 난 계속 일할 거야.", en: "As long as I get paid on time, I'll keep working." },
+        { kr: "품질이 좋기만 하면, 우린 계약할 것입니다.", en: "As long as the quality is good, we'll sign the contract." },
+        { kr: "회의가 짧기만 하면, 난 참석할게.", en: "As long as the meeting is short, I'll attend." },
+        { kr: "네가 마감 기한을 지키는 한, 문제없어.", en: "As long as you meet the deadline, there's no problem." },
+        { kr: "조건이 맞기만 하면, 협력하겠습니다.", en: "As long as the terms are right, we'll cooperate." },
+        { kr: "네가 열심히 하는 한, 기회는 올 거야.", en: "As long as you work hard, the chance will come." },
+        { kr: "그가 찬성하기만 하면, 우린 진행할 수 있어.", en: "As long as he agrees, we can proceed." },
+        { kr: "데이터가 정확하기만 하면, 우린 성공할 거야.", en: "As long as the data is accurate, we'll succeed." },
+        { kr: "예산만 충분하면, 우린 그걸 살 수 있어.", en: "As long as the budget is enough, we can buy it." },
+        { kr: "네가 내 말을 듣는 한, 우린 이길 수 있어.", en: "As long as you listen to me, we can win." },
+
+        // 기타 조건부 상황 (Misc)
+        { kr: "공기가 맑기만 하면, 창문을 열어둘게.", en: "As long as the air is clean, I'll leave the window open." },
+        { kr: "네가 원하기만 하면, 내가 도와줄게.", en: "As long as you want, I'll help you." },
+        { kr: "위험하지만 않으면, 시도해볼게.", en: "As long as it's not dangerous, I'll try it." },
+        { kr: "어렵지 않기만 하면, 내가 해볼게.", en: "As long as it's not hard, I'll do it." },
+        { kr: "네가 포기하지 않는 한, 끝난 게 아니야.", en: "As long as you don't give up, it's not over." },
+        { kr: "기차표가 있기만 하면, 난 오늘 떠날 거야.", en: "As long as there are train tickets, I'll leave today." },
+        { kr: "돈을 낭비하지 않는 한, 넌 부자가 될 거야.", en: "As long as you don't waste money, you'll be rich." },
+        { kr: "네가 허락하기만 하면, 내가 가져갈게.", en: "As long as you permit, I'll take it." },
+        { kr: "우리가 준비된 한, 두려울 게 없어.", en: "As long as we're prepared, there's nothing to fear." },
+        { kr: "네가 진실을 말하는 한, 난 네 편이야.", en: "As long as you tell the truth, I'm on your side." },
+        { kr: "이게 합법적이기만 하면, 난 할게.", en: "As long as this is legal, I'll do it." },
+        { kr: "버스가 오기만 하면, 우린 갈 수 있어.", en: "As long as the bus comes, we can go." },
+        { kr: "네가 집중하는 한, 넌 배울 수 있어.", en: "As long as you focus, you can learn." },
+        { kr: "모든 게 잘되기만 하면, 난 행복할 거야.", en: "As long as everything goes well, I'll be happy." },
+        { kr: "네가 꿈을 꾸는 한, 가능성은 있어.", en: "As long as you dream, there's a possibility." }
+    ];
+
+    let currentTask = { kr: '', en: '' };
+    let history = [];
+    let playMode = 'manual';
+    let autoTimer = null;
+
+    function startTrainer() {
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        generate();
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+
+        if (isAuto) {
+            generate();
+        } else {
+            clearTimeout(autoTimer);
+            updateProgressBar(0, 0);
+        }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        if (currentTask.kr) history.push({...currentTask});
+        if (history.length > 50) history.shift();
+        const randomIndex = Math.floor(Math.random() * allClaims.length);
+        currentTask = allClaims[randomIndex];
+        updateDisplay();
+
+        if (playMode === 'auto') {
+            runAutoCycle();
+        }
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000); 
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000); 
+            autoTimer = setTimeout(() => {
+                generate();
+            }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        currentTask = history.pop();
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.kr;
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() {
+        document.getElementById('english-answer').classList.add('show');
+    }
+
+    const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
+    let currentBannerIdx = 0;
+    setInterval(() => {
+        currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+        const msg = bannerMsgs[currentBannerIdx];
+        document.getElementById('banner-icon').innerText = msg.icon;
+        document.getElementById('banner-title').innerText = msg.text;
+    }, 4000);
+</script>
+
+</body>
+</html>

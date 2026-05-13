@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daily English Trainer</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-amber: #92400e;
+            --btn-amber: #d97706;
+            --accent-green: #059669;
+            --bg-gray: #fffbeb;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #333; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            text-align: center; width: 95%; max-width: 500px; border: 1px solid #fef3c7; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 15px;
+        }
+        .top-controls.active { display: flex; }
+
+        h1 { 
+            color: var(--primary-amber); font-size: 20px !important; margin: 10px 0 25px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2;
+        }
+
+        #korean-task { 
+            font-size: 19px; font-weight: 700; margin: 20px 0 15px 0; min-height: 100px; 
+            color: #451a03; line-height: 1.6; word-break: keep-all; display: flex; align-items: center; justify-content: center; 
+            padding: 0 10px; letter-spacing: -0.02em;
+        }
+
+        .start-container { margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--btn-amber); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(146, 64, 14, 0.2);
+        }
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(146, 64, 14, 0.15); }
+        .lvl-btn:active { transform: scale(0.95); }
+
+        .auto-toggle {
+            display: flex; align-items: center; gap: 5px; background: #fef3c7; padding: 4px; border-radius: 12px;
+        }
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: #92400e;
+        }
+        .toggle-btn.active { background: var(--primary-amber); color: white; }
+        
+        .answer-container {
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%;
+        }
+
+        #english-answer { 
+            font-size: 16px; color: var(--accent-green); width: 100%; padding: 15px; 
+            background: #ecfdf5; border-radius: 12px; border: 1px solid #a7f3d0; font-weight: 600; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 8px; }
+        .ans-btn { background: var(--btn-amber); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #78350f; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #92400e; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #fef3c7; font-size: 13px; margin-top: 15px; width: 100%; }
+        
+        .hidden { display: none !important; }
+
+        .promo-banner { margin-top: 30px; width: 100%; }
+
+        #auto-progress {
+            width: 0%; height: 4px; background: #f59e0b; position: absolute; top: 0; left: 0; border-radius: 24px 24px 0 0; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini">
+            <button class="lvl-btn" onclick="generate()">다시 섞기 🎲</button>
+        </div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
+    </div>
+
+    <h1>✨ "It occurred to me" 실전 트레이너</h1>
+    
+    <div id="korean-task">문득 떠오른 생각, 영어로 바로 내뱉어보세요! 💡</div>
+    
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작 🎲</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
+            <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+            <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center">
+                <h3 id="banner-title" class="font-black text-slate-800 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const allClaims = [
+        // 핵심 문장 (Q1-Q5)
+        { kr: "문득 우리가 예전에 여기 왔었다는 생각이 들었어. 🏛️", en: "It occurred to me that we’ve been here before." },
+        { kr: "갑자기 내 지갑을 두고 왔다는 생각이 번쩍 들더라고. 👛", en: "It occurred to me that I left my wallet." },
+        { kr: "문득 네가 맞을지도 모른다는 생각이 들었어. 👍", en: "It occurred to me that you might be right." },
+        { kr: "갑자기 왜 그 생각을 못 했을까 싶더라고. 😮", en: "It occurred to me why I hadn’t thought of that." },
+        { kr: "문득 우리가 이제 헤어질 때가 됐다는 생각이 들었어. 👋", en: "It occurred to me that it’s time to say goodbye." },
+
+        // 일상 속 깨달음
+        { kr: "갑자기 문을 안 잠갔다는 생각이 들었어.", en: "It occurred to me that I didn't lock the door." },
+        { kr: "문득 우리가 오늘 만나기로 했다는 게 생각났어.", en: "It occurred to me that we were supposed to meet today." },
+        { kr: "갑자기 가스를 안 껐다는 생각이 번쩍 들더라고.", en: "It occurred to me that I left the gas on." },
+        { kr: "문득 오늘이 네 생일이라는 생각이 들었어.", en: "It occurred to me that today is your birthday." },
+        { kr: "갑자기 내가 숙제를 안 했다는 게 생각났어.", en: "It occurred to me that I hadn't done my homework." },
+        { kr: "문득 우산을 안 가져왔다는 생각이 들더라고.", en: "It occurred to me that I didn't bring an umbrella." },
+        { kr: "갑자기 내가 전화하는 걸 잊었다는 생각이 들었어.", en: "It occurred to me that I forgot to call." },
+        { kr: "문득 내가 약속 장소를 착각했다는 생각이 들었어.", en: "It occurred to me that I had the wrong place." },
+        { kr: "갑자기 내가 비밀번호를 잊어버렸다는 생각이 들더라고.", en: "It occurred to me that I forgot the password." },
+        { kr: "문득 내가 이 노래를 안다는 생각이 들었어.", en: "It occurred to me that I know this song." },
+
+        // 인간관계 및 감정
+        { kr: "문득 네가 나를 속이고 있을지도 모른다는 생각이 들었어.", en: "It occurred to me that you might be lying to me." },
+        { kr: "갑자기 내가 너무 무례했다는 생각이 들더라고.", en: "It occurred to me that I was being too rude." },
+        { kr: "문득 그가 나를 좋아하지 않는다는 생각이 들었어.", en: "It occurred to me that he doesn't like me." },
+        { kr: "갑자기 내가 혼자가 아니라는 생각이 들었어.", en: "It occurred to me that I'm not alone." },
+        { kr: "문득 내가 그를 오해했다는 생각이 들더라고.", en: "It occurred to me that I misunderstood him." },
+        { kr: "갑자기 내가 더 노력해야겠다는 생각이 들었어.", en: "It occurred to me that I should try harder." },
+        { kr: "문득 우리가 너무 멀어졌다는 생각이 들었어.", en: "It occurred to me that we've grown apart." },
+        { kr: "갑자기 내가 사과해야겠다는 생각이 번쩍 들더라고.", en: "It occurred to me that I should apologize." },
+        { kr: "문득 그녀가 아플지도 모른다는 생각이 들었어.", en: "It occurred to me that she might be sick." },
+        { kr: "갑자기 내가 너무 이기적이었다는 생각이 들었어.", en: "It occurred to me that I was being too selfish." },
+
+        // 직장 및 비즈니스
+        { kr: "문득 보고서에 오타가 있다는 생각이 들었어.", en: "It occurred to me that there's a typo in the report." },
+        { kr: "갑자기 회의 시간을 잘못 알았다는 생각이 들더라고.", en: "It occurred to me that I had the wrong meeting time." },
+        { kr: "문득 더 좋은 방법이 있을 거라는 생각이 들었어.", en: "It occurred to me that there might be a better way." },
+        { kr: "갑자기 파일을 저장 안 했다는 생각이 번쩍 들었어.", en: "It occurred to me that I didn't save the file." },
+        { kr: "문득 내가 이 프로젝트를 끝낼 수 없겠다는 생각이 들었어.", en: "It occurred to me that I can't finish this project." },
+        { kr: "갑자기 전화를 안 받았다는 생각이 들더라고.", en: "It occurred to me that I didn't answer the phone." },
+        { kr: "문득 내가 이메일을 잘못 보냈다는 생각이 들었어.", en: "It occurred to me that I sent the email to the wrong person." },
+        { kr: "갑자기 마감 기한이 오늘이라는 생각이 번쩍 들었어.", en: "It occurred to me that the deadline is today." },
+        { kr: "문득 우리가 새로운 계획이 필요하다는 생각이 들었어.", en: "It occurred to me that we need a new plan." },
+        { kr: "갑자기 내가 질문을 안 했다는 생각이 들더라고.", en: "It occurred to me that I didn't ask any questions." },
+
+        // 기타 깨달음 및 제안
+        { kr: "문득 이게 꿈일지도 모른다는 생각이 들었어.", en: "It occurred to me that this might be a dream." },
+        { kr: "갑자기 내가 길을 잘못 들었다는 생각이 들더라고.", en: "It occurred to me that I took the wrong turn." },
+        { kr: "문득 이 모든 게 의미 없다는 생각이 들었어.", en: "It occurred to me that all of this is meaningless." },
+        { kr: "갑자기 내가 너무 많이 먹었다는 생각이 들었어.", en: "It occurred to me that I ate too much." },
+        { kr: "문득 우리가 다시 시작해야겠다는 생각이 들더라고.", en: "It occurred to me that we should start over." },
+        { kr: "갑자기 날씨가 추워질 거라는 생각이 들었어.", en: "It occurred to me that the weather would get cold." },
+        { kr: "문득 내가 잘못된 선택을 했다는 생각이 들었어.", en: "It occurred to me that I made the wrong choice." },
+        { kr: "갑자기 내가 여기 왜 있는지 모르겠다는 생각이 들더라고.", en: "It occurred to me that I don't know why I'm here." },
+        { kr: "문득 돈을 아껴야겠다는 생각이 들었어.", en: "It occurred to me that I should save money." },
+        { kr: "갑자기 내가 이겼다는 생각이 번쩍 들었어.", en: "It occurred to me that I won." },
+        { kr: "문득 모든 게 다 잘될 거라는 생각이 들었어.", en: "It occurred to me that everything will be okay." },
+        { kr: "갑자기 내가 이 책을 읽었다는 생각이 들더라고.", en: "It occurred to me that I've read this book." },
+        { kr: "문득 우리가 정말 운이 좋다는 생각이 들었어.", en: "It occurred to me that we're really lucky." },
+        { kr: "갑자기 시간이 너무 빠르다는 생각이 들었어.", en: "It occurred to me that time goes by so fast." },
+        { kr: "문득 이게 마지막 기회라는 생각이 들더라고.", en: "It occurred to me that this is the last chance." }
+    ];
+
+    let currentTask = { kr: '', en: '' };
+    let history = [];
+    let playMode = 'manual';
+    let autoTimer = null;
+
+    function startTrainer() {
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        generate();
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+
+        if (isAuto) {
+            generate();
+        } else {
+            clearTimeout(autoTimer);
+            updateProgressBar(0, 0);
+        }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        if (currentTask.kr) history.push({...currentTask});
+        if (history.length > 50) history.shift();
+        const randomIndex = Math.floor(Math.random() * allClaims.length);
+        currentTask = allClaims[randomIndex];
+        updateDisplay();
+
+        if (playMode === 'auto') {
+            runAutoCycle();
+        }
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000); 
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000); 
+            autoTimer = setTimeout(() => {
+                generate();
+            }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        currentTask = history.pop();
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.kr;
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() {
+        document.getElementById('english-answer').classList.add('show');
+    }
+
+    const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
+    let currentBannerIdx = 0;
+    setInterval(() => {
+        currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+        const msg = bannerMsgs[currentBannerIdx];
+        document.getElementById('banner-icon').innerText = msg.icon;
+        document.getElementById('banner-title').innerText = msg.text;
+    }, 4000);
+</script>
+
+</body>
+</html>
