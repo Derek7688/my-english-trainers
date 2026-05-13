@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ultimate Cafe Trainer Pro</title>
     
-    <!-- 폰트: Pretendard Variable 적용 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -19,208 +18,122 @@
 
         body { 
             font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: flex-start; 
-            min-height: 100vh; 
-            background-color: var(--bg-gray); 
-            margin: 0; 
-            padding: 40px 0; 
-            color: #333; 
-            -webkit-font-smoothing: antialiased;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #333; -webkit-font-smoothing: antialiased;
         }
 
         .card { 
-            background: white; 
-            padding: 30px 25px; 
-            border-radius: 28px; 
-            box-shadow: 0 15px 35px rgba(75, 54, 33, 0.08); 
-            text-align: center; 
-            width: 95%; 
-            max-width: 480px; 
-            border: 1px solid rgba(0,0,0,0.03);
-            position: relative; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            background: white; padding: 30px 25px; border-radius: 28px; box-shadow: 0 15px 35px rgba(75, 54, 33, 0.08); 
+            text-align: center; width: 95%; max-width: 480px; border: 1px solid rgba(0,0,0,0.03); position: relative; 
+            display: flex; flex-direction: column; align-items: center;
         }
 
-        /* 🚀 제목 스타일: 상단 여백을 줄이고 하단 여백을 유지 */
+        /* 상단 제어 바 (구석 버튼들) */
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 20px;
+        }
+        .top-controls.active { display: flex; }
+
         h1 { 
-            color: var(--primary-coffee); 
-            font-size: 24px !important; 
-            margin: 10px 0 40px 0; 
-            font-weight: 900; 
-            letter-spacing: -0.05em; 
-            line-height: 1.2;
-            order: 2; /* 버튼 다음으로 오도록 순서 고정 */
+            color: var(--primary-coffee); font-size: 24px !important; margin: 10px 0 30px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2;
         }
 
-        /* 🚀 모드 선택 컨테이너: 절대 위치 해제 및 상단 배치 */
+        /* 난이도 선택 버튼 */
         .level-selector { 
-            display: inline-flex; 
-            justify-content: center; 
-            gap: 8px; 
-            margin-bottom: 10px; /* 제목과의 간격 */
-            background: #f1f3f5;
-            padding: 4px;
-            border-radius: 12px;
-            order: 1; /* 최상단에 오도록 순서 고정 */
-            width: fit-content;
+            display: inline-flex; justify-content: center; gap: 6px; background: #f1f3f5; padding: 4px; border-radius: 12px;
         }
-
-        /* 🚀 PC 버전에서의 겹침 방지를 위해 absolute 제거 */
-        @media (min-width: 640px) {
-            .level-selector {
-                position: static; /* 절대 위치 해제 */
-                margin-top: 5px;
-            }
-        }
+        /* 연습 모드에서의 난이도 선택 (작은 버전) */
+        .level-selector.mini .lvl-btn { padding: 4px 10px; font-size: 11px; }
 
         .lvl-btn { 
-            padding: 6px 16px; 
-            border-radius: 9px; 
-            font-size: 13px; 
-            background: transparent; 
-            color: #868e96; 
-            border: none;
-            cursor: pointer; 
-            font-weight: 700; 
-            transition: all 0.2s ease; 
+            padding: 8px 18px; border-radius: 9px; font-size: 13px; background: transparent; 
+            color: #868e96; border: none; cursor: pointer; font-weight: 700; transition: all 0.2s ease; 
         }
+        .lvl-btn.active-blue { background: white; color: var(--accent-blue); box-shadow: 0 2px 8px rgba(25, 118, 210, 0.12); }
+        .lvl-btn.active-orange { background: white; color: var(--accent-orange); box-shadow: 0 2px 8px rgba(245, 124, 0, 0.12); }
 
-        .lvl-btn.active-blue { 
-            background: white; 
-            color: var(--accent-blue); 
-            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.12);
+        /* 자동/수동 토글 버튼 */
+        .auto-toggle {
+            display: flex; align-items: center; gap: 5px; background: #eee; padding: 4px; border-radius: 12px;
         }
-
-        .lvl-btn.active-orange { 
-            background: white; 
-            color: var(--accent-orange); 
-            box-shadow: 0 2px 8px rgba(245, 124, 0, 0.12);
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: #868e96;
         }
+        .toggle-btn.active { background: var(--primary-coffee); color: white; }
 
         #korean-task { 
-            font-size: 20px; 
-            font-weight: 700; 
-            margin: 20px 0; 
-            min-height: 90px; 
-            color: #2c3e50; 
-            line-height: 1.55; 
-            word-break: keep-all; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            letter-spacing: -0.02em;
-            order: 3;
+            font-size: 20px; font-weight: 700; margin: 20px 0; min-height: 90px; 
+            color: #2c3e50; line-height: 1.55; word-break: keep-all; display: flex; align-items: center; justify-content: center; letter-spacing: -0.02em;
         }
 
         #english-answer { 
-            font-size: 17px; 
-            color: #2e7d32; 
-            margin-bottom: 25px; 
-            min-height: 80px; 
-            display: flex; 
-            align-items: center;
-            justify-content: center;
-            padding: 18px; 
-            background: #f1fbf3; 
-            border-radius: 16px; 
-            border: 1px solid #c8e6c9; 
-            font-weight: 600;
-            line-height: 1.5;
-            visibility: hidden; 
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            order: 4;
+            font-size: 17px; color: #2e7d32; margin-bottom: 25px; min-height: 80px; 
+            display: flex; align-items: center; justify-content: center; padding: 18px; 
+            background: #f1fbf3; border-radius: 16px; border: 1px solid #c8e6c9; font-weight: 600; line-height: 1.5;
+            visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
         }
+        #english-answer.show { visibility: visible; opacity: 1; }
 
-        #english-answer.show {
-            visibility: visible;
-            opacity: 1;
+        .main-controls { display: flex; justify-content: center; gap: 10px; width: 100%; }
+        .ans-btn, .next-btn { 
+            flex: 1; padding: 15px; border-radius: 14px; font-weight: 700; cursor: pointer; border: none; font-size: 15px; transition: transform 0.1s;
         }
-
-        #action-area { order: 5; width: 100%; }
-
-        .main-controls { display: flex; justify-content: center; gap: 10px; }
-        
-        .ans-btn { 
-            background: var(--primary-coffee); 
-            color: white; 
-            flex: 1; 
-            padding: 15px; 
-            border-radius: 14px; 
-            font-weight: 700; 
-            cursor: pointer; 
-            border: none; 
-            font-size: 15px;
-            transition: transform 0.1s;
-        }
-
-        .next-btn { 
-            background: #6f4e37; 
-            color: white; 
-            flex: 1; 
-            padding: 15px; 
-            border-radius: 14px; 
-            font-weight: 700; 
-            cursor: pointer; 
-            border: none; 
-            font-size: 15px;
-            transition: transform 0.1s;
-        }
-
+        .ans-btn { background: var(--primary-coffee); color: white; }
+        .next-btn { background: #6f4e37; color: white; }
         .ans-btn:active, .next-btn:active { transform: scale(0.97); }
 
         .back-btn { 
-            background: transparent;
-            color: #adb5bd; 
-            padding: 12px; 
-            border-radius: 14px; 
-            font-weight: 600; 
-            cursor: pointer; 
-            border: 1px dashed #dee2e6; 
-            font-size: 13px; 
-            margin-top: 15px; 
-            width: 100%; 
+            background: transparent; color: #adb5bd; padding: 12px; border-radius: 14px; 
+            font-weight: 600; cursor: pointer; border: 1px dashed #dee2e6; font-size: 13px; margin-top: 15px; width: 100%; 
         }
 
         .hidden { display: none !important; }
-
-        /* PSE 광고 배너 순서 고정 */
-        #banner-container { order: 6; }
+        
+        /* 자동 모드 진행 바 */
+        #auto-progress {
+            width: 0%; height: 4px; background: var(--accent-orange); position: absolute; top: 0; left: 0; border-radius: 28px 28px 0 0; transition: width 0.1s linear;
+        }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <!-- 모드 선택 버튼 (최상단 고정) -->
-    <div class="level-selector">
-        <button id="btn-beg" class="lvl-btn" onclick="setMode('beginner')">초급 모드</button>
-        <button id="btn-adv" class="lvl-btn" onclick="setMode('advanced')">고급 모드</button>
+    <div id="auto-progress"></div>
+    
+    <!-- 연습 시작 후 나타날 구석 제어 바 -->
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini" class="level-selector mini"></div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
     </div>
 
     <h1>☕ 실전 카페 주문 트레이너</h1>
 
     <div id="korean-task">원하시는 난이도를 선택해 주세요!</div>
+    
+    <!-- 첫 화면용 중앙 난이도 선택 -->
+    <div id="lvl-container-main" class="level-selector mb-10">
+        <button id="btn-beg" class="lvl-btn" onclick="setMode('beginner')">초급 모드</button>
+        <button id="btn-adv" class="lvl-btn" onclick="setMode('advanced')">고급 모드</button>
+    </div>
+
     <div id="english-answer"></div>
     
-    <div id="action-area" class="control-group hidden">
+    <div id="action-area" class="control-group hidden w-full">
         <div class="main-controls">
-            <button class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
-            <button class="next-btn" onclick="generate()">다음 주문 🎲</button>
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 주문 🎲</button>
         </div>
         <button class="back-btn" onclick="goBack()">이전 주문으로 되돌리기 ↩️</button>
     </div>
 
-    <!-- PSE 광고 배너 -->
-    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
-         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
-        <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
-            <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
-            <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center">
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div id="banner-content" class="flex items-center gap-3 text-left">
+            <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl text-white font-bold">🔥</div>
+            <div class="flex-1">
                 <h3 id="banner-title" class="font-black text-slate-800 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
                 <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
             </div>
@@ -234,25 +147,49 @@
         temps: { "따뜻한": "Hot", "아이스": "Iced" },
         menus: { "아메리카노": "Americano", "라떼": "Latte", "플랫 화이트": "Flat white", "콜드 브루": "Cold brew", "바닐라 라떼": "Vanilla Latte" },
         milks: { "두유": "soy milk", "오트 우유": "oat milk", "아몬드 우유": "almond milk", "무지방 우유": "non-fat milk", "저지방 우유": "low-fat milk" },
-        options: { 
-            "샷 추가": "with an extra shot", "샷은 반만": "with only a half-shot", "덜 달게": "half-sweet", 
-            "시럽 빼고": "without syrup", "얼음 적게": "with less ice", "얼음 빼고": "without ice", 
-            "휘핑 크림 많이": "with extra whipped cream", "아주 뜨겁게": "extra hot", 
-            "아이용으로 미지근하게": "at kids' temperature", "캐리어에 담아서": "in a carrier", 
-            "테이크아웃": "to go", "홀더와 뚜껑 끼워서": "with a sleeve and a lid", "거품 없이": "with no foam" 
-        }
+        options: { "샷 추가": "with an extra shot", "샷은 반만": "with only a half-shot", "덜 달게": "half-sweet", "시럽 빼고": "without syrup", "얼음 적게": "with less ice", "얼음 빼고": "without ice", "휘핑 크림 많이": "with extra whipped cream", "아주 뜨겁게": "extra hot", "테이크아웃": "to go", "거품 없이": "with no foam" }
     };
 
     let currentMode = '';
+    let playMode = 'manual'; // 'manual' or 'auto'
     let currentTask = { kr: '', en: '' };
     let history = [];
+    let autoTimer = null;
 
     function setMode(mode) {
         currentMode = mode;
+        // UI 전환: 중앙 버튼 숨기고 상단 제어바 노출
+        document.getElementById('lvl-container-main').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
         document.getElementById('action-area').classList.remove('hidden');
-        document.getElementById('btn-beg').className = 'lvl-btn' + (mode === 'beginner' ? ' active-blue' : '');
-        document.getElementById('btn-adv').className = 'lvl-btn' + (mode === 'advanced' ? ' active-orange' : '');
+        
+        // 상단 구석으로 버튼 옮기기
+        const miniContainer = document.getElementById('lvl-container-mini');
+        miniContainer.innerHTML = `
+            <button class="lvl-btn ${mode === 'beginner' ? 'active-blue' : ''}" onclick="setMode('beginner')">초급</button>
+            <button class="lvl-btn ${mode === 'advanced' ? 'active-orange' : ''}" onclick="setMode('advanced')">고급</button>
+        `;
+        
         generate();
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+
+        if (isAuto) {
+            generate(); // 자동 모드 시작
+        } else {
+            clearTimeout(autoTimer);
+            updateProgressBar(0);
+        }
     }
 
     function getRandomFixed(obj) {
@@ -263,14 +200,15 @@
 
     function generate() {
         if (!currentMode) return;
+        clearTimeout(autoTimer);
+        
         if (currentTask.kr) history.push({...currentTask});
         if (history.length > 20) history.shift();
 
         const s = getRandomFixed(data.sizes);
         const t = getRandomFixed(data.temps);
         const m = getRandomFixed(data.menus);
-        let krText = "";
-        let enText = "";
+        let krText = "", enText = "";
 
         if (currentMode === 'beginner') {
             krText = `${s.kr} 사이즈 ${t.kr} ${m.kr} 하나 주세요.`;
@@ -288,12 +226,33 @@
         }
         currentTask = { kr: krText, en: enText };
         updateDisplay();
+
+        if (playMode === 'auto') {
+            runAutoCycle();
+        }
     }
 
-    function goBack() {
-        if (history.length === 0) return;
-        currentTask = history.pop();
-        updateDisplay();
+    function runAutoCycle() {
+        let timeLeft = 5000;
+        updateProgressBar(100, 5000);
+        
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000);
+            autoTimer = setTimeout(() => {
+                generate();
+            }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        setTimeout(() => {
+            bar.style.transition = `width ${duration}ms linear`;
+            bar.style.width = '100%';
+        }, 10);
     }
 
     function updateDisplay() {
@@ -307,24 +266,22 @@
         document.getElementById('english-answer').classList.add('show');
     }
 
-    const bannerMsgs = [
-        { icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" },
-        { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }
-    ];
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        currentTask = history.pop();
+        updateDisplay();
+    }
+
+    // 배너 로테이션
+    const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
     let currentBannerIdx = 0;
-    function rotateBanner() {
+    setInterval(() => {
         currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
         const msg = bannerMsgs[currentBannerIdx];
-        const content = document.getElementById('banner-content');
-        if(!content) return;
-        content.style.opacity = 0;
-        setTimeout(() => {
-            document.getElementById('banner-icon').innerText = msg.icon;
-            document.getElementById('banner-title').innerText = msg.text;
-            content.style.opacity = 1;
-        }, 500);
-    }
-    setInterval(rotateBanner, 4000);
+        document.getElementById('banner-icon').innerText = msg.icon;
+        document.getElementById('banner-title').innerText = msg.text;
+    }, 4000);
 </script>
 
 </body>
