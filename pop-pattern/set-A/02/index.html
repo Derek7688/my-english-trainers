@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daily English Trainer</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-amber: #92400e;
+            --btn-amber: #d97706;
+            --accent-green: #059669;
+            --bg-gray: #fffbeb;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #333; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            text-align: center; width: 95%; max-width: 500px; border: 1px solid #fef3c7; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        /* 상단 제어 바 (다시 섞기 좌측 / 모드 전환 우측) */
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 15px;
+        }
+        .top-controls.active { display: flex; }
+
+        h1 { 
+            color: var(--primary-amber); font-size: 20px !important; margin: 10px 0 25px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2;
+        }
+
+        #korean-task { 
+            font-size: 19px; font-weight: 700; margin: 20px 0 15px 0; min-height: 100px; 
+            color: #451a03; line-height: 1.6; word-break: keep-all; display: flex; align-items: center; justify-content: center; 
+            padding: 0 10px; letter-spacing: -0.02em;
+        }
+
+        /* 시작 버튼 컨테이너: 화면 정중앙 배치 */
+        .start-container { margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--btn-amber); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(146, 64, 14, 0.2);
+        }
+        /* 구석 소형 버튼 스타일 */
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(146, 64, 14, 0.15); }
+        .lvl-btn:active { transform: scale(0.95); }
+
+        .auto-toggle {
+            display: flex; align-items: center; gap: 5px; background: #fef3c7; padding: 4px; border-radius: 12px;
+        }
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: #92400e;
+        }
+        .toggle-btn.active { background: var(--primary-amber); color: white; }
+        
+        /* 정답창 영역 고정 (위아래 흔들림 방지) */
+        .answer-container {
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%;
+        }
+
+        #english-answer { 
+            font-size: 16px; color: var(--accent-green); width: 100%; padding: 15px; 
+            background: #ecfdf5; border-radius: 12px; border: 1px solid #a7f3d0; font-weight: 600; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 8px; }
+        .ans-btn { background: var(--btn-amber); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #78350f; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #92400e; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #fef3c7; font-size: 13px; margin-top: 15px; width: 100%; }
+        
+        .hidden { display: none !important; }
+
+        /* 배너 최하단 고정 */
+        .promo-banner { margin-top: 30px; width: 100%; }
+
+        /* 자동 모드 진행 바 */
+        #auto-progress {
+            width: 0%; height: 4px; background: #f59e0b; position: absolute; top: 0; left: 0; border-radius: 24px 24px 0 0; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+
+    <!-- 연습 시작 후 상단 좌(다시섞기)/우(토글) 배치 -->
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini">
+            <button class="lvl-btn" onclick="generate()">다시 섞기 🎲</button>
+        </div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
+    </div>
+
+    <h1>✨ "Let me ~" 실전 트레이너</h1>
+    
+    <div id="korean-task">제가 기꺼이 도와드릴게요! 🙋‍♀️</div>
+    
+    <!-- 첫 화면 중앙 시작 버튼 -->
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작 🎲</button>
+    </div>
+
+    <!-- 고정된 정답창 영역 -->
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <!-- PSE 광고 배너 -->
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
+            <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+            <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center">
+                <h3 id="banner-title" class="font-black text-slate-800 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const allClaims = [
+        { kr: "제가 확인해 드릴게요. ☑️", en: "Let me check that for you." },
+        { kr: "제가 도와드릴게요. 🙋‍♀️", en: "Let me help you with that." },
+        { kr: "제가 이메일 보내드릴게요. 📨", en: "Let me send you an email." },
+        { kr: "제가 세부 사항을 설명해 드릴게요. 👂", en: "Let me explain the details." },
+        { kr: "그건 제가 나중에 다시 말씀드릴게요. 🤫", en: "Let me get back to you on that." },
+        { kr: "제가 볼게요.", en: "Let me see." },
+        { kr: "제가 그것을 볼게요.", en: "Let me look at it." },
+        { kr: "제가 다시 시도해 볼게요.", en: "Let me try again." },
+        { kr: "제가 보여드릴게요.", en: "Let me show you." },
+        { kr: "제가 지불할게요. (내가 낼게)", en: "Let me pay for this." },
+        { kr: "제가 문을 열어드릴게요.", en: "Let me open the door." },
+        { kr: "제가 가방을 들어드릴게요.", en: "Let me carry your bag." },
+        { kr: "제가 생각 좀 해볼게요.", en: "Let me think about it." },
+        { kr: "제가 나중에 전화드릴게요.", en: "Let me call you later." },
+        { kr: "제가 제 친구를 소개할게요.", en: "Let me introduce my friend." },
+        { kr: "제가 그것을 고쳐볼게요.", en: "Let me fix it." },
+        { kr: "제가 도와드릴까요? (제가 도울게요)", en: "Let me help you." },
+        { kr: "제가 질문 하나 할게요.", en: "Let me ask a question." },
+        { kr: "제가 확인해 볼게요.", en: "Let me check." },
+        { kr: "제가 다시 확인할게요.", en: "Let me double check." },
+        { kr: "제가 가르쳐 드릴게요.", en: "Let me teach you." },
+        { kr: "제가 요리할게요.", en: "Let me cook." },
+        { kr: "제가 설거지할게요.", en: "Let me do the dishes." },
+        { kr: "제가 청소할게요.", en: "Let me clean up." },
+        { kr: "제가 안내해 드릴게요.", en: "Let me guide you." },
+        { kr: "제가 비밀 하나 말해줄게요.", en: "Let me tell you a secret." },
+        { kr: "제가 진실을 말할게요.", en: "Let me tell you the truth." },
+        { kr: "제가 메시지를 남길게요.", en: "Let me leave a message." },
+        { kr: "제가 예약을 확인할게요.", en: "Let me check the reservation." },
+        { kr: "제가 사진을 찍어드릴게요.", en: "Let me take a photo for you." },
+        { kr: "제가 길을 찾아볼게요.", en: "Let me find the way." },
+        { kr: "제가 스케줄을 확인해 볼게요.", en: "Let me check the schedule." },
+        { kr: "제가 마중 나갈게요.", en: "Let me pick you up." },
+        { kr: "제가 질문에 답할게요.", en: "Let me answer the question." },
+        { kr: "제가 다시 읽어볼게요.", en: "Let me read it again." },
+        { kr: "제가 직접 물어볼게요.", en: "Let me ask him myself." },
+        { kr: "제가 예시를 들어볼게요.", en: "Let me give you an example." },
+        { kr: "제가 주소를 적을게요.", en: "Let me write down the address." },
+        { kr: "제가 점심 살게요.", en: "Let me buy lunch." },
+        { kr: "제가 커피 살게요.", en: "Let me buy some coffee." },
+        { kr: "제가 그것을 마칠게요.", en: "Let me finish it." },
+        { kr: "제가 창문을 닫을게요.", en: "Let me close the window." },
+        { kr: "제가 불을 켤게요.", en: "Let me turn on the light." },
+        { kr: "제가 불을 끌게요.", en: "Let me turn off the light." },
+        { kr: "제가 차를 운전할게요.", en: "Let me drive the car." },
+        { kr: "제가 준비할게요.", en: "Let me get ready." },
+        { kr: "제가 알아볼게요.", en: "Let me find out." },
+        { kr: "제가 지도를 보여드릴게요.", en: "Let me show you the map." },
+        { kr: "제가 이메일을 읽어볼게요.", en: "Let me read the email." },
+        { kr: "제가 그것을 정리할게요.", en: "Let me organize it." }
+    ];
+
+    let currentTask = { kr: '', en: '' };
+    let history = [];
+    let playMode = 'manual';
+    let autoTimer = null;
+
+    function startTrainer() {
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        generate();
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+
+        if (isAuto) {
+            generate();
+        } else {
+            clearTimeout(autoTimer);
+            updateProgressBar(0, 0);
+        }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        if (currentTask.kr) history.push({...currentTask});
+        if (history.length > 50) history.shift();
+        const randomIndex = Math.floor(Math.random() * allClaims.length);
+        currentTask = allClaims[randomIndex];
+        updateDisplay();
+
+        if (playMode === 'auto') {
+            runAutoCycle();
+        }
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000); // 5초 대기
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000); // 3초 정답 노출
+            autoTimer = setTimeout(() => {
+                generate();
+            }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        currentTask = history.pop();
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.kr;
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() {
+        document.getElementById('english-answer').classList.add('show');
+    }
+
+    const bannerMsgs = [
+        { icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" },
+        { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }
+    ];
+    let currentBannerIdx = 0;
+    setInterval(() => {
+        currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+        const msg = bannerMsgs[currentBannerIdx];
+        document.getElementById('banner-icon').innerText = msg.icon;
+        document.getElementById('banner-title').innerText = msg.text;
+    }, 4000);
+</script>
+
+</body>
+</html>
