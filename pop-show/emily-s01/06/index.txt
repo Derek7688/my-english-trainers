@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Emily in Paris S01 E06 - Trainer</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-amber: #92400e;
+            --btn-amber: #d97706;
+            --accent-green: #059669;
+            --bg-gray: #fffbeb;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #333; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            text-align: center; width: 95%; max-width: 500px; border: 1px solid #fef3c7; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 15px;
+        }
+        .top-controls.active { display: flex; }
+
+        h1 { 
+            color: var(--primary-amber); font-size: 18px !important; margin: 10px 0 25px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2;
+        }
+
+        #korean-task { 
+            font-size: 19px; font-weight: 700; margin: 20px 0 15px 0; min-height: 100px; 
+            color: #451a03; line-height: 1.6; word-break: keep-all; display: flex; align-items: center; justify-content: center; 
+            padding: 0 10px; letter-spacing: -0.02em;
+        }
+
+        .start-container { margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--btn-amber); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(146, 64, 14, 0.2);
+        }
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(146, 64, 14, 0.15); }
+        .lvl-btn:active { transform: scale(0.95); }
+
+        .auto-toggle {
+            display: flex; align-items: center; gap: 5px; background: #fef3c7; padding: 4px; border-radius: 12px;
+        }
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: #92400e;
+        }
+        .toggle-btn.active { background: var(--primary-amber); color: white; }
+        
+        .answer-container {
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%;
+        }
+
+        #english-answer { 
+            font-size: 16px; color: var(--accent-green); width: 100%; padding: 15px; 
+            background: #ecfdf5; border-radius: 12px; border: 1px solid #a7f3d0; font-weight: 600; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 8px; }
+        .ans-btn { background: var(--btn-amber); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #78350f; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #92400e; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #fef3c7; font-size: 13px; margin-top: 15px; width: 100%; }
+        
+        .hidden { display: none !important; }
+
+        #auto-progress {
+            width: 0%; height: 4px; background: #f59e0b; position: absolute; top: 0; left: 0; border-radius: 24px 24px 0 0; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini">
+            <button class="lvl-btn" onclick="generate()">다시 섞기 🎲</button>
+        </div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
+    </div>
+
+    <h1>✨ Emily in Paris | S01 E06 실전 패턴 Pop!</h1>
+    
+    <div id="korean-task">트라우마를 극복하고 정면 돌파하는 에밀리!<br>핵심 패턴 3개를 무한 반복하세요. 💪</div>
+    
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작 🎲</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <div class="mt-10 w-full max-w-sm mx-auto text-center">
+        <p class="text-[11px] text-gray-400 font-medium">PSE 실전 트레이닝 시스템 | 총 50문항 수록</p>
+    </div>
+</div>
+
+<script>
+    const allClaims = [
+        // Pattern 1: Observe, admire and try to disappear (17문항)
+        { kr: "관찰하고, 감탄하고, 조용히 존재감을 지우세요.", en: "Observe, admire, and try to disappear." },
+        { kr: "그냥 관찰하고, 감탄하고, 조용히 있으세요.", en: "Just observe, admire, and try to disappear." },
+        { kr: "회의에서 조용히 참관만 하세요.", en: "At the meeting, observe, admire, and try to disappear." },
+        { kr: "수업에서 조용히 참관만 하세요.", en: "In class, observe, admire, and try to disappear." },
+        { kr: "오늘은 조용히 참관만 하세요.", en: "Today, observe, admire, and try to disappear." },
+        { kr: "지금은 조용히 참관만 하세요.", en: "For now, observe, admire, and try to disappear." },
+        { kr: "신입들은 조용히 참관만 해야 합니다.", en: "New people should observe, admire, and try to disappear." },
+        { kr: "인턴들은 조용히 참관만 해야 합니다.", en: "Interns should observe, admire, and try to disappear." },
+        { kr: "저는 조용히 참관만 할게요.", en: "I'll observe, admire, and try to disappear." },
+        { kr: "우리는 조용히 참관만 할게요.", en: "We'll observe, admire, and try to disappear." },
+        { kr: "조용히 참관하는 게 좋습니다.", en: "It's better to observe, admire, and try to disappear." },
+        { kr: "첫 주에는 조용히 참관하세요.", en: "During the first week, observe, admire, and try to disappear." },
+        { kr: "파티에서 조용히 참관만 하세요.", en: "At the party, observe, admire, and try to disappear." },
+        { kr: "사무실에서 조용히 참관만 하세요.", en: "In the office, observe, admire, and try to disappear." },
+        { kr: "그녀는 조용히 참관만 했어요.", en: "She observed, admired, and tried to disappear." },
+        { kr: "그는 조용히 참관만 했어요.", en: "He observed, admired, and tried to disappear." },
+        { kr: "모두 조용히 참관만 하세요.", en: "Everyone, observe, admire, and try to disappear." },
+
+        // Pattern 2: Blow it (16문항)
+        { kr: "나는 기회를 날려버렸어.", en: "I blew it." },
+        { kr: "너는 기회를 날려버렸어.", en: "You blew it." },
+        { kr: "그녀는 기회를 날려버렸어.", en: "She blew it." },
+        { kr: "그는 기회를 날려버렸어.", en: "He blew it." },
+        { kr: "우리는 기회를 날려버렸어.", en: "We blew it." },
+        { kr: "그들은 기회를 날려버렸어.", en: "They blew it." },
+        { kr: "망치지 마!", en: "Don't blow it!" },
+        { kr: "그것을 망치지 마.", en: "Don't blow it." },
+        { kr: "이번에는 망치지 마.", en: "Don't blow it this time." },
+        { kr: "나는 면접을 망쳤어.", en: "I blew the interview." },
+        { kr: "그녀는 시험을 망쳤어.", en: "She blew the exam." },
+        { kr: "그는 게임을 망쳤어.", en: "He blew the game." },
+        { kr: "우리는 기회를 망쳤어.", en: "We blew the chance." },
+        { kr: "나는 마지막 순간에 망쳤어.", en: "I blew it at the last second." },
+        { kr: "거의 다 됐는데 망쳤어.", en: "I almost had it, but I blew it." },
+        { kr: "두 번 다시 망치지 마.", en: "Don't blow it again." },
+
+        // Pattern 3: Waste one's time on someone/something (17문항)
+        { kr: "그에게 시간 낭비하지 마.", en: "Don't waste your time on him." },
+        { kr: "그녀에게 시간 낭비하지 마.", en: "Don't waste your time on her." },
+        { kr: "그들에게 시간 낭비하지 마.", en: "Don't waste your time on them." },
+        { kr: "나한테 시간 낭비하지 마.", en: "Don't waste your time on me." },
+        { kr: "그 일에 시간 낭비하지 마.", en: "Don't waste your time on that." },
+        { kr: "이 일에 시간 낭비하지 마.", en: "Don't waste your time on this." },
+        { kr: "거기에 시간 낭비하지 마.", en: "Don't waste your time on there." },
+        { kr: "나는 그에게 시간 낭비하고 있어.", en: "I'm wasting my time on him." },
+        { kr: "그녀는 그에게 시간 낭비하고 있어.", en: "She's wasting her time on him." },
+        { kr: "그는 나에게 시간 낭비하고 있어.", en: "He's wasting his time on me." },
+        { kr: "우리는 여기에 시간 낭비하고 있어.", en: "We're wasting our time on this." },
+        { kr: "왜 나한테 시간 낭비해?", en: "Why are you wasting your time on me?" },
+        { kr: "왜 그 일에 시간 낭비해?", en: "Why are you wasting your time on that?" },
+        { kr: "시간 낭비 그만해.", en: "Stop wasting your time." },
+        { kr: "너는 네 시간을 낭비하고 있어.", en: "You are wasting your time." },
+        { kr: "나는 내 시간을 낭비하고 싶지 않아.", en: "I don't want to waste my time." },
+        { kr: "쓸데없는 일에 시간 낭비하지 마.", en: "Don't waste your time on useless things." }
+    ];
+
+    let currentTask = { kr: '', en: '' };
+    let history = [];
+    let playMode = 'manual';
+    let autoTimer = null;
+
+    function startTrainer() {
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        generate();
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+
+        if (isAuto) {
+            generate();
+        } else {
+            clearTimeout(autoTimer);
+            updateProgressBar(0, 0);
+        }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        if (currentTask.kr) history.push({...currentTask});
+        if (history.length > 50) history.shift();
+        const randomIndex = Math.floor(Math.random() * allClaims.length);
+        currentTask = allClaims[randomIndex];
+        updateDisplay();
+
+        if (playMode === 'auto') {
+            runAutoCycle();
+        }
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000); 
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000); 
+            autoTimer = setTimeout(() => {
+                generate();
+            }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        currentTask = history.pop();
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.kr;
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() {
+        document.getElementById('english-answer').classList.add('show');
+    }
+</script>
+
+</body>
+</html>

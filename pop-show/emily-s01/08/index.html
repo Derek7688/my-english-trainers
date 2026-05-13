@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Emily in Paris S01 E08 - Trainer</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-amber: #92400e;
+            --btn-amber: #d97706;
+            --accent-green: #059669;
+            --bg-gray: #fffbeb;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #333; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            text-align: center; width: 95%; max-width: 500px; border: 1px solid #fef3c7; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 15px;
+        }
+        .top-controls.active { display: flex; }
+
+        h1 { 
+            color: var(--primary-amber); font-size: 18px !important; margin: 10px 0 25px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2;
+        }
+
+        #korean-task { 
+            font-size: 19px; font-weight: 700; margin: 20px 0 15px 0; min-height: 100px; 
+            color: #451a03; line-height: 1.6; word-break: keep-all; display: flex; align-items: center; justify-content: center; 
+            padding: 0 10px; letter-spacing: -0.02em;
+        }
+
+        .start-container { margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--btn-amber); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(146, 64, 14, 0.2);
+        }
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(146, 64, 14, 0.15); }
+        .lvl-btn:active { transform: scale(0.95); }
+
+        .auto-toggle {
+            display: flex; align-items: center; gap: 5px; background: #fef3c7; padding: 4px; border-radius: 12px;
+        }
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: #92400e;
+        }
+        .toggle-btn.active { background: var(--primary-amber); color: white; }
+        
+        .answer-container {
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%;
+        }
+
+        #english-answer { 
+            font-size: 16px; color: var(--accent-green); width: 100%; padding: 15px; 
+            background: #ecfdf5; border-radius: 12px; border: 1px solid #a7f3d0; font-weight: 600; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 8px; }
+        .ans-btn { background: var(--btn-amber); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #78350f; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #92400e; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #fef3c7; font-size: 13px; margin-top: 15px; width: 100%; }
+        
+        .hidden { display: none !important; }
+
+        #auto-progress {
+            width: 0%; height: 4px; background: #f59e0b; position: absolute; top: 0; left: 0; border-radius: 24px 24px 0 0; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini">
+            <button class="lvl-btn" onclick="generate()">다시 섞기 🎲</button>
+        </div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
+    </div>
+
+    <h1>✨ Emily in Paris | S01 E08 실전 패턴 Pop!</h1>
+    
+    <div id="korean-task">프랑스 시굴 농장에서의 아슬아슬한 하룻밤!<br>핵심 패턴 3개를 무한 반복하세요. 💪</div>
+    
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작 🎲</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <div class="mt-10 w-full max-w-sm mx-auto text-center">
+        <p class="text-[11px] text-gray-400 font-medium">PSE 실전 트레이닝 시스템 | 총 50문항 수록</p>
+    </div>
+</div>
+
+<script>
+    const allClaims = [
+        // Pattern 1: Get it out in the open (17문항)
+        { kr: "솔직하게 다 털어놓읍시다.", en: "Let's get it out in the open." },
+        { kr: "그녀는 모든 것을 솔직하게 털어놓고 싶어 해요.", en: "She wants to get it all out in the open." },
+        { kr: "우리는 문제를 솔직하게 털어놓아야 해요.", en: "We need to get our problems out in the open." },
+        { kr: "비밀을 솔직하게 털어놓는 게 나아요.", en: "It's better to get the secret out in the open." },
+        { kr: "마침내 그들은 감정을 솔직하게 드러냈어.", en: "They finally got their feelings out in the open." },
+        { kr: "진실을 솔직하게 밝히세요.", en: "Get the truth out in the open." },
+        { kr: "모든 것을 숨기지 말고 드러내세요.", en: "Get everything out in the open." },
+        { kr: "나는 그것을 솔직하게 밝히고 싶어.", en: "I want to get it out in the open." },
+        { kr: "그는 그것을 솔직하게 밝히고 싶어 해.", en: "He wants to get it out in the open." },
+        { kr: "우리는 사실을 솔직하게 밝혀야 해.", en: "We must get the facts out in the open." },
+        { kr: "계획을 솔직하게 공개합시다.", en: "Let's get the plan out in the open." },
+        { kr: "숨기지 말고 다 얘기해봐.", en: "Just get it out in the open." },
+        { kr: "그녀는 마침내 그것을 털어놓았어.", en: "She finally got it out in the open." },
+        { kr: "그는 마침내 그것을 털어놓았어.", en: "He finally got it out in the open." },
+        { kr: "우리는 그것을 공개적으로 밝힐 거야.", en: "We will get it out in the open." },
+        { kr: "그것을 숨기지 마세요.", en: "Don't keep it inside, get it out in the open." },
+        { kr: "누가 그것을 털어놓았니?", en: "Who got it out in the open?" },
+
+        // Pattern 2: More than make up for it (16문항)
+        { kr: "그것은 충분히 만회하고도 남았어.", en: "It more than made up for it." },
+        { kr: "두 번째 것이 충분히 만회해주었어.", en: "The second one more than made up for it." },
+        { kr: "이 선물이 실수를 충분히 만회해주길 바라요.", en: "I hope this gift more than makes up for the mistake." },
+        { kr: "그 경치가 고생을 충분히 보상해주었어.", en: " the view more than made up for the trouble." },
+        { kr: "노력이 부족한 경험을 충분히 메꿔주었어.", en: "The hard work more than made up for the lack of experience." },
+        { kr: "열정이 실력을 충분히 메꿔주고도 남아.", en: "The passion more than makes up for the skill." },
+        { kr: "이 성과가 모든 것을 보상해주고도 남아.", en: "This result more than makes up for everything." },
+        { kr: "그녀는 부족함을 충분히 메꿔주고 있어.", en: "She more than makes up for the deficiency." },
+        { kr: "그는 실수를 충분히 만회하고 있어.", en: "He more than makes up for the mistake." },
+        { kr: "그것은 기다림을 충분히 보상해주었어.", en: "It more than made up for the wait." },
+        { kr: "이 음식이 배고픔을 충분히 달래주네.", en: "This food more than makes up for the hunger." },
+        { kr: "미소가 나쁜 기분을 충분히 날려주었어.", en: "The smile more than made up for the bad mood." },
+        { kr: "친절함이 실수를 충분히 덮어주었어.", en: "The kindness more than made up for the error." },
+        { kr: "그것은 가격을 충분히 보상하고도 남아.", en: "It more than makes up for the price." },
+        { kr: "보너스가 야근을 충분히 보상해주었어.", en: "The bonus more than made up for the overtime." },
+        { kr: "사랑이 모든 고통을 충분히 덮어줘.", en: "Love more than makes up for all the pain." },
+
+        // Pattern 3: Be fed up with (17문항)
+        { kr: "나는 당신에게 신물이 나요.", en: "I'm fed up with you." },
+        { kr: "나는 야근에 신물이 나요.", en: "I'm fed up with working overtime." },
+        { kr: "그녀는 변명에 진저리가 났어.", en: "She is fed up with excuses." },
+        { kr: "그는 거짓말에 신물이 났어.", en: "He is fed up with lies." },
+        { kr: "나는 매일 똑같은 일상이 지겨워.", en: "I'm fed up with the same routine." },
+        { kr: "너는 이 날씨가 지겹니?", en: "Are you fed up with this weather?" },
+        { kr: "나는 소음에 신물이 나.", en: "I'm fed up with the noise." },
+        { kr: "우리는 기다리는 것에 신물이 났어.", en: "We are fed up with waiting." },
+        { kr: "그녀는 상사의 간섭에 신물이 났어.", en: "She is fed up with the boss's control." },
+        { kr: "나는 교통 체증에 정말 질렸어.", en: "I'm really fed up with the traffic." },
+        { kr: "그는 그 일에 질려버렸어.", en: "He is fed up with that job." },
+        { kr: "너는 내 말에 질렸니?", en: "Are you fed up with my words?" },
+        { kr: "나는 이 상황에 신물이 나.", en: "I'm fed up with this situation." },
+        { kr: "그녀는 냉담한 태도에 질렸어.", en: "She is fed up with the cold attitude." },
+        { kr: "모두가 이 문제에 신물이 났어.", en: "Everyone is fed up with this problem." },
+        { kr: "나는 더 이상 못 참겠어(신물 나).", en: "I'm fed up with this already." },
+        { kr: "그들은 실패에 신물이 났어.", en: "They are fed up with failure." }
+    ];
+
+    let currentTask = { kr: '', en: '' };
+    let history = [];
+    let playMode = 'manual';
+    let autoTimer = null;
+
+    function startTrainer() {
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        generate();
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+
+        if (isAuto) {
+            generate();
+        } else {
+            clearTimeout(autoTimer);
+            updateProgressBar(0, 0);
+        }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        if (currentTask.kr) history.push({...currentTask});
+        if (history.length > 50) history.shift();
+        const randomIndex = Math.floor(Math.random() * allClaims.length);
+        currentTask = allClaims[randomIndex];
+        updateDisplay();
+
+        if (playMode === 'auto') {
+            runAutoCycle();
+        }
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000); 
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000); 
+            autoTimer = setTimeout(() => {
+                generate();
+            }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        currentTask = history.pop();
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.kr;
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() {
+        document.getElementById('english-answer').classList.add('show');
+    }
+</script>
+
+</body>
+</html>
