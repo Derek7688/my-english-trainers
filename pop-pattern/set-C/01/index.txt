@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daily English Trainer</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-amber: #92400e;
+            --btn-amber: #d97706;
+            --accent-green: #059669;
+            --bg-gray: #fffbeb;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #333; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            text-align: center; width: 95%; max-width: 500px; border: 1px solid #fef3c7; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 15px;
+        }
+        .top-controls.active { display: flex; }
+
+        h1 { 
+            color: var(--primary-amber); font-size: 20px !important; margin: 10px 0 25px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2;
+        }
+
+        #korean-task { 
+            font-size: 19px; font-weight: 700; margin: 20px 0 15px 0; min-height: 100px; 
+            color: #451a03; line-height: 1.6; word-break: keep-all; display: flex; align-items: center; justify-content: center; 
+            padding: 0 10px; letter-spacing: -0.02em;
+        }
+
+        .start-container { margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--btn-amber); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(146, 64, 14, 0.2);
+        }
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(146, 64, 14, 0.15); }
+        .lvl-btn:active { transform: scale(0.95); }
+
+        .auto-toggle {
+            display: flex; align-items: center; gap: 5px; background: #fef3c7; padding: 4px; border-radius: 12px;
+        }
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: #92400e;
+        }
+        .toggle-btn.active { background: var(--primary-amber); color: white; }
+        
+        .answer-container {
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%;
+        }
+
+        #english-answer { 
+            font-size: 16px; color: var(--accent-green); width: 100%; padding: 15px; 
+            background: #ecfdf5; border-radius: 12px; border: 1px solid #a7f3d0; font-weight: 600; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 8px; }
+        .ans-btn { background: var(--btn-amber); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #78350f; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #92400e; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #fef3c7; font-size: 13px; margin-top: 15px; width: 100%; }
+        
+        .hidden { display: none !important; }
+
+        .promo-banner { margin-top: 30px; width: 100%; }
+
+        #auto-progress {
+            width: 0%; height: 4px; background: #f59e0b; position: absolute; top: 0; left: 0; border-radius: 24px 24px 0 0; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini">
+            <button class="lvl-btn" onclick="generate()">다시 섞기 🎲</button>
+        </div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
+    </div>
+
+    <h1>✨ "I’m supposed to ~" 실전 트레이너</h1>
+    
+    <div id="korean-task">원래 그러기로 되어 있는 일들을 말해봐요! 🗓️</div>
+    
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작 🎲</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
+            <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+            <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center">
+                <h3 id="banner-title" class="font-black text-slate-800 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const allClaims = [
+        // 핵심 문장 (Q1-Q5)
+        { kr: "나 오늘 출근해야 돼. 💼", en: "I'm supposed to work today." },
+        { kr: "나 오늘 친구 만나기로 했어. 🍻", en: "I'm supposed to meet a friend today." },
+        { kr: "나 7시까지 거기 가기로 했어. 🕗", en: "I'm supposed to be there by 7." },
+        { kr: "오늘 이거 다 끝내야 해요. 📚", en: "I'm supposed to finish this today." },
+        { kr: "나 오늘 저녁에 부모님 댁에 가기로 했어. 🏠", en: "I'm supposed to go to my parents' house tonight." },
+
+        // 일상 계획/약속 변형
+        { kr: "나 오늘 운동하기로 했어.", en: "I'm supposed to exercise today." },
+        { kr: "나 오늘 청소하기로 했어.", en: "I'm supposed to clean up today." },
+        { kr: "나 오늘 공부하기로 했어.", en: "I'm supposed to study today." },
+        { kr: "나 오늘 일찍 자기로 했어.", en: "I'm supposed to go to bed early tonight." },
+        { kr: "나 6시에 그를 만나기로 했어.", en: "I'm supposed to meet him at 6." },
+        { kr: "나 이따가 전화하기로 했어.", en: "I'm supposed to call later." },
+        { kr: "나 시장에 가기로 했어.", en: "I'm supposed to go to the market." },
+        { kr: "나 오늘 일찍 일어나야 돼.", en: "I'm supposed to get up early today." },
+        { kr: "나 거기 혼자 가기로 했어.", en: "I'm supposed to go there alone." },
+        { kr: "나 비밀 지키기로 했어.", en: "I'm supposed to keep a secret." },
+
+        // 업무 및 사회적 약속 변형
+        { kr: "나 오늘 회의에 참석해야 돼.", en: "I'm supposed to attend a meeting today." },
+        { kr: "나 보고서 써야 돼.", en: "I'm supposed to write a report." },
+        { kr: "나 파일 보내야 돼.", en: "I'm supposed to send the file." },
+        { kr: "나 이메일 답장해야 돼.", en: "I'm supposed to reply to the email." },
+        { kr: "나 9시까지 사무실에 가야 돼.", en: "I'm supposed to be at the office by 9." },
+        { kr: "나 발표해야 돼.", en: "I'm supposed to give a presentation." },
+        { kr: "나 오늘 야근해야 돼.", en: "I'm supposed to work late today." },
+        { kr: "나 그를 도와주기로 했어.", en: "I'm supposed to help him." },
+        { kr: "나 예약을 확인해야 돼.", en: "I'm supposed to confirm the reservation." },
+        { kr: "나 이거 수리해야 돼.", en: "I'm supposed to fix this." },
+
+        // 타인/규칙 관련 변형
+        { kr: "그는 여기 오기로 되어 있어.", en: "He is supposed to come here." },
+        { kr: "그녀는 일찍 도착하기로 되어 있어.", en: "She is supposed to arrive early." },
+        { kr: "우리는 기다리기로 되어 있어.", en: "We are supposed to wait." },
+        { kr: "그들은 정각에 시작하기로 되어 있어.", en: "They are supposed to start on time." },
+        { kr: "너 그거 알아야 돼.", en: "You are supposed to know that." },
+        { kr: "여기서 담배 피우면 안 돼 (피우지 않기로 되어 있어).", en: "You are not supposed to smoke here." },
+        { kr: "그거 말하면 안 돼.", en: "You are not supposed to say that." },
+        { kr: "버스 곧 오기로 되어 있어.", en: "The bus is supposed to come soon." },
+        { kr: "날씨 맑기로 되어 있어.", en: "It's supposed to be sunny." },
+        { kr: "이거 작동해야 되는데 (왜 안되지).", en: "This is supposed to work." },
+
+        // 기타 추가 변형
+        { kr: "나 옷 갈아입어야 돼.", en: "I'm supposed to change clothes." },
+        { kr: "나 숙제해야 돼.", en: "I'm supposed to do my homework." },
+        { kr: "나 약 먹어야 돼.", en: "I'm supposed to take medicine." },
+        { kr: "나 사진 찍어야 돼.", en: "I'm supposed to take photos." },
+        { kr: "나 요리해야 돼.", en: "I'm supposed to cook." },
+        { kr: "나 가방 싸야 돼.", en: "I'm supposed to pack my bag." },
+        { kr: "나 돈 모아야 돼.", en: "I'm supposed to save money." },
+        { kr: "나 연습해야 돼.", en: "I'm supposed to practice." },
+        { kr: "나 질문에 답해야 돼.", en: "I'm supposed to answer the question." },
+        { kr: "나 체크인 해야 돼.", en: "I'm supposed to check in." },
+        { kr: "나 이 책 읽어야 돼.", en: "I'm supposed to read this book." },
+        { kr: "나 쓰레기 버려야 돼.", en: "I'm supposed to take out the trash." },
+        { kr: "나 손 씻어야 돼.", en: "I'm supposed to wash my hands." },
+        { kr: "나 일찍 퇴근하기로 했어.", en: "I'm supposed to finish work early." },
+        { kr: "나 오늘 쉬기로 했어.", en: "I'm supposed to take a break today." }
+    ];
+
+    let currentTask = { kr: '', en: '' };
+    let history = [];
+    let playMode = 'manual';
+    let autoTimer = null;
+
+    function startTrainer() {
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        generate();
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+
+        if (isAuto) {
+            generate();
+        } else {
+            clearTimeout(autoTimer);
+            updateProgressBar(0, 0);
+        }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        if (currentTask.kr) history.push({...currentTask});
+        if (history.length > 50) history.shift();
+        const randomIndex = Math.floor(Math.random() * allClaims.length);
+        currentTask = allClaims[randomIndex];
+        updateDisplay();
+
+        if (playMode === 'auto') {
+            runAutoCycle();
+        }
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000); 
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000); 
+            autoTimer = setTimeout(() => {
+                generate();
+            }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        currentTask = history.pop();
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.kr;
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() {
+        document.getElementById('english-answer').classList.add('show');
+    }
+
+    const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
+    let currentBannerIdx = 0;
+    setInterval(() => {
+        currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+        const msg = bannerMsgs[currentBannerIdx];
+        document.getElementById('banner-icon').innerText = msg.icon;
+        document.getElementById('banner-title').innerText = msg.text;
+    }, 4000);
+</script>
+
+</body>
+</html>

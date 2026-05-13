@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daily English Trainer</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-amber: #92400e;
+            --btn-amber: #d97706;
+            --accent-green: #059669;
+            --bg-gray: #fffbeb;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #333; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            text-align: center; width: 95%; max-width: 500px; border: 1px solid #fef3c7; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 15px;
+        }
+        .top-controls.active { display: flex; }
+
+        h1 { 
+            color: var(--primary-amber); font-size: 20px !important; margin: 10px 0 25px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2;
+        }
+
+        #korean-task { 
+            font-size: 19px; font-weight: 700; margin: 20px 0 15px 0; min-height: 100px; 
+            color: #451a03; line-height: 1.6; word-break: keep-all; display: flex; align-items: center; justify-content: center; 
+            padding: 0 10px; letter-spacing: -0.02em;
+        }
+
+        .start-container { margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--btn-amber); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(146, 64, 14, 0.2);
+        }
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(146, 64, 14, 0.15); }
+        .lvl-btn:active { transform: scale(0.95); }
+
+        .auto-toggle {
+            display: flex; align-items: center; gap: 5px; background: #fef3c7; padding: 4px; border-radius: 12px;
+        }
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: #92400e;
+        }
+        .toggle-btn.active { background: var(--primary-amber); color: white; }
+        
+        .answer-container {
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%;
+        }
+
+        #english-answer { 
+            font-size: 16px; color: var(--accent-green); width: 100%; padding: 15px; 
+            background: #ecfdf5; border-radius: 12px; border: 1px solid #a7f3d0; font-weight: 600; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 8px; }
+        .ans-btn { background: var(--btn-amber); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #78350f; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #92400e; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #fef3c7; font-size: 13px; margin-top: 15px; width: 100%; }
+        
+        .hidden { display: none !important; }
+
+        .promo-banner { margin-top: 30px; width: 100%; }
+
+        #auto-progress {
+            width: 0%; height: 4px; background: #f59e0b; position: absolute; top: 0; left: 0; border-radius: 24px 24px 0 0; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini">
+            <button class="lvl-btn" onclick="generate()">다시 섞기 🎲</button>
+        </div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
+    </div>
+
+    <h1>✨ "There is no way" 실전 트레이너</h1>
+    
+    <div id="korean-task">도저히 믿기지 않나요? 단호하게 말해봅시다! 😱</div>
+    
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작 🎲</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
+            <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+            <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center">
+                <h3 id="banner-title" class="font-black text-slate-800 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const allClaims = [
+        // 핵심 문장 (Q1-Q5)
+        { kr: "그게 진짜일 리 없어. 😱", en: "There is no way that's true." },
+        { kr: "걔가 그랬을 리가 없어. 🤦‍♂️", en: "There is no way he did that." },
+        { kr: "우리가 오늘 안에 이걸 다 끝낼 리가 없어. 😔", en: "There is no way we can finish this today." },
+        { kr: "너 혼자 이걸 다 했을 리가 없어. 💫", en: "There is no way you did this by yourself." },
+        { kr: "네가 거짓말했을 리가 없어. 🤥", en: "There is no way you lied." },
+
+        // 사람 관련 변형 (He/She/They)
+        { kr: "그가 그걸 잊었을 리가 없어.", en: "There is no way he forgot it." },
+        { kr: "그녀가 벌써 도착했을 리가 없어.", en: "There is no way she arrived already." },
+        { kr: "그들이 이겼을 리가 없어.", en: "There is no way they won." },
+        { kr: "그가 나를 못 봤을 리가 없어.", en: "There is no way he didn't see me." },
+        { kr: "그녀가 나에게 전화를 안 했을 리가 없어.", en: "There is no way she didn't call me." },
+        { kr: "그가 틀렸을 리가 없어.", en: "There is no way he is wrong." },
+        { kr: "그녀가 화가 났을 리가 없어.", en: "There is no way she is angry." },
+        { kr: "그들이 우리를 기다리고 있을 리가 없어.", en: "There is no way they are waiting for us." },
+        { kr: "그가 벌써 집에 갔을 리가 없어.", en: "There is no way he went home already." },
+        { kr: "그녀가 그걸 모를 리가 없어.", en: "There is no way she doesn't know that." },
+
+        // 상황 및 사물 관련 변형 (It/That/The)
+        { kr: "그게 고장 났을 리가 없어.", en: "There is no way it's broken." },
+        { kr: "그게 그렇게 비쌀 리가 없어.", en: "There is no way it's that expensive." },
+        { kr: "날씨가 맑을 리가 없어.", en: "There is no way the weather is sunny." },
+        { kr: "가게가 벌써 닫았을 리가 없어.", en: "There is no way the store is closed already." },
+        { kr: "이게 정답일 리가 없어.", en: "There is no way this is the answer." },
+        { kr: "그 영화가 재미없을 리가 없어.", en: "There is no way the movie is bad." },
+        { kr: "파일이 삭제됐을 리가 없어.", en: "There is no way the file was deleted." },
+        { kr: "커피가 차가울 리가 없어.", en: "There is no way the coffee is cold." },
+        { kr: "계획이 바뀌었을 리가 없어.", en: "There is no way the plan changed." },
+        { kr: "문이 잠겼을 리가 없어.", en: "There is no way the door is locked." },
+
+        // 비즈니스 및 시간 관련 변형
+        { kr: "회의가 벌써 끝났을 리가 없어.", en: "There is no way the meeting finished already." },
+        { kr: "마감 기한이 오늘일 리가 없어.", en: "There is no way the deadline is today." },
+        { kr: "그가 사직했을 리가 없어.", en: "There is no way he resigned." },
+        { kr: "예산이 부족할 리가 없어.", en: "There is no way the budget is low." },
+        { kr: "우리가 늦었을 리가 없어.", en: "There is no way we are late." },
+        { kr: "가격이 올랐을 리가 없어.", en: "There is no way the price went up." },
+        { kr: "그가 이메일을 못 받았을 리가 없어.", en: "There is no way he didn't get the email." },
+        { kr: "결과가 틀렸을 리가 없어.", en: "There is no way the results are wrong." },
+        { kr: "사무실에 아무도 없을 리가 없어.", en: "There is no way nobody is in the office." },
+        { kr: "보고서에 실수가 있을 리가 없어.", en: "There is no way there is a mistake in the report." },
+
+        // 기타 추가 변형
+        { kr: "내가 그걸 잃어버렸을 리가 없어.", en: "There is no way I lost it." },
+        { kr: "네가 여기 있을 리가 없어.", en: "There is no way you are here." },
+        { kr: "그게 꿈일 리가 없어.", en: "There is no way it's a dream." },
+        { kr: "버스가 벌써 떠났을 리가 없어.", en: "There is no way the bus already left." },
+        { kr: "이게 고기일 리가 없어.", en: "There is no way this is meat." },
+        { kr: "네가 그걸 다 먹었을 리가 없어.", en: "There is no way you ate it all." },
+        { kr: "배터리가 나갔을 리가 없어.", en: "There is no way the battery is dead." },
+        { kr: "전화기가 꺼졌을 리가 없어.", en: "There is no way the phone is off." },
+        { kr: "비밀번호가 틀릴 리가 없어.", en: "There is no way the password is wrong." },
+        { kr: "아무도 안 도와줬을 리가 없어.", en: "There is no way nobody helped." },
+        { kr: "그가 내 이름을 잊었을 리가 없어.", en: "There is no way he forgot my name." },
+        { kr: "우리가 길을 잃었을 리가 없어.", en: "There is no way we are lost." },
+        { kr: "네가 나를 싫어할 리가 없어.", en: "There is no way you hate me." },
+        { kr: "이게 마지막일 리가 없어.", en: "There is no way this is the last one." },
+        { kr: "모든 게 잘 안 풀릴 리가 없어.", en: "There is no way everything goes wrong." }
+    ];
+
+    let currentTask = { kr: '', en: '' };
+    let history = [];
+    let playMode = 'manual';
+    let autoTimer = null;
+
+    function startTrainer() {
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        generate();
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+
+        if (isAuto) {
+            generate();
+        } else {
+            clearTimeout(autoTimer);
+            updateProgressBar(0, 0);
+        }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        if (currentTask.kr) history.push({...currentTask});
+        if (history.length > 50) history.shift();
+        const randomIndex = Math.floor(Math.random() * allClaims.length);
+        currentTask = allClaims[randomIndex];
+        updateDisplay();
+
+        if (playMode === 'auto') {
+            runAutoCycle();
+        }
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000); 
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000); 
+            autoTimer = setTimeout(() => {
+                generate();
+            }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        currentTask = history.pop();
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.kr;
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() {
+        document.getElementById('english-answer').classList.add('show');
+    }
+
+    const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
+    let currentBannerIdx = 0;
+    setInterval(() => {
+        currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+        const msg = bannerMsgs[currentBannerIdx];
+        document.getElementById('banner-icon').innerText = msg.icon;
+        document.getElementById('banner-title').innerText = msg.text;
+    }, 4000);
+</script>
+
+</body>
+</html>
