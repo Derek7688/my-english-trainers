@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daily English Trainer</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-amber: #92400e;
+            --btn-amber: #d97706;
+            --accent-green: #059669;
+            --bg-gray: #fffbeb;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #333; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            text-align: center; width: 95%; max-width: 500px; border: 1px solid #fef3c7; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        /* 1. 상단 제어 바 (다시 섞기 좌측 / 모드 전환 우측) */
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 15px;
+        }
+        .top-controls.active { display: flex; }
+
+        h1 { 
+            color: var(--primary-amber); font-size: 20px !important; margin: 10px 0 25px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2;
+        }
+
+        #korean-task { 
+            font-size: 19px; font-weight: 700; margin: 20px 0 15px 0; min-height: 100px; 
+            color: #451a03; line-height: 1.6; word-break: keep-all; display: flex; align-items: center; justify-content: center; 
+            padding: 0 10px; letter-spacing: -0.02em;
+        }
+
+        /* 2. 시작 버튼 컨테이너: 화면 정중앙 배치 */
+        .start-container { margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--btn-amber); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(146, 64, 14, 0.2);
+        }
+        /* 구석 다시 섞기 버튼 스타일 */
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(146, 64, 14, 0.15); }
+        .lvl-btn:active { transform: scale(0.95); }
+
+        .auto-toggle {
+            display: flex; align-items: center; gap: 5px; background: #fef3c7; padding: 4px; border-radius: 12px;
+        }
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: #92400e;
+        }
+        .toggle-btn.active { background: var(--primary-amber); color: white; }
+        
+        /* 3. 정답창 영역 고정 (위아래 흔들림 방지) */
+        .answer-container {
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%;
+        }
+
+        #english-answer { 
+            font-size: 16px; color: var(--accent-green); width: 100%; padding: 15px; 
+            background: #ecfdf5; border-radius: 12px; border: 1px solid #a7f3d0; font-weight: 600; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 8px; }
+        .ans-btn { background: var(--btn-amber); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #78350f; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #92400e; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #fef3c7; font-size: 13px; margin-top: 15px; width: 100%; }
+        
+        .hidden { display: none !important; }
+
+        /* 4. 배너 위치 최하단 고정 */
+        .promo-banner { margin-top: 30px; width: 100%; }
+
+        /* 자동 모드 진행 바 */
+        #auto-progress {
+            width: 0%; height: 4px; background: #f59e0b; position: absolute; top: 0; left: 0; border-radius: 24px 24px 0 0; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini">
+            <button class="lvl-btn" onclick="generate()">다시 섞기 🎲</button>
+        </div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
+    </div>
+
+    <h1>✨ "It turns out ~" 실전 트레이너</h1>
+    
+    <div id="korean-task">알고 보니 반전이 있었네요! 사실을 밝혀봐요. 💡</div>
+    
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작 🎲</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <!-- PSE 광고 배너 -->
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
+            <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+            <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center">
+                <h3 id="banner-title" class="font-black text-slate-800 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const allClaims = [
+        // 핵심 문장 (Q1-Q5)
+        { kr: "알고 보니 우리 구면이더라고요. 👥", en: "It turns out we've met before." },
+        { kr: "알고 보니 별거 아니더라고요. 🤪", en: "It turns out it wasn't a big deal." },
+        { kr: "알고 보니 우리가 동갑이더라고요. 🧑‍🤝‍🧑", en: "It turns out we're the same age." },
+        { kr: "알고 보니 제가 틀렸더라고요. 😱", en: "It turns out I was wrong." },
+        { kr: "알고 보니 우린 공통점이 많더라고요. 👊", en: "It turns out we have a lot in common." },
+
+        // 사람 관련 반전 (It turns out he/she/they ~)
+        { kr: "알고 보니 그가 내 이웃이더라고요.", en: "It turns out he's my neighbor." },
+        { kr: "알고 보니 그녀가 의사더라고요.", en: "It turns out she's a doctor." },
+        { kr: "알고 보니 그들이 형제더라고요.", en: "It turns out they're brothers." },
+        { kr: "알고 보니 그가 거짓말을 했더라고요.", en: "It turns out he was lying." },
+        { kr: "알고 보니 그녀가 내 이름을 알더라고요.", en: "It turns out she knows my name." },
+        { kr: "알고 보니 그가 유명한 사람더라고요.", en: "It turns out he's famous." },
+        { kr: "알고 보니 그들이 이사를 갔더라고요.", en: "It turns out they moved away." },
+        { kr: "알고 보니 그녀가 영어를 잘하더라고요.", en: "It turns out she speaks English well." },
+        { kr: "알고 보니 그가 사장이더라고요.", en: "It turns out he's the boss." },
+        { kr: "알고 보니 그들이 친구 사이더라고요.", en: "It turns out they are friends." },
+
+        // 상황 및 사실 관련 반전 (It turns out it/there ~)
+        { kr: "알고 보니 그게 사실이더라고요.", en: "It turns out it's true." },
+        { kr: "알고 보니 그게 더 싸더라고요.", en: "It turns out it's cheaper." },
+        { kr: "알고 보니 비가 오더라고요.", en: "It turns out it's raining." },
+        { kr: "알고 보니 휴일이더라고요.", en: "It turns out it's a holiday." },
+        { kr: "알고 보니 길이 막히더라고요.", en: "It turns out the traffic is heavy." },
+        { kr: "알고 보니 오해가 있었더라고요.", en: "It turns out there was a mistake." },
+        { kr: "알고 보니 빈 방이 없더라고요.", en: "It turns out there are no vacancies." },
+        { kr: "알고 보니 그게 고장 났더라고요.", en: "It turns out it's broken." },
+        { kr: "알고 보니 공짜더라고요.", en: "It turns out it's free." },
+        { kr: "알고 보니 가게가 닫았더라고요.", en: "It turns out the store is closed." },
+
+        // 비즈니스 및 업무 관련
+        { kr: "알고 보니 회의가 취소됐더라고요.", en: "It turns out the meeting is canceled." },
+        { kr: "알고 보니 예산이 부족하더라고요.", en: "The thing is, we don't have enough budget." },
+        { kr: "알고 보니 제가 선약이 있더라고요.", en: "It turns out I have a prior engagement." },
+        { kr: "알고 보니 마감 기한이 내일이더라고요.", en: "It turns out the deadline is tomorrow." },
+        { kr: "알고 보니 계획이 바뀌었더라고요.", en: "It turns out the plan changed." },
+        { kr: "알고 보니 우리가 늦었더라고요.", en: "It turns out we're late." },
+        { kr: "알고 보니 결과가 좋더라고요.", en: "It turns out the results are good." },
+        { kr: "알고 보니 가격이 올랐더라고요.", en: "It turns out the price went up." },
+        { kr: "알고 보니 주문이 접수됐더라고요.", en: "It turns out the order was received." },
+        { kr: "알고 보니 파일이 여기에 있더라고요.", en: "It turns out the file is here." },
+
+        // 기타 일상 반전
+        { kr: "알고 보니 제가 열쇠를 잃어버렸더라고요.", en: "It turns out I lost my keys." },
+        { kr: "알고 보니 제가 지갑을 집에 두고 왔더라고요.", en: "It turns out I left my wallet at home." },
+        { kr: "알고 보니 시간이 다 됐더라고요.", en: "It turns out we're out of time." },
+        { kr: "알고 보니 제가 맞더라고요.", en: "It turns out I was right." },
+        { kr: "알고 보니 그게 제 소관이 아니더라고요.", en: "It turns out it's not my area." },
+        { kr: "알고 보니 그가 파티에 안 오더라고요.", en: "It turns out he's not coming to the party." },
+        { kr: "알고 보니 영화가 재미없더라고요.", en: "It turns out the movie is not good." },
+        { kr: "알고 보니 그가 바쁘더라고요.", en: "It turns out he's busy." },
+        { kr: "알고 보니 버스가 이미 떠났더라고요.", en: "It turns out the bus already left." },
+        { kr: "알고 보니 배터리가 없더라고요.", en: "It turns out the battery is dead." },
+        { kr: "알고 보니 주소가 틀렸더라고요.", en: "It turns out the address is wrong." },
+        { kr: "알고 보니 그녀가 화가 안 났더라고요.", en: "It turns out she's not angry." },
+        { kr: "알고 보니 제가 비밀번호를 알더라고요.", en: "It turns out I know the password." },
+        { kr: "알고 보니 모든 게 괜찮더라고요.", en: "It turns out everything is okay." },
+        { kr: "알고 보니 꿈이 아니더라고요.", en: "It turns out it's not a dream." }
+    ];
+
+    let currentTask = { kr: '', en: '' };
+    let history = [];
+    let playMode = 'manual';
+    let autoTimer = null;
+
+    function startTrainer() {
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        generate();
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+
+        if (isAuto) {
+            generate();
+        } else {
+            clearTimeout(autoTimer);
+            updateProgressBar(0, 0);
+        }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        if (currentTask.kr) history.push({...currentTask});
+        if (history.length > 50) history.shift();
+        const randomIndex = Math.floor(Math.random() * allClaims.length);
+        currentTask = allClaims[randomIndex];
+        updateDisplay();
+
+        if (playMode === 'auto') {
+            runAutoCycle();
+        }
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000); 
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000); 
+            autoTimer = setTimeout(() => {
+                generate();
+            }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        currentTask = history.pop();
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.kr;
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() {
+        document.getElementById('english-answer').classList.add('show');
+    }
+
+    const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
+    let currentBannerIdx = 0;
+    setInterval(() => {
+        currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+        const msg = bannerMsgs[currentBannerIdx];
+        document.getElementById('banner-icon').innerText = msg.icon;
+        document.getElementById('banner-title').innerText = msg.text;
+    }, 4000);
+</script>
+
+</body>
+</html>

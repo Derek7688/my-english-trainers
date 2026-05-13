@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daily English Trainer</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-amber: #92400e;
+            --btn-amber: #d97706;
+            --accent-green: #059669;
+            --bg-gray: #fffbeb;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #333; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            text-align: center; width: 95%; max-width: 500px; border: 1px solid #fef3c7; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        /* 1. 상단 제어 바 (다시 섞기 좌측 / 모드 전환 우측) */
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 15px;
+        }
+        .top-controls.active { display: flex; }
+
+        h1 { 
+            color: var(--primary-amber); font-size: 20px !important; margin: 10px 0 25px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2;
+        }
+
+        #korean-task { 
+            font-size: 19px; font-weight: 700; margin: 20px 0 15px 0; min-height: 100px; 
+            color: #451a03; line-height: 1.6; word-break: keep-all; display: flex; align-items: center; justify-content: center; 
+            padding: 0 10px; letter-spacing: -0.02em;
+        }
+
+        /* 2. 시작 버튼 컨테이너: 화면 정중앙 배치 */
+        .start-container { margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--btn-amber); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(146, 64, 14, 0.2);
+        }
+        /* 구석 다시 섞기 버튼 스타일 */
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(146, 64, 14, 0.15); }
+        .lvl-btn:active { transform: scale(0.95); }
+
+        .auto-toggle {
+            display: flex; align-items: center; gap: 5px; background: #fef3c7; padding: 4px; border-radius: 12px;
+        }
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: #92400e;
+        }
+        .toggle-btn.active { background: var(--primary-amber); color: white; }
+        
+        /* 3. 정답창 영역 고정 (흔들림 방지) */
+        .answer-container {
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%;
+        }
+
+        #english-answer { 
+            font-size: 16px; color: var(--accent-green); width: 100%; padding: 15px; 
+            background: #ecfdf5; border-radius: 12px; border: 1px solid #a7f3d0; font-weight: 600; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 8px; }
+        .ans-btn { background: var(--btn-amber); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #78350f; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #92400e; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #fef3c7; font-size: 13px; margin-top: 15px; width: 100%; }
+        
+        .hidden { display: none !important; }
+
+        /* 4. 배너 위치 최하단 고정 */
+        .promo-banner { margin-top: 30px; width: 100%; }
+
+        /* 자동 모드 진행 바 */
+        #auto-progress {
+            width: 0%; height: 4px; background: #f59e0b; position: absolute; top: 0; left: 0; border-radius: 24px 24px 0 0; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini">
+            <button class="lvl-btn" onclick="generate()">다시 섞기 🎲</button>
+        </div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
+    </div>
+
+    <h1>✨ "The thing is ~" 실전 트레이너</h1>
+    
+    <div id="korean-task">돌려 말하지 말고, 핵심 이유를 말해봐요! 💡</div>
+    
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작 🎲</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
+            <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+            <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center">
+                <h3 id="banner-title" class="font-black text-slate-800 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const allClaims = [
+        // 핵심 문장 (Q1-Q5)
+        { kr: "실은, 제가 선약이 있어서요. ☑️", en: "The thing is, I have a prior engagement." },
+        { kr: "문제는, 예산이 부족하다는 거예요. 💰", en: "The thing is, we don't have enough budget." },
+        { kr: "실은, 제가 그런 걸 별로 안 좋아하거든요. 😑", en: "The thing is, I don't really like that kind of stuff." },
+        { kr: "제 말은, 그건 제 잘못이 아니라는 거예요. 🤦‍♀️", en: "The thing is, it's not my fault." },
+        { kr: "문제는, 우린 시간이 없다는 거예요. ⏰", en: "The thing is, we're out of time." },
+
+        // 이유/상황 관련 변형 (The thing is, I ~)
+        { kr: "실은, 제가 좀 바빠요.", en: "The thing is, I'm a bit busy." },
+        { kr: "실은, 제가 잊어버렸어요.", en: "The thing is, I forgot." },
+        { kr: "실은, 제가 돈이 없어요.", en: "The thing is, I don't have any money." },
+        { kr: "실은, 제가 피곤해요.", en: "The thing is, I'm tired." },
+        { kr: "실은, 제가 확신이 없어요.", en: "The thing is, I'm not sure." },
+        { kr: "실은, 제가 가야 해요.", en: "The thing is, I have to go." },
+        { kr: "실은, 제가 이해가 안 돼요.", en: "The thing is, I don't understand." },
+        { kr: "실은, 제가 그걸 못 찾겠어요.", en: "The thing is, I can't find it." },
+        { kr: "실은, 제가 아파요.", en: "The thing is, I'm sick." },
+        { kr: "실은, 제가 요리를 못 해요.", en: "The thing is, I can't cook." },
+
+        // 문제점 관련 변형 (The thing is, it/we ~)
+        { kr: "문제는, 너무 비싸다는 거예요.", en: "The thing is, it's too expensive." },
+        { kr: "문제는, 너무 멀다는 거예요.", en: "The thing is, it's too far." },
+        { kr: "문제는, 비가 온다는 거예요.", en: "The thing is, it's raining." },
+        { kr: "문제는, 우리가 늦었다는 거예요.", en: "The thing is, we're late." },
+        { kr: "문제는, 그게 고장 났다는 거예요.", en: "The thing is, it's broken." },
+        { kr: "문제는, 길이 막힌다는 거예요.", en: "The thing is, the traffic is heavy." },
+        { kr: "문제는, 답이 없다는 거예요.", en: "The thing is, there is no answer." },
+        { kr: "문제는, 식당이 닫았다는 거예요.", en: "The thing is, the restaurant is closed." },
+        { kr: "문제는, 가방을 잃어버렸다는 거예요.", en: "The thing is, I lost my bag." },
+        { kr: "문제는, 비밀이라는 거예요.", en: "The thing is, it's a secret." },
+
+        // 타인/업무 관련 변형
+        { kr: "실은, 그가 여기 없어요.", en: "The thing is, he's not here." },
+        { kr: "실은, 그녀가 화가 났어요.", en: "The thing is, she's angry." },
+        { kr: "실은, 그들이 몰라요.", en: "The thing is, they don't know." },
+        { kr: "문제는, 마감 기한이 오늘이라는 거예요.", en: "The thing is, the deadline is today." },
+        { kr: "문제는, 회의가 취소됐다는 거예요.", en: "The thing is, the meeting is canceled." },
+        { kr: "실은, 제가 이메일을 못 받았어요.", en: "The thing is, I didn't get the email." },
+        { kr: "문제는, 계획이 바뀌었다는 거예요.", en: "The thing is, the plan changed." },
+        { kr: "실은, 그가 거짓말을 하고 있어요.", en: "The thing is, he's lying." },
+        { kr: "문제는, 아무도 안 왔다는 거예요.", en: "The thing is, nobody came." },
+        { kr: "실은, 제가 준비가 안 됐어요.", en: "The thing is, I'm not ready." },
+
+        // 기타 추가 변형
+        { kr: "실은, 그게 쉽지 않아요.", en: "The thing is, it's not easy." },
+        { kr: "실은, 저는 커피를 안 마셔요.", en: "The thing is, I don't drink coffee." },
+        { kr: "문제는, 배터리가 없다는 거예요.", en: "The thing is, I have no battery." },
+        { kr: "실은, 제가 영어를 잘 못 해요.", en: "The thing is, I can't speak English well." },
+        { kr: "문제는, 거기가 너무 붐빈다는 거예요.", en: "The thing is, it's too crowded." },
+        { kr: "실은, 제가 어제 바빴어요.", en: "The thing is, I was busy yesterday." },
+        { kr: "문제는, 차가 없다는 거예요.", en: "The thing is, I don't have a car." },
+        { kr: "실은, 그게 사실이에요.", en: "The thing is, it's true." },
+        { kr: "문제는, 우리가 길을 잃었다는 거예요.", en: "The thing is, we're lost." },
+        { kr: "실은, 제가 질문이 하나 있어요.", en: "The thing is, I have a question." },
+        { kr: "문제는, 열쇠가 없다는 거예요.", en: "The thing is, I don't have the key." },
+        { kr: "실은, 제가 도움이 필요해요.", en: "The thing is, I need some help." },
+        { kr: "문제는, 가격이 올랐다는 거예요.", en: "The thing is, the price went up." },
+        { kr: "실은, 제가 지금 갈 수 없어요.", en: "The thing is, I can't go now." },
+        { kr: "실은, 그게 제 소관이 아니에요.", en: "The thing is, it's not my area." }
+    ];
+
+    let currentTask = { kr: '', en: '' };
+    let history = [];
+    let playMode = 'manual';
+    let autoTimer = null;
+
+    function startTrainer() {
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        generate();
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+
+        if (isAuto) {
+            generate();
+        } else {
+            clearTimeout(autoTimer);
+            updateProgressBar(0, 0);
+        }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        if (currentTask.kr) history.push({...currentTask});
+        if (history.length > 50) history.shift();
+        const randomIndex = Math.floor(Math.random() * allClaims.length);
+        currentTask = allClaims[randomIndex];
+        updateDisplay();
+
+        if (playMode === 'auto') {
+            runAutoCycle();
+        }
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000); 
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000); 
+            autoTimer = setTimeout(() => {
+                generate();
+            }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        currentTask = history.pop();
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.kr;
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() {
+        document.getElementById('english-answer').classList.add('show');
+    }
+
+    const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
+    let currentBannerIdx = 0;
+    setInterval(() => {
+        currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+        const msg = bannerMsgs[currentBannerIdx];
+        document.getElementById('banner-icon').innerText = msg.icon;
+        document.getElementById('banner-title').innerText = msg.text;
+    }, 4000);
+</script>
+
+</body>
+</html>
