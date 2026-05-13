@@ -28,7 +28,6 @@
             display: flex; flex-direction: column; align-items: center;
         }
 
-        /* 상단 제어 바 (구석 버튼들) */
         .top-controls {
             display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 20px;
         }
@@ -39,11 +38,9 @@
             font-weight: 900; letter-spacing: -0.05em; line-height: 1.2;
         }
 
-        /* 난이도 선택 버튼 */
         .level-selector { 
             display: inline-flex; justify-content: center; gap: 6px; background: #f1f3f5; padding: 4px; border-radius: 12px;
         }
-        /* 연습 모드에서의 난이도 선택 (작은 버전) */
         .level-selector.mini .lvl-btn { padding: 4px 10px; font-size: 11px; }
 
         .lvl-btn { 
@@ -53,7 +50,6 @@
         .lvl-btn.active-blue { background: white; color: var(--accent-blue); box-shadow: 0 2px 8px rgba(25, 118, 210, 0.12); }
         .lvl-btn.active-orange { background: white; color: var(--accent-orange); box-shadow: 0 2px 8px rgba(245, 124, 0, 0.12); }
 
-        /* 자동/수동 토글 버튼 */
         .auto-toggle {
             display: flex; align-items: center; gap: 5px; background: #eee; padding: 4px; border-radius: 12px;
         }
@@ -90,7 +86,6 @@
 
         .hidden { display: none !important; }
         
-        /* 자동 모드 진행 바 */
         #auto-progress {
             width: 0%; height: 4px; background: var(--accent-orange); position: absolute; top: 0; left: 0; border-radius: 28px 28px 0 0; transition: width 0.1s linear;
         }
@@ -101,7 +96,6 @@
 <div class="card">
     <div id="auto-progress"></div>
     
-    <!-- 연습 시작 후 나타날 구석 제어 바 -->
     <div id="top-controls" class="top-controls">
         <div id="lvl-container-mini" class="level-selector mini"></div>
         <div class="auto-toggle">
@@ -114,7 +108,6 @@
 
     <div id="korean-task">원하시는 난이도를 선택해 주세요!</div>
     
-    <!-- 첫 화면용 중앙 난이도 선택 -->
     <div id="lvl-container-main" class="level-selector mb-10">
         <button id="btn-beg" class="lvl-btn" onclick="setMode('beginner')">초급 모드</button>
         <button id="btn-adv" class="lvl-btn" onclick="setMode('advanced')">고급 모드</button>
@@ -151,25 +144,22 @@
     };
 
     let currentMode = '';
-    let playMode = 'manual'; // 'manual' or 'auto'
+    let playMode = 'manual';
     let currentTask = { kr: '', en: '' };
     let history = [];
     let autoTimer = null;
 
     function setMode(mode) {
         currentMode = mode;
-        // UI 전환: 중앙 버튼 숨기고 상단 제어바 노출
         document.getElementById('lvl-container-main').classList.add('hidden');
         document.getElementById('top-controls').classList.add('active');
         document.getElementById('action-area').classList.remove('hidden');
         
-        // 상단 구석으로 버튼 옮기기
         const miniContainer = document.getElementById('lvl-container-mini');
         miniContainer.innerHTML = `
             <button class="lvl-btn ${mode === 'beginner' ? 'active-blue' : ''}" onclick="setMode('beginner')">초급</button>
             <button class="lvl-btn ${mode === 'advanced' ? 'active-orange' : ''}" onclick="setMode('advanced')">고급</button>
         `;
-        
         generate();
     }
 
@@ -177,19 +167,14 @@
         playMode = mode;
         document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
         document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
-        
         const isAuto = (mode === 'auto');
         document.getElementById('manual-ans-btn').disabled = isAuto;
         document.getElementById('manual-next-btn').disabled = isAuto;
         document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
         document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
 
-        if (isAuto) {
-            generate(); // 자동 모드 시작
-        } else {
-            clearTimeout(autoTimer);
-            updateProgressBar(0);
-        }
+        if (isAuto) generate();
+        else { clearTimeout(autoTimer); updateProgressBar(0); }
     }
 
     function getRandomFixed(obj) {
@@ -206,15 +191,35 @@
         if (history.length > 20) history.shift();
 
         const s = getRandomFixed(data.sizes);
-        const t = getRandomFixed(data.temps);
         const m = getRandomFixed(data.menus);
+        
+        // 🚀 콜드 브루 로직 수정: 콜드 브루일 경우 무조건 '아이스'로 고정
+        let t;
+        if (m.en === "Cold brew") {
+            t = { kr: "아이스", en: "Iced" };
+        } else {
+            t = getRandomFixed(data.temps);
+        }
+
         let krText = "", enText = "";
 
         if (currentMode === 'beginner') {
-            krText = `${s.kr} 사이즈 ${t.kr} ${m.kr} 하나 주세요.`;
-            enText = `I'll have ${s.en} ${t.en} ${m.en}, please.`;
+            const patternRand = Math.random();
+            if (patternRand < 0.34) {
+                krText = `${s.kr} 사이즈 ${t.kr} ${m.kr} 하나 주세요.`;
+                enText = `I'll have ${s.en} ${t.en} ${m.en}, please.`;
+            } else if (patternRand < 0.67) {
+                const mk = getRandomFixed(data.milks);
+                krText = `우유를 ${mk.kr}로 바꿀 수 있을까요?`;
+                enText = `Is it possible to change the milk to ${mk.en}?`;
+            } else {
+                const o = getRandomFixed(data.options);
+                krText = `${o.kr} 부탁드려요.`;
+                enText = `Can I get this ${o.en}?`;
+            }
         } else {
-            if (Math.random() > 0.5) {
+            const mixRand = Math.random();
+            if (mixRand < 0.5) {
                 const mk = getRandomFixed(data.milks);
                 krText = `${s.kr} ${t.kr} ${m.kr} 하나 주시고요, 우유를 ${mk.kr}로 바꿀 수 있을까요?`;
                 enText = `I'll have ${s.en} ${t.en} ${m.en}, and is it possible to change the milk to ${mk.en}?`;
@@ -224,31 +229,24 @@
                 enText = `I'll have ${s.en} ${t.en} ${m.en}, and can I get this ${o.en}?`;
             }
         }
+
         currentTask = { kr: krText, en: enText };
         updateDisplay();
-
-        if (playMode === 'auto') {
-            runAutoCycle();
-        }
+        if (playMode === 'auto') runAutoCycle();
     }
 
     function runAutoCycle() {
-        let timeLeft = 5000;
         updateProgressBar(100, 5000);
-        
         autoTimer = setTimeout(() => {
             showAnswer();
             updateProgressBar(100, 3000);
-            autoTimer = setTimeout(() => {
-                generate();
-            }, 3000);
+            autoTimer = setTimeout(() => { generate(); }, 3000);
         }, 5000);
     }
 
     function updateProgressBar(width, duration) {
         const bar = document.getElementById('auto-progress');
-        bar.style.transition = 'none';
-        bar.style.width = '0%';
+        bar.style.transition = 'none'; bar.style.width = '0%';
         setTimeout(() => {
             bar.style.transition = `width ${duration}ms linear`;
             bar.style.width = '100%';
@@ -262,9 +260,7 @@
         ans.innerText = currentTask.en;
     }
 
-    function showAnswer() {
-        document.getElementById('english-answer').classList.add('show');
-    }
+    function showAnswer() { document.getElementById('english-answer').classList.add('show'); }
 
     function goBack() {
         if (history.length === 0) return;
@@ -273,7 +269,6 @@
         updateDisplay();
     }
 
-    // 배너 로테이션
     const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
     let currentBannerIdx = 0;
     setInterval(() => {
