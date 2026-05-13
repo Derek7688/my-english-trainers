@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Emily in Paris S02 E05 - Trainer</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.tailwindcss.com/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-amber: #92400e;
+            --btn-amber: #d97706;
+            --accent-green: #059669;
+            --bg-gray: #fffbeb;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #333; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            text-align: center; width: 95%; max-width: 500px; border: 1px solid #fef3c7; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 15px;
+        }
+        .top-controls.active { display: flex; }
+
+        h1 { 
+            color: var(--primary-amber); font-size: 18px !important; margin: 10px 0 25px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2;
+        }
+
+        #korean-task { 
+            font-size: 19px; font-weight: 700; margin: 20px 0 15px 0; min-height: 100px; 
+            color: #451a03; line-height: 1.6; word-break: keep-all; display: flex; align-items: center; justify-content: center; 
+            padding: 0 10px; letter-spacing: -0.02em;
+        }
+
+        .start-container { margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--btn-amber); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(146, 64, 14, 0.2);
+        }
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(146, 64, 14, 0.15); }
+        .lvl-btn:active { transform: scale(0.95); }
+
+        .auto-toggle {
+            display: flex; align-items: center; gap: 5px; background: #fef3c7; padding: 4px; border-radius: 12px;
+        }
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: #92400e;
+        }
+        .toggle-btn.active { background: var(--primary-amber); color: white; }
+        
+        .answer-container {
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%;
+        }
+
+        #english-answer { 
+            font-size: 16px; color: var(--accent-green); width: 100%; padding: 15px; 
+            background: #ecfdf5; border-radius: 12px; border: 1px solid #a7f3d0; font-weight: 600; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 8px; }
+        .ans-btn { background: var(--btn-amber); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #78350f; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #92400e; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #fef3c7; font-size: 13px; margin-top: 15px; width: 100%; }
+        
+        .hidden { display: none !important; }
+
+        #auto-progress {
+            width: 0%; height: 4px; background: #f59e0b; position: absolute; top: 0; left: 0; border-radius: 24px 24px 0 0; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini">
+            <button class="lvl-btn" onclick="generate()">다시 섞기 🎲</button>
+        </div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
+    </div>
+
+    <h1>✨ Emily in Paris | S02 E05 실전 패턴 Pop!</h1>
+    
+    <div id="korean-task">파리의 판타지와 현실 사이의 에밀리!<br>핵심 패턴 3개를 무한 반복하세요. 💪</div>
+    
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작 🎲</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <div class="mt-10 w-full max-w-sm mx-auto text-center">
+        <p class="text-[11px] text-gray-400 font-medium">PSE 실전 트레이닝 시스템 | 총 50문항 수록</p>
+    </div>
+</div>
+
+<script>
+    const allClaims = [
+        // Pattern 1: Get something out of the way (17문항)
+        { kr: "이걸 먼저 끝내버립시다.", en: "Let's get this out of the way first." },
+        { kr: "이걸 그냥 해치워버릴까요?", en: "Should we just get this out of the way?" },
+        { kr: "서류 작업을 먼저 해치웁시다.", en: "Let's get the paperwork out of the way first." },
+        { kr: "숙제를 먼저 끝내버리고 싶어요.", en: "I want to get my homework out of the way first." },
+        { kr: "회의를 빨리 끝내버립시다.", en: "Let's get this meeting out of the way fast." },
+        { kr: "청소를 먼저 해치워야 해요.", en: "I need to get the cleaning out of the way first." },
+        { kr: "운동을 먼저 끝내버립시다.", en: "Let's get the exercise out of the way first." },
+        { kr: "쇼핑을 먼저 해치웁시다.", en: "Let's get the shopping out of the way first." },
+        { kr: "빨래를 먼저 끝내버리고 싶어.", en: "I want to get the laundry out of the way first." },
+        { kr: "전화를 먼저 해치웁시다.", en: "Let's get the phone call out of the way first." },
+        { kr: "보고서를 먼저 끝내버려.", en: "Get the report out of the way first." },
+        { kr: "이메일을 먼저 해치우자.", en: "Let's get the email out of the way first." },
+        { kr: "어려운 일을 먼저 끝내버립시다.", en: "Let's get the hard work out of the way first." },
+        { kr: "질문들을 먼저 해치웁시다.", en: "Let's get the questions out of the way first." },
+        { kr: "설명을 먼저 끝내버릴게.", en: "I'll get the explanation out of the way first." },
+        { kr: "돈 문제를 먼저 해치웁시다.", en: "Let's get the money issue out of the way first." },
+        { kr: "테스트를 먼저 끝내버리자.", en: "Let's get the test out of the way first." },
+
+        // Pattern 2: Cards on the table (16문항)
+        { kr: "솔직히 다 털어놓읍시다.", en: "Let's put our cards on the table." },
+        { kr: "솔직히 다 털어놓고 말해서, 이거 내 처음이야.", en: "Cards on the table, this is my first time." },
+        { kr: "솔직히 말해서, 나는 동의하지 않아.", en: "Cards on the table, I don't agree." },
+        { kr: "솔직히 말해서, 이거 너무 비싸.", en: "Cards on the table, it's too expensive." },
+        { kr: "솔직히 말해서, 나는 시간이 없어.", en: "Cards on the table, I don't have time." },
+        { kr: "패를 다 까놓고 솔직해져 봅시다.", en: "Let's put our cards on the table and be honest." },
+        { kr: "그는 패를 다 보여주듯 설명했어.", en: "He put his cards on the table and explained." },
+        { kr: "솔직히 말해서, 이건 공정하지 않아.", en: "Cards on the table, this is not fair." },
+        { kr: "솔직히 말해서, 나는 그를 좋아하지 않아.", en: "Cards on the table, I don't like him." },
+        { kr: "솔직히 말해서, 우리 도움이 필요해.", en: "Cards on the table, we need help." },
+        { kr: "그녀는 솔직히 다 털어놓았어.", en: "She put her cards on the table." },
+        { kr: "솔직히 말해서, 계획이 바뀌었어.", en: "Cards on the table, the plan changed." },
+        { kr: "솔직히 말해서, 나는 모르겠어.", en: "Cards on the table, I don't know." },
+        { kr: "너는 솔직히 다 털어놓아야 해.", en: "You need to put your cards on the table." },
+        { kr: "우리 서로 솔직히 다 털어놓자.", en: "Let's put our cards on the table with each other." },
+        { kr: "솔직히 말해서, 모든 게 괜찮을 거야.", en: "Cards on the table, everything will be fine." },
+
+        // Pattern 3: Rip off the band-aid (17문항)
+        { kr: "단칼에 결판을 냅시다.", en: "Let's rip off the Band-Aid." },
+        { kr: "그냥 한 번에 끝내버려.", en: "Just rip off the Band-Aid." },
+        { kr: "망설이지 말고 단칼에 끝내.", en: "Stop hesitating and just rip off the Band-Aid." },
+        { kr: "단번에 끝내는 게 가장 친절해.", en: "Ripping off the Band-Aid is the kindest." },
+        { kr: "나는 사표를 단칼에 냈어.", en: "I ripped off the Band-Aid and quit." },
+        { kr: "관계를 단칼에 정리해.", en: "Rip off the Band-Aid and end it." },
+        { kr: "비밀을 단칼에 말해버려.", en: "Rip off the Band-Aid and tell the secret." },
+        { kr: "나는 고통을 단칼에 끝내고 싶어.", en: "I want to rip off the Band-Aid." },
+        { kr: "그녀는 단칼에 헤어졌어.", en: "She ripped off the Band-Aid and broke up." },
+        { kr: "그는 단칼에 거절했어.", en: "He ripped off the Band-Aid and said no." },
+        { kr: "우리는 단칼에 결정을 내렸어.", en: "We ripped off the Band-Aid and decided." },
+        { kr: "너는 단칼에 끝내야 해.", en: "You need to rip off the Band-Aid." },
+        { kr: "빨리 단칼에 끝내는 게 나아.", en: "It's better to rip off the Band-Aid quickly." },
+        { kr: "나는 진실을 단칼에 말했어.", en: "I ripped off the Band-Aid and told the truth." },
+        { kr: "전화를 단칼에 해버려.", en: "Just rip off the Band-Aid and call." },
+        { kr: "치과 치료를 단번에 끝내버리자.", en: "Let's rip off the Band-Aid and do the treatment." },
+        { kr: "모든 걸 단칼에 해결하자.", en: "Let's rip off the Band-Aid and solve everything." }
+    ];
+
+    let currentTask = { kr: '', en: '' };
+    let history = [];
+    let playMode = 'manual';
+    let autoTimer = null;
+
+    function startTrainer() {
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        generate();
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+
+        if (isAuto) {
+            generate();
+        } else {
+            clearTimeout(autoTimer);
+            updateProgressBar(0, 0);
+        }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        if (currentTask.kr) history.push({...currentTask});
+        if (history.length > 50) history.shift();
+        const randomIndex = Math.floor(Math.random() * allClaims.length);
+        currentTask = allClaims[randomIndex];
+        updateDisplay();
+
+        if (playMode === 'auto') {
+            runAutoCycle();
+        }
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000); 
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000); 
+            autoTimer = setTimeout(() => {
+                generate();
+            }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        currentTask = history.pop();
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.kr;
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() {
+        document.getElementById('english-answer').classList.add('show');
+    }
+</script>
+
+</body>
+</html>

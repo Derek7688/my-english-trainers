@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Emily in Paris S02 E06 - Trainer</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.tailwindcss.com/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-amber: #92400e;
+            --btn-amber: #d97706;
+            --accent-green: #059669;
+            --bg-gray: #fffbeb;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #333; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            text-align: center; width: 95%; max-width: 500px; border: 1px solid #fef3c7; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 15px;
+        }
+        .top-controls.active { display: flex; }
+
+        h1 { 
+            color: var(--primary-amber); font-size: 18px !important; margin: 10px 0 25px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2;
+        }
+
+        #korean-task { 
+            font-size: 19px; font-weight: 700; margin: 20px 0 15px 0; min-height: 100px; 
+            color: #451a03; line-height: 1.6; word-break: keep-all; display: flex; align-items: center; justify-content: center; 
+            padding: 0 10px; letter-spacing: -0.02em;
+        }
+
+        .start-container { margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--btn-amber); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(146, 64, 14, 0.2);
+        }
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(146, 64, 14, 0.15); }
+        .lvl-btn:active { transform: scale(0.95); }
+
+        .auto-toggle {
+            display: flex; align-items: center; gap: 5px; background: #fef3c7; padding: 4px; border-radius: 12px;
+        }
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: #92400e;
+        }
+        .toggle-btn.active { background: var(--primary-amber); color: white; }
+        
+        .answer-container {
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%;
+        }
+
+        #english-answer { 
+            font-size: 16px; color: var(--accent-green); width: 100%; padding: 15px; 
+            background: #ecfdf5; border-radius: 12px; border: 1px solid #a7f3d0; font-weight: 600; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 8px; }
+        .ans-btn { background: var(--btn-amber); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #78350f; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #92400e; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #fef3c7; font-size: 13px; margin-top: 15px; width: 100%; }
+        
+        .hidden { display: none !important; }
+
+        #auto-progress {
+            width: 0%; height: 4px; background: #f59e0b; position: absolute; top: 0; left: 0; border-radius: 24px 24px 0 0; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini">
+            <button class="lvl-btn" onclick="generate()">다시 섞기 🎲</button>
+        </div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
+    </div>
+
+    <h1>✨ Emily in Paris | S02 E06 실전 패턴 Pop!</h1>
+    
+    <div id="korean-task">레스토랑 개업식 대소동!<br>핵심 패턴 3개를 무한 반복하세요. 💪</div>
+    
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작 🎲</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <div class="mt-10 w-full max-w-sm mx-auto text-center">
+        <p class="text-[11px] text-gray-400 font-medium">PSE 실전 트레이닝 시스템 | 총 50문항 수록</p>
+    </div>
+</div>
+
+<script>
+    const allClaims = [
+        // Pattern 1: Under control (17문항)
+        { kr: "제가 다 알아서 하고 있어요.", en: "I've got it under control." },
+        { kr: "그녀가 다 알아서 하고 있어요.", en: "She's got it under control." },
+        { kr: "그는 다 알아서 하고 있어요.", en: "He's got it under control." },
+        { kr: "상황은 통제 하에 있습니다.", en: "The situation is under control." },
+        { kr: "모든 것이 통제 하에 있습니다.", en: "Everything is under control." },
+        { kr: "프로젝트는 제가 알아서 하고 있어요.", en: "I've got the project under control." },
+        { kr: "예산은 제가 알아서 하고 있어요.", en: "I've got the budget under control." },
+        { kr: "팀은 제가 알아서 하고 있어요.", en: "I've got the team under control." },
+        { kr: "당황하지 마세요, 통제 하에 있습니다.", en: "Don't panic, it's under control." },
+        { kr: "모든 것이 완벽하게 준비되었는지 확인하세요.", en: "Make sure everything is under control." },
+        { kr: "행사는 통제 하에 있나요?", en: "Is the event under control?" },
+        { kr: "우리는 모든 것을 알아서 하고 있어요.", en: "We've got everything under control." },
+        { kr: "그들은 모든 것을 알아서 하고 있어요.", en: "They've got everything under control." },
+        { kr: "걱정 마세요, 제가 알아서 합니다.", en: "Don't worry, I have it under control." },
+        { kr: "그녀는 모든 상황을 통제하고 있어요.", en: "She has the situation under control." },
+        { kr: "이제 통제 하에 들어왔어요.", en: "It is under control now." },
+        { kr: "빨리 통제 하에 둬야 합니다.", en: "We must get it under control fast." },
+
+        // Pattern 2: High-maintenance (16문항)
+        { kr: "그는 정말 까다로워요.", en: "He's so high-maintenance." },
+        { kr: "그녀는 정말 까다로워요.", en: "She's so high-maintenance." },
+        { kr: "당신은 정말 까다롭군요.", en: "You're so high-maintenance." },
+        { kr: "제 사장님은 아주 까다로워요.", en: "My boss is very high-maintenance." },
+        { kr: "까다로운 고객을 상대하는 건 힘들어요.", en: "It's hard to handle high-maintenance clients." },
+        { kr: "이 차는 손이 너무 많이 가요.", en: "This car is very high-maintenance." },
+        { kr: "그 장비는 손이 너무 많이 가요.", en: "That equipment is very high-maintenance." },
+        { kr: "까다로운 사람들을 좋아하지 않아요.", en: "I don't like high-maintenance people." },
+        { kr: "그는 손이 많이 가는 편인가요?", en: "Is he high-maintenance?" },
+        { kr: "그녀는 손이 많이 가는 편인가요?", en: "Is she high-maintenance?" },
+        { kr: "저는 까다로운 사람이 아니에요.", en: "I am not high-maintenance." },
+        { kr: "우리는 까다로운 고객이 많아요.", en: "We have many high-maintenance customers." },
+        { kr: "그 식물은 키우기 까다로워요.", en: "That plant is high-maintenance." },
+        { kr: "이 직업은 아주 까다로워요.", en: "This job is high-maintenance." },
+        { kr: "그 프로젝트는 관리가 까다로워요.", en: "The project is high-maintenance." },
+        { kr: "너무 까다롭게 굴지 마세요.", en: "Don't be so high-maintenance." },
+
+        // Pattern 3: A dime a dozen (17문항)
+        { kr: "요리사는 파리에 널리고 널렸어요.", en: "Chefs are a dime a dozen in Paris." },
+        { kr: "좋은 앱은 널리고 널렸어요.", en: "Good apps are a dime a dozen." },
+        { kr: "그런 조언은 흔해 빠졌어요.", en: "That advice is a dime a dozen." },
+        { kr: "이런 기회는 널렸어요.", en: "Opportunities like this are a dime a dozen." },
+        { kr: "가수는 널리고 널렸어요.", en: "Singers are a dime a dozen." },
+        { kr: "식당은 이 동네에 널렸어요.", en: "Restaurants are a dime a dozen in this neighborhood." },
+        { kr: "아이디어는 널렸지만 실천이 중요해요.", en: "Ideas are a dime a dozen, but action is important." },
+        { kr: "이런 물건은 흔해 빠졌어요.", en: "Items like this are a dime a dozen." },
+        { kr: "똑똑한 사람은 널렸어요.", en: "Smart people are a dime a dozen." },
+        { kr: "그것은 널리고 널린 흔한 일이에요.", en: "It is a dime a dozen." },
+        { kr: "흔한 소리는 듣고 싶지 않아요.", en: "I don't want to hear dime-a-dozen talk." },
+        { kr: "진짜 실력자는 흔치 않아요.", en: "Real talent isn't a dime a dozen." },
+        { kr: "이런 디자인은 널렸어요.", en: "Designs like this are a dime a dozen." },
+        { kr: "파리에는 카페가 널렸어요.", en: "Cafes are a dime a dozen in Paris." },
+        { kr: "그것들은 널리고 널린 것들이에요.", en: "They are a dime a dozen." },
+        { kr: "모든 게 다 흔해 빠졌어.", en: "Everything is a dime a dozen." },
+        { kr: "그런 사람은 널렸어.", en: "People like him are a dime a dozen." }
+    ];
+
+    let currentTask = { kr: '', en: '' };
+    let history = [];
+    let playMode = 'manual';
+    let autoTimer = null;
+
+    function startTrainer() {
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        generate();
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+
+        if (isAuto) {
+            generate();
+        } else {
+            clearTimeout(autoTimer);
+            updateProgressBar(0, 0);
+        }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        if (currentTask.kr) history.push({...currentTask});
+        if (history.length > 50) history.shift();
+        const randomIndex = Math.floor(Math.random() * allClaims.length);
+        currentTask = allClaims[randomIndex];
+        updateDisplay();
+
+        if (playMode === 'auto') {
+            runAutoCycle();
+        }
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000); 
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000); 
+            autoTimer = setTimeout(() => {
+                generate();
+            }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        currentTask = history.pop();
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.kr;
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() {
+        document.getElementById('english-answer').classList.add('show');
+    }
+</script>
+
+</body>
+</html>
