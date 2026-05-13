@@ -29,6 +29,7 @@
         /* 상단 제어 바 (구석 버튼들) */
         .top-controls {
             display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 15px;
+            order: 1;
         }
         .top-controls.active { display: flex; }
 
@@ -38,15 +39,22 @@
             font-weight: 900; letter-spacing: -0.05em; line-height: 1.2; order: 2;
         }
 
-        /* 🚀 시작/다시섞기 버튼 컨테이너 */
-        .level-selector { order: 1; }
-        .lvl-btn { 
-            background: var(--primary-coffee); color: white; border: none; padding: 10px 24px; 
-            border-radius: 50px; font-size: 14px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
-            box-shadow: 0 2px 8px rgba(75, 54, 33, 0.15);
+        /* 큰 문구 스타일 */
+        #korean-task { 
+            font-size: 19px; font-weight: 700; margin: 20px 0 15px 0; min-height: 100px; 
+            color: #2c3e50; line-height: 1.6; word-break: keep-all; display: flex; align-items: center; justify-content: center; 
+            padding: 0 10px; letter-spacing: -0.02em; order: 3;
         }
-        /* 구석으로 이동했을 때의 버튼 스타일 */
-        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; }
+
+        /* 🚀 시작 버튼 위치: 큰 문구 아래 (order 4) */
+        .start-container { order: 4; margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--primary-coffee); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(75, 54, 33, 0.2);
+        }
+        /* 구석으로 이동했을 때의 다시 섞기 버튼 스타일 */
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(75, 54, 33, 0.15); }
         .lvl-btn:active { transform: scale(0.95); }
 
         /* 자동/수동 토글 버튼 */
@@ -58,15 +66,9 @@
         }
         .toggle-btn.active { background: var(--primary-coffee); color: white; }
         
-        #korean-task { 
-            font-size: 19px; font-weight: 700; margin: 20px 0 15px 0; min-height: 100px; 
-            color: #2c3e50; line-height: 1.6; word-break: keep-all; display: flex; align-items: center; justify-content: center; 
-            padding: 0 10px; letter-spacing: -0.02em; order: 3;
-        }
-        
         /* 🚀 정답창 영역 고정 */
         .answer-container {
-            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%; order: 4;
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%; order: 5;
         }
 
         #english-answer { 
@@ -76,14 +78,14 @@
         }
         #english-answer.show { visibility: visible; opacity: 1; }
 
-        #action-area { order: 5; width: 100%; }
+        #action-area { order: 6; width: 100%; }
         .main-controls { display: flex; justify-content: center; gap: 8px; }
         .ans-btn { background: var(--primary-coffee); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
         .next-btn { background: #6f4e37; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
         .back-btn { background: transparent; color: #adb5bd; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #dee2e6; font-size: 13px; margin-top: 15px; width: 100%; }
         
         .hidden { display: none !important; }
-        #banner-container { order: 6; }
+        #banner-container { order: 7; }
 
         /* 자동 모드 진행 바 */
         #auto-progress {
@@ -96,7 +98,7 @@
 <div class="card">
     <div id="auto-progress"></div>
 
-    <!-- 연습 시작 후 나타날 구석 제어 바 -->
+    <!-- 연습 시작 후 나타날 구석 제어 바 (order 1) -->
     <div id="top-controls" class="top-controls">
         <div id="lvl-container-mini"></div>
         <div class="auto-toggle">
@@ -105,15 +107,15 @@
         </div>
     </div>
 
-    <!-- 첫 화면 중앙 시작 버튼 -->
-    <div id="lvl-container-main" class="level-selector mt-4">
-        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작</button>
-    </div>
-
     <h1>☕ 실전 카페 클레임 트레이너</h1>
     
     <div id="korean-task">잘못 나온 음료, 그냥 마실 건가요? 😤</div>
     
+    <!-- 첫 화면 중앙 시작 버튼 (큰 문구 아래 위치) -->
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작</button>
+    </div>
+
     <div class="answer-container">
         <div id="english-answer"></div>
     </div>
@@ -169,7 +171,7 @@
     let autoTimer = null;
 
     function startTrainer() {
-        document.getElementById('lvl-container-main').classList.add('hidden');
+        document.getElementById('start-container').classList.add('hidden');
         document.getElementById('top-controls').classList.add('active');
         document.getElementById('action-area').classList.remove('hidden');
         
@@ -194,7 +196,7 @@
             generate();
         } else {
             clearTimeout(autoTimer);
-            updateProgressBar(0);
+            updateProgressBar(0, 0);
         }
     }
 
