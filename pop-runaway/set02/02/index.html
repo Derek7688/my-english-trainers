@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shopping Discount & Condition Trainer v1.1</title>
+    <!-- Pretendard 폰트 불러오기 (CDN) -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-navy: #0f172a;
+            --btn-accent: #334155;
+            --accent-pink: #db2777;
+            --bg-gray: #f8fafc;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #333; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            text-align: center; width: 95%; max-width: 500px; border: 1px solid #e2e8f0; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 15px;
+            order: 1;
+        }
+        .top-controls.active { display: flex; }
+
+        h1 { 
+            color: var(--primary-navy); font-size: 20px !important; margin: 10px 0 25px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2; order: 2;
+        }
+
+        #korean-task { 
+            font-size: 19px; font-weight: 700; margin: 20px 0 15px 0; min-height: 120px; 
+            color: #1e293b; line-height: 1.6; word-break: keep-all; display: flex; align-items: center; justify-content: center; 
+            padding: 0 10px; letter-spacing: -0.02em; order: 3;
+        }
+
+        .start-container { order: 4; margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--btn-accent); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
+        .lvl-btn:active { transform: scale(0.95); }
+
+        .auto-toggle {
+            display: flex; align-items: center; gap: 5px; background: #f1f5f9; padding: 4px; border-radius: 12px;
+        }
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: #64748b;
+        }
+        .toggle-btn.active { background: var(--primary-navy); color: white; }
+        
+        .answer-container {
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%; order: 5;
+        }
+
+        #english-answer { 
+            font-size: 16px; color: #0f172a; width: 100%; padding: 15px; 
+            background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; font-weight: 600; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { order: 6; width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 8px; width: 100%; }
+        .ans-btn { background: var(--primary-navy); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #475569; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #adb5bd; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #dee2e6; font-size: 13px; margin-top: 15px; width: 100%; }
+        
+        .hidden { display: none !important; }
+        #banner-container { order: 7; }
+
+        #auto-progress {
+            width: 0%; height: 4px; background: var(--accent-pink); position: absolute; top: 0; left: 0; border-radius: 24px 24px 0 0; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini"></div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
+    </div>
+
+    <h1>💸 실전 해외 쇼핑 제품 컨디션 & 할인 협상 트레이너</h1>
+    <div id="korean-task">흠집이나 얼룩을 발견해도 당당하게! 정중하게 할인을 요청해 보세요. 🤝</div>
+    
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
+            <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+            <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center">
+                <h3 id="banner-title" class="font-black text-slate-800 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const data = {
+        defects: [
+            { kr: "스크래치", en: "a scratch" },
+            { kr: "얼룩", en: "a stain" },
+            { kr: "실밥 풀림", en: "a loose thread" },
+            { kr: "금", en: "a crack" },
+            { kr: "작은 구멍", en: "a small hole" },
+            { kr: "찢어진 곳", en: "a rip" },
+            { kr: "보풀", en: "some pilling" },
+            { kr: "변색", en: "some discoloration" },
+            { kr: "찌그러진 곳", en: "a dent" }
+        ],
+        reasons: [
+            { kr: "여기 흠집이 있어서", en: "because of the damage" },
+            { kr: "여기 얼룩이 묻어 있어서", en: "because of this stain" },
+            { kr: "포장이 손상되어 있어서", en: "because of the damaged packaging" },
+            { kr: "이게 마지막 상품이라서", en: "because it's the last one" },
+            { kr: "진열되었던 상품이라서", en: "because it's a display item" },
+            { kr: "진열 상품이어도 상관없으니까", en: "because I don’t mind taking the display item" },
+            { kr: "제가 여기 단골이라서", en: "because I’m a regular here" },
+            { kr: "여기 친구들한테 추천 많이 해서", en: "because I recommended this place to my friends" }
+        ],
+        negotiations: [
+            { kr: "현금으로 계산하면", en: "if I pay in cash" },
+            { kr: "두 개 사면", en: "if I buy two" },
+            { kr: "세트로 구매하면", en: "if I buy the whole set" },
+            { kr: "대량으로 구매하면", en: "if I buy in bulk" },
+            { kr: "지금 바로 사서 가져가면", en: "if I take it right now" },
+            { kr: "제가 직접 들고 가면", en: "if I carry it myself" },
+            { kr: "선물 포장 안 해주셔도 되니까", en: "if I skip the gift wrap" },
+            { kr: "상자 없이 가져가도 괜찮으니까", en: "if I take it without the box" },
+            { kr: "제 예산을 조금 초과해서 그러는데", en: "since it's a bit over my budget" }
+        ]
+    };
+
+    let currentTask = { kr: '', en: '' };
+    let history = [];
+    let playMode = 'manual';
+    let autoTimer = null;
+
+    // 🚀 한국어 조사(이/가) 판별기 구현
+    function getJosa(word) {
+        const lastChar = word.charAt(word.length - 1);
+        // 한글 범위를 벗어나는 경우 기본값 처리
+        if (lastChar < '가' || lastChar > '힣') return '가'; 
+        // 종성(받침) 유무 확인 계산식
+        const hasBatchim = (lastChar.charCodeAt(0) - 44032) % 28 !== 0;
+        return hasBatchim ? '이' : '가';
+    }
+
+    function startTrainer() {
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        const miniContainer = document.getElementById('lvl-container-mini');
+        miniContainer.innerHTML = `<button class="lvl-btn" onclick="generate()">다시 섞기 🎲</button>`;
+        generate();
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+        if (isAuto) generate();
+        else { clearTimeout(autoTimer); updateProgressBar(0, 0); }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        if (currentTask.kr) history.push({...currentTask});
+        if (history.length > 50) history.shift();
+
+        const patternRand = Math.random();
+        let kr = "", en = "";
+
+        if (patternRand < 0.34) {
+            const d = data.defects[Math.floor(Math.random() * data.defects.length)];
+            // 🚀 동적으로 받침을 계산해 올바른 조사 매칭
+            kr = `여기에 ${d.kr}${getJosa(d.kr)} 있네요.`;
+            en = `I noticed ${d.en} on this.`;
+        } else if (patternRand < 0.67) {
+            const r = data.reasons[Math.floor(Math.random() * data.reasons.length)];
+            kr = `${r.kr} 할인받을 수 있을까요?`;
+            en = `Can I get a discount ${r.en}?`;
+        } else {
+            const n = data.negotiations[Math.floor(Math.random() * data.negotiations.length)];
+            kr = `${n.kr} 조금 더 깎아줄 수 있나요?`;
+            en = `Can you go a little lower ${n.en}?`;
+        }
+
+        currentTask = { kr, en };
+        updateDisplay();
+        if (playMode === 'auto') runAutoCycle();
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000);
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000);
+            autoTimer = setTimeout(() => { generate(); }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none'; bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        currentTask = history.pop();
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.kr;
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() { document.getElementById('english-answer').classList.add('show'); }
+
+    setInterval(() => {
+        const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
+        const currentBannerIdx = Math.floor(Date.now() / 4000) % bannerMsgs.length;
+        const bIcon = document.getElementById('banner-icon');
+        const bTitle = document.getElementById('banner-title');
+        if(bIcon && bTitle) {
+            bIcon.innerText = bannerMsgs[currentBannerIdx].icon;
+            bTitle.innerText = bannerMsgs[currentBannerIdx].text;
+        }
+    }, 4000);
+</script>
+
+</body>
+</html>
