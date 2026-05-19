@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>셀프 사다리 (Self-Ladder)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; touch-action: manipulation; }
+        .auto-active { background-color: #f97316 !important; color: white !important; border-color: #f97316 !important; }
+        .card-container { min-height: 380px; display: flex; flex-direction: column; justify-content: center; }
+        .banner-inner { transition: all 0.5s ease; }
+        #progress-container { cursor: pointer; touch-action: none; }
+        
+        /* 🚀 직전 학습 내용 스타일 (희미하게) */
+        #prev-item-box { transition: all 0.5s ease; min-height: 48px; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col items-center justify-start p-4">
+
+    <!-- 배너 템플릿 -->
+    <template id="banner-template">
+        <div class="promo-banner bg-white border border-blue-50 p-4 rounded-[2.2rem] mb-6 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+             onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+            <div class="banner-inner flex items-center gap-4">
+                <div class="banner-icon w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+                <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center text-left">
+                    <h3 class="banner-title font-black text-slate-800 text-[14px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                    <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- [1] 설정 화면 -->
+    <div id="setup-screen" class="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-sm w-full border border-slate-100 my-auto text-center">
+        <span class="bg-orange-100 text-orange-600 px-4 py-1 rounded-full text-sm font-bold mb-3 inline-block uppercase tracking-widest">Ladder Tool</span>
+        <h1 class="text-3xl font-black text-slate-800 mb-2 font-black">셀프 사다리</h1>
+        <p id="setup-lesson-title" class="text-blue-600 font-bold text-lg italic mb-6 text-center w-full">Loading...</p>
+        <div id="setup-banner-area"></div>
+        <div class="mb-10 px-2 text-left">
+            <div class="flex justify-between items-center mb-4">
+                <p class="text-slate-700 font-bold text-sm">누적 반복 단위</p>
+                <div class="bg-blue-600 text-white px-3 py-1 rounded-lg font-black text-xl" id="chunk-value">5</div>
+            </div>
+            <input type="range" id="chunk-slider" min="1" max="10" value="5" oninput="updateChunkDisplay(this.value)" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+        </div>
+        <div class="mb-6">
+            <button id="auto-mode-btn" onclick="toggleAutoMode()" class="w-full py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-600 flex items-center justify-center gap-2 transition-all hover:bg-slate-50">
+                <span id="auto-icon">⚪</span> 자동 재생 OFF
+            </button>
+        </div>
+        <button onclick="startStudy()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold text-lg shadow-xl active:scale-95 transition-all">연습 시작하기</button>
+    </div>
+
+    <!-- [2] 학습 화면 -->
+    <div id="study-screen" class="hidden w-full max-w-lg text-slate-900 mx-auto">
+        <div class="flex justify-between items-center mb-4 px-2">
+            <button onclick="location.reload()" class="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+            </button>
+            <div id="active-lesson-name" class="text-slate-400 font-black text-xs tracking-widest uppercase text-center flex-1 font-black">Practice</div>
+            <div class="w-10"></div>
+        </div>
+
+        <!-- 🚀 직전 학습 문장 표시 영역 (희미하게) -->
+        <div id="prev-item-box" class="w-full px-8 mb-2 flex flex-col items-center justify-center text-center opacity-0">
+            <p id="prev-kr" class="text-xs font-bold text-slate-400 truncate w-full"></p>
+            <p id="prev-en" class="text-xs font-black text-blue-300 truncate w-full"></p>
+        </div>
+
+        <div class="bg-white p-10 rounded-[3rem] shadow-2xl card-container text-center mb-6 border border-slate-50 relative overflow-hidden">
+            <div class="absolute top-6 left-8 right-8 flex justify-between items-center">
+                <span id="sentence-number" class="bg-slate-100 text-slate-400 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter">No.0</span>
+                <div class="flex items-center gap-3">
+                    <button onclick="switchModeInGame()" id="mode-switch-btn" class="text-slate-300 font-bold text-[10px] underline decoration-slate-100 hover:text-blue-400 transition-colors">자동 모드 전환</button>
+                    <div id="mode-status" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-slate-50 text-slate-300 uppercase tracking-tighter font-black transition-all">수동</div>
+                </div>
+            </div>
+            <div id="kr-box" class="text-2xl font-bold text-slate-800 leading-relaxed mb-8 break-keep px-2"></div>
+            <div id="en-box" class="invisible opacity-0 translate-y-4 transition-all duration-500 w-full text-center">
+                <div class="h-[1px] bg-slate-100 w-16 mx-auto mb-8"></div>
+                <p id="en-text" class="text-2xl font-black text-blue-600 leading-tight break-keep px-4 font-black"></p>
+            </div>
+            <div id="finish-ui" class="hidden absolute inset-0 bg-white z-50 flex flex-col items-center justify-center p-6 text-center rounded-[3rem]">
+                <p class="text-4xl mb-4">🎉</p>
+                <h2 class="text-2xl font-black mb-2 font-black text-slate-800">연습 완료!</h2>
+                <div id="finish-banner-area" class="w-full"></div>
+                <button id="cal-confirm-btn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg mb-2">복습 알림 예약하기</button>
+                <button onclick="location.reload()" class="text-slate-400 text-sm font-bold py-2">그냥 종료하기</button>
+            </div>
+        </div>
+
+        <div id="study-banner-area"></div>
+
+        <div id="control-panel" class="flex flex-col gap-3 mb-6">
+            <div class="flex gap-2">
+                <button onclick="prevStep()" id="prev-btn" class="w-16 bg-white border-2 border-slate-100 text-slate-300 py-5 rounded-[1.8rem] font-black text-xl active:scale-95 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <button onclick="handleAction()" id="main-btn" class="flex-1 bg-slate-900 text-white py-5 rounded-[1.8rem] font-black text-lg shadow-2xl active:scale-95 transition-all font-black">정답 확인</button>
+            </div>
+        </div>
+
+        <div id="progress-container" class="h-4 flex items-center w-full mb-2">
+            <div class="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden pointer-events-none">
+                <div id="progress-bar" class="h-full bg-orange-500 transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+        <p id="progress-text" class="text-center text-slate-400 text-[9px] font-bold uppercase tracking-widest pb-6 pointer-events-none">Step 1 / 00</p>
+    </div>
+
+    <script>
+        // 🌟 요청하신 새로운 구글 스프레드 시트 ID로 변경 완료되었습니다.
+        const SHEET_ID = "1j-U02tE9SunwlYoSGTzP6lTuhJY2bWD-lBCVja7f7MI";
+        const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
+
+        let rawData = [], studySequence = [], currentIdx = 0, isRevealed = false, selectedChunkSize = 5;
+        let isAutoMode = false, autoTimer = null;
+
+        const bannerMsgs = [
+            { icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" },
+            { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }
+        ];
+        let currentBannerIdx = 0;
+
+        function injectBanners() {
+            const template = document.getElementById('banner-template').content;
+            ['setup-banner-area', 'study-banner-area', 'finish-banner-area'].forEach(id => {
+                const area = document.getElementById(id);
+                if (area) area.appendChild(template.cloneNode(true));
+            });
+        }
+
+        function rotateBanners() {
+            currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+            const msg = bannerMsgs[currentBannerIdx];
+            document.querySelectorAll('.promo-banner').forEach(banner => {
+                const inner = banner.querySelector('.banner-inner');
+                if(!inner) return;
+                inner.style.opacity = 0;
+                inner.style.transform = "translateY(3px)";
+                setTimeout(() => {
+                    banner.querySelector('.banner-icon').innerText = msg.icon;
+                    banner.querySelector('.banner-title').innerText = msg.text;
+                    inner.style.opacity = 1;
+                    inner.style.transform = "translateY(0)";
+                }, 500);
+            });
+        }
+
+        function updateChunkDisplay(val) {
+            selectedChunkSize = parseInt(val);
+            document.getElementById('chunk-value').innerText = val;
+        }
+
+        function toggleAutoMode() {
+            isAutoMode = !isAutoMode;
+            const btn = document.getElementById('auto-mode-btn');
+            btn.innerHTML = isAutoMode ? `<span>🟠</span> 자동 재생 ON` : `<span>⚪</span> 자동 재생 OFF`;
+            btn.className = `w-full py-4 rounded-2xl border-2 font-bold flex items-center justify-center gap-2 transition-all ${isAutoMode ? 'auto-active' : 'border-slate-100 text-slate-600'}`;
+        }
+
+        function switchModeInGame() {
+            isAutoMode = !isAutoMode;
+            updateInGameModeUI();
+            if(isAutoMode) handleAction(); else clearTimeout(autoTimer);
+        }
+
+        function updateInGameModeUI() {
+            const status = document.getElementById('mode-status');
+            const switchBtn = document.getElementById('mode-switch-btn');
+            if(isAutoMode) {
+                status.innerText = "자동";
+                status.className = "text-[9px] font-black px-2 py-0.5 rounded-full bg-orange-100 text-orange-600 uppercase tracking-tighter";
+                switchBtn.innerText = "수동 전환";
+            } else {
+                status.innerText = "수동";
+                status.className = "text-[9px] font-black px-2 py-0.5 rounded-full bg-slate-50 text-slate-300 uppercase tracking-tighter";
+                switchBtn.innerText = "자동 전환";
+            }
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        let currentLessonId = params.get('id') ? decodeURIComponent(params.get('id')).trim() : null;
+        document.getElementById('setup-lesson-title').innerText = currentLessonId || "Error";
+        document.getElementById('active-lesson-name').innerText = currentLessonId || "";
+
+        async function startStudy() {
+            try {
+                const res = await fetch(SHEET_URL);
+                const text = await res.text();
+                const rows = text.split('\n').map(row => row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"|"$/g, '').trim()));
+                rawData = rows.slice(1).filter(r => r[0] === currentLessonId).map(r => ({ num: r[1], kr: r[2], en: r[3] }));
+                
+                studySequence = [];
+                for (let i = 0; i < rawData.length; i += selectedChunkSize) {
+                    let end = Math.min(i + selectedChunkSize - 1, rawData.length - 1);
+                    for (let j = i; j <= end; j++) {
+                        for (let k = i; k <= j; k++) studySequence.push({ data: rawData[k] });
+                    }
+                    if (end > i) {
+                        for (let j = end; j >= i; j--) {
+                            for (let k = end; k >= j; k--) studySequence.push({ data: rawData[k] });
+                        }
+                    }
+                }
+                document.getElementById('setup-screen').classList.add('hidden');
+                document.getElementById('study-screen').classList.remove('hidden');
+                initProgressControl();
+                updateInGameModeUI();
+                render();
+            } catch (e) { alert("데이터 로드 실패"); }
+        }
+
+        function render() {
+            clearTimeout(autoTimer);
+            const item = studySequence[currentIdx];
+            
+            // 🚀 직전 학습 문장 표시 로직
+            const prevBox = document.getElementById('prev-item-box');
+            if (currentIdx > 0) {
+                const prevItem = studySequence[currentIdx - 1];
+                document.getElementById('prev-kr').innerText = "Last: " + prevItem.data.kr;
+                document.getElementById('prev-en').innerText = prevItem.data.en;
+                prevBox.classList.remove('opacity-0');
+                prevBox.classList.add('opacity-40');
+            } else {
+                prevBox.classList.remove('opacity-40');
+                prevBox.classList.add('opacity-0');
+            }
+
+            document.getElementById('sentence-number').innerText = `No.${item.data.num}`;
+            document.getElementById('kr-box').innerText = item.data.kr;
+            document.getElementById('en-text').innerText = item.data.en;
+            document.getElementById('progress-text').innerText = `Step ${currentIdx + 1} / ${studySequence.length}`;
+            document.getElementById('progress-bar').style.width = `${((currentIdx) / (studySequence.length - 1)) * 100}%`;
+            document.getElementById('en-box').classList.add('invisible', 'opacity-0');
+            document.getElementById('main-btn').innerText = "정답 확인";
+            isRevealed = false;
+            const prevBtn = document.getElementById('prev-btn');
+            if (currentIdx > 0) {
+                prevBtn.classList.remove('text-slate-300', 'pointer-events-none');
+                prevBtn.classList.add('text-slate-600');
+            } else {
+                prevBtn.classList.add('text-slate-300', 'pointer-events-none');
+                prevBtn.classList.remove('text-slate-600');
+            }
+            if(isAutoMode) autoTimer = setTimeout(handleAction, 4500);
+        }
+
+        function handleAction() {
+            clearTimeout(autoTimer);
+            if (!isRevealed) {
+                document.getElementById('en-box').classList.remove('invisible', 'opacity-0');
+                document.getElementById('main-btn').innerText = "다음 단계";
+                isRevealed = true;
+                if(isAutoMode) autoTimer = setTimeout(handleAction, 3000);
+            } else {
+                currentIdx++;
+                if (currentIdx < studySequence.length) render();
+                else finishStudy();
+            }
+        }
+
+        function prevStep() { if (currentIdx > 0) { currentIdx--; render(); } }
+
+        function initProgressControl() {
+            const container = document.getElementById('progress-container');
+            const seek = (e) => {
+                const rect = container.getBoundingClientRect();
+                const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                let percent = x / rect.width;
+                percent = Math.max(0, Math.min(1, percent));
+                const newIdx = Math.round(percent * (studySequence.length - 1));
+                if (newIdx !== currentIdx) {
+                    currentIdx = newIdx;
+                    render();
+                }
+            };
+            container.addEventListener('mousedown', (e) => {
+                seek(e);
+                const onMouseMove = (moveEvent) => seek(moveEvent);
+                const onMouseUp = () => {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                };
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            });
+            container.addEventListener('touchstart', (e) => {
+                seek(e);
+                const onTouchMove = (moveEvent) => {
+                    moveEvent.preventDefault();
+                    seek(moveEvent);
+                };
+                const onTouchEnd = () => {
+                    document.removeEventListener('touchmove', onTouchMove);
+                    document.removeEventListener('touchend', onTouchEnd);
+                };
+                document.addEventListener('touchmove', onTouchMove, { passive: false });
+                document.addEventListener('touchend', onTouchEnd);
+            });
+        }
+
+        function finishStudy() {
+            clearTimeout(autoTimer);
+            document.getElementById('finish-ui').classList.remove('hidden');
+            document.getElementById('prev-item-box').classList.add('hidden');
+            document.getElementById('study-banner-area').style.display = 'none';
+            document.getElementById('control-panel').style.display = 'none';
+            const btn = document.getElementById('cal-confirm-btn');
+            btn.onclick = function() {
+                const days = prompt("며칠 뒤에 복습 알림을 예약할까요? (1~30)", "1");
+                if (!days) return;
+                const targetDate = new Date();
+                targetDate.setDate(targetDate.getDate() + parseInt(days));
+                const dateStr = targetDate.toISOString().replace(/-|:|\.\d+/g, '').slice(0, 8);
+                const title = encodeURIComponent(`[복습] ${currentLessonId}`);
+                const details = encodeURIComponent(`복습 사다리 타기!\n\n🔗 주소: ${window.location.href}`);
+                location.href = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&dates=${dateStr}T090000/${dateStr}T100000`;
+            };
+        }
+
+        window.onload = () => {
+            injectBanners();
+            setInterval(rotateBanners, 4000);
+        };
+    </script>
+</body>
+</html>
