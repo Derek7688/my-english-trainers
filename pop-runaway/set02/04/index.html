@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shopping Packaging & Payment Trainer v1.1</title>
+    <!-- Pretendard 폰트 불러오기 (CDN) -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-navy: #0f172a;
+            --btn-accent: #334155;
+            --accent-pink: #db2777;
+            --bg-gray: #f8fafc;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #333; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            text-align: center; width: 95%; max-width: 500px; border: 1px solid #e2e8f0; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        /* 상단 제어 바 (구석 버튼들) */
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 15px;
+            order: 1;
+        }
+        .top-controls.active { display: flex; }
+
+        /* 🚀 제목 스타일 */
+        h1 { 
+            color: var(--primary-navy); font-size: 20px !important; margin: 10px 0 25px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2; order: 2;
+        }
+
+        /* 큰 문구 스타일 */
+        #korean-task { 
+            font-size: 19px; font-weight: 700; margin: 20px 0 15px 0; min-height: 120px; 
+            color: #1e293b; line-height: 1.6; word-break: keep-all; display: flex; align-items: center; justify-content: center; 
+            padding: 0 10px; letter-spacing: -0.02em; order: 3;
+        }
+
+        /* 🚀 시작 버튼 컨테이너: 큰 문구 아래 */
+        .start-container { order: 4; margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--btn-accent); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        /* 구석으로 이동했을 때의 다시 섞기 버튼 스타일 */
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
+        .lvl-btn:active { transform: scale(0.95); }
+
+        /* 자동/수동 토글 버튼 */
+        .auto-toggle {
+            display: flex; align-items: center; gap: 5px; background: #f1f5f9; padding: 4px; border-radius: 12px;
+        }
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: #64748b;
+        }
+        .toggle-btn.active { background: var(--primary-navy); color: white; }
+        
+        /* 🚀 정답창 영역 고정 */
+        .answer-container {
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%; order: 5;
+        }
+
+        #english-answer { 
+            font-size: 16px; color: #0f172a; width: 100%; padding: 15px; 
+            background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; font-weight: 600; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { order: 6; width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 8px; width: 100%; }
+        .ans-btn { background: var(--primary-navy); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #475569; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #adb5bd; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #dee2e6; font-size: 13px; margin-top: 15px; width: 100%; }
+        
+        .hidden { display: none !important; }
+        #banner-container { order: 7; }
+
+        #auto-progress {
+            width: 0%; height: 4px; background: var(--accent-pink); position: absolute; top: 0; left: 0; border-radius: 24px 24px 0 0; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini"></div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
+    </div>
+
+    <h1>🛍️ 실전 해외 쇼핑 마무리 & 결제 오류 트레이너</h1>
+    <div id="korean-task">계산대 앞 마무리 포장 요청부터 잘못 청구된 금액 확인까지 완벽하게! 💳</div>
+    
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
+            <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+            <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center">
+                <h3 id="banner-title" class="font-black text-slate-800 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const data = {
+        packagings: [
+            { kr: "선물용으로 포장해서", en: "gift-wrapped" },
+            { kr: "종이 쇼핑백에 담아서", en: "in a paper bag" },
+            { kr: "비닐봉지에 담아서", en: "in a plastic bag" },
+            { kr: "따로따로 나누어서 포장해서", en: "wrapped separately" },
+            { kr: "선물 상자에 넣어서", en: "in a gift box" },
+            { kr: "깨지지 않게 뽁뽁이로 싸서", en: "wrapped in bubble wrap" },
+            { kr: "더 큰 가방에 담아서", en: "in a bigger bag" },
+            { kr: "쇼핑백 하나 더 같이 해서", en: "with an extra shopping bag" },
+            { kr: "이 쇼핑백에 담아서", en: "in this shopping bag" }, 
+            { kr: "작은 상자에 넣어서", en: "in a small box" } 
+        ],
+        documents: [
+            { kr: "영수증", en: "a receipt" },
+            { kr: "선물용 영수증", en: "a gift receipt" },
+            { kr: "면세 처리를 위한 서류", en: "the tax-free documents" },
+            { kr: "이메일 영수증", en: "an email receipt" },
+            { kr: "인쇄된 종이 영수증", en: "a printed receipt" },
+            { kr: "구매 증명서", en: "a proof of purchase" },
+            { kr: "품질 보증서", en: "the warranty document" },
+            { kr: "항목별 상세 내역서", en: "an itemized receipt" },
+            { kr: "할인 쿠폰", en: "a discount coupon" }, 
+            { kr: "주차권", en: "a parking ticket" } 
+        ],
+        charges: [
+            { kr: "이중으로 결제된", en: "twice" },
+            { kr: "잘못된 금액이 청구된", en: "the wrong amount" },
+            { kr: "너무 많이 청구된", en: "too much" },
+            { kr: "이 항목에 대해 잘못 청구된", en: "wrong for this item" },
+            { kr: "할인 전 원래 가격으로 청구된", en: "the full price instead of the sale price" },
+            { kr: "구매하지 않은 물건까지 청구된", en: "for something I didn't buy" },
+            { kr: "세금이 잘못 계산되어서 청구된", en: "the wrong tax rate" },
+            { kr: "추가 요금이 청구된", en: "an extra fee" }, 
+            { kr: "세 번 결제된", en: "three times" }, 
+            { kr: "배송비까지 청구된", en: "for shipping" } 
+        ]
+    };
+
+    let currentTask = { kr: '', en: '' };
+    let history = [];
+    let playMode = 'manual';
+    let autoTimer = null;
+
+    function startTrainer() {
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        const miniContainer = document.getElementById('lvl-container-mini');
+        miniContainer.innerHTML = `<button class="lvl-btn" onclick="generate()">다시 섞기 🎲</button>`;
+        generate();
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+        if (isAuto) generate();
+        else { clearTimeout(autoTimer); updateProgressBar(0, 0); }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        if (currentTask.kr) history.push({...currentTask});
+        if (history.length > 50) history.shift();
+
+        const patternRand = Math.random();
+        let kr = "", en = "";
+
+        if (patternRand < 0.34) {
+            // 패턴 1: Could I get this [Packaging]?
+            const p = data.packagings[Math.floor(Math.random() * data.packagings.length)];
+            kr = `이거 ${p.kr} 받을 수 있을까요?`;
+            en = `Could I get this ${p.en}?`;
+        } else if (patternRand < 0.67) {
+            // 패턴 2: Could I get [Document]?
+            const d = data.documents[Math.floor(Math.random() * data.documents.length)];
+            kr = `${d.kr} 좀 주시겠어요?`;
+            en = `Could I get ${d.en}?`;
+        } else {
+            // 패턴 3: I think I was charged [Charge Error].
+            const c = data.charges[Math.floor(Math.random() * data.charges.length)];
+            kr = `${c.kr} 것 같아요.`;
+            en = `I think I was charged ${c.en}.`;
+        }
+
+        currentTask = { kr, en };
+        updateDisplay();
+        if (playMode === 'auto') runAutoCycle();
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000);
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000);
+            autoTimer = setTimeout(() => { generate(); }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none'; bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        currentTask = history.pop();
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.kr;
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() { document.getElementById('english-answer').classList.add('show'); }
+
+    setInterval(() => {
+        const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
+        const currentBannerIdx = Math.floor(Date.now() / 4000) % bannerMsgs.length;
+        const bIcon = document.getElementById('banner-icon');
+        const bTitle = document.getElementById('banner-title');
+        if(bIcon && bTitle) {
+            bIcon.innerText = bannerMsgs[currentBannerIdx].icon;
+            bTitle.innerText = bannerMsgs[currentBannerIdx].text;
+        }
+    }, 4000);
+</script>
+
+</body>
+</html>
