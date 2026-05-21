@@ -1,4 +1,3 @@
-:Title:Local Photo Request & Sharing Trainer:photo_request_trainer.html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -6,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Global Travel Photo Request Trainer</title>
     <!-- Pretendard 폰트 불러오기 (CDN) -->
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.tailwindcss.com/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* STREAMING_CHUNK: Defining core theme color variables and resetting global CSS... */
         :root {
             --primary-slate: #0f172a;
             --btn-accent: #475569;
@@ -108,7 +106,6 @@
         </div>
     </div>
 
-    <!-- STREAMING_CHUNK: Rendering primary app card header and subtitle... -->
     <h1>📸 실전 현지인 사진 요청 & 공유 트레이너</h1>
     <div id="korean-task">외국인에게 그냥 폰만 쥐여주고 얼굴 빵떡 사진 받으실 건가요? 😤 원하는 구도로 완벽한 인생샷을 요청해 보세요! 📸</div>
     
@@ -121,7 +118,6 @@
         <div id="english-answer"></div>
     </div>
     
-    <!-- STREAMING_CHUNK: Placing button elements and navigation anchors... -->
     <div id="action-area" class="control-group hidden">
         <div class="main-controls">
             <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
@@ -144,7 +140,6 @@
 </div>
 
 <script>
-    /* STREAMING_CHUNK: Declaring exact data dictionary with 25 highly precise expressions... */
     const data = {
         framings: [
             { kr: "세로로", en: "vertically" },
@@ -184,7 +179,6 @@
     let playMode = 'manual';
     let autoTimer = null;
 
-    /* STREAMING_CHUNK: Initializing state variables and starting training session... */
     function startTrainer() {
         document.getElementById('start-container').classList.add('hidden');
         document.getElementById('top-controls').classList.add('active');
@@ -207,7 +201,6 @@
         else { clearTimeout(autoTimer); updateProgressBar(0, 0); }
     }
 
-    /* STREAMING_CHUNK: Constructing random pattern and rendering natural Korean templates... */
     function generate() {
         clearTimeout(autoTimer);
         if (currentTask.kr) history.push({...currentTask});
@@ -242,7 +235,6 @@
         if (playMode === 'auto') runAutoCycle();
     }
 
-    /* STREAMING_CHUNK: Running automatic play loop cycles with synchronized timer bars... */
     function runAutoCycle() {
         updateProgressBar(100, 5000);
         autoTimer = setTimeout(() => {
@@ -279,7 +271,6 @@
 
     function showAnswer() { document.getElementById('english-answer').classList.add('show'); }
 
-    /* STREAMING_CHUNK: Activating bottom banner rotations at fixed intervals... */
     setInterval(() => {
         const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
         const currentBannerIdx = Math.floor(Date.now() / 4000) % bannerMsgs.length;
@@ -294,4 +285,3 @@
 
 </body>
 </html>
-```eof
