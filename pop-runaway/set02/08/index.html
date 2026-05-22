@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ultimate Local Pub & Bar Trainer</title>
+    <!-- Pretendard 폰트 불러오기 (CDN) -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-amber: #f59e0b;
+            --primary-dark: #0f1115;
+            --btn-accent: #d97706;
+            --accent-orange: #f97316;
+            --bg-card: #1e222b;
+            --text-muted: #9ca3af;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--primary-dark); margin: 0; padding: 40px 0; color: #f3f4f6; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: var(--bg-card); padding: 30px 25px; border-radius: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); 
+            text-align: center; width: 95%; max-width: 500px; border: 1px solid rgba(245, 158, 11, 0.15); position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        /* 상단 제어 바 (구석 버튼들) */
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 20px;
+            order: 1;
+        }
+        .top-controls.active { display: flex; }
+
+        /* 🚀 제목 스타일 */
+        h1 { 
+            color: var(--primary-amber); font-size: 22px !important; margin: 10px 0 25px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2; order: 2;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* 큰 문구 스타일 */
+        #korean-task { 
+            font-size: 19px; font-weight: 700; margin: 20px 0 15px 0; min-height: 100px; 
+            color: #ffffff; line-height: 1.6; word-break: keep-all; display: flex; align-items: center; justify-content: center; 
+            padding: 0 10px; letter-spacing: -0.02em; order: 3;
+        }
+
+        /* 🚀 시작 버튼 컨테이너: 큰 문구 바로 아래 위치 */
+        .start-container { order: 4; margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--btn-accent); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+        }
+        /* 구석으로 이동했을 때의 다시 섞기 버튼 스타일 */
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .lvl-btn:active { transform: scale(0.95); }
+
+        /* 자동/수동 토글 버튼 */
+        .auto-toggle {
+            display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.05); padding: 4px; border-radius: 12px;
+        }
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: var(--text-muted);
+        }
+        .toggle-btn.active { background: var(--primary-amber); color: var(--primary-dark); }
+        
+        /* 🚀 정답창 영역 고정: 흔들림 철저히 방지 */
+        .answer-container {
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%; order: 5;
+        }
+
+        #english-answer { 
+            font-size: 17px; color: #ffffff; width: 100%; padding: 15px; 
+            background: rgba(255,255,255,0.04); border-radius: 12px; border: 1px solid rgba(245, 158, 11, 0.25); font-weight: 600; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { order: 6; width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 8px; width: 100%; }
+        .ans-btn { background: var(--btn-accent); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2); }
+        .next-btn { background: #4b5563; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: var(--text-muted); padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed rgba(255,255,255,0.15); font-size: 13px; margin-top: 15px; width: 100%; }
+        .back-btn:hover { color: #f3f4f6; }
+        
+        .hidden { display: none !important; }
+        #banner-container { order: 7; }
+
+        /* 자동 모드 진행 바 */
+        #auto-progress {
+            width: 0%; height: 4px; background: var(--accent-orange); position: absolute; top: 0; left: 0; border-radius: 28px 28px 0 0; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini"></div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
+    </div>
+
+    <h1>🍻 실전 로컬 펍 & 바 트레이너</h1>
+    
+    <div id="korean-task">메뉴판 앞 기선제압! 내 취향의 술을 추천받고 멋진 건배사로 로컬의 밤을 즐겨보세요! 🍻</div>
+    
+    <!-- 첫 화면 중앙 시작 버튼 -->
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <!-- PSE 광고 배너 -->
+    <div id="banner-container" class="promo-banner bg-[#1a1d24] border border-gray-800 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
+            <div id="banner-icon" class="w-10 h-10 bg-amber-500 rounded-2xl flex items-center justify-center text-xl shadow-amber-900 shadow-lg text-black font-bold">🔥</div>
+            <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center">
+                <h3 id="banner-title" class="font-black text-gray-200 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                <p class="text-amber-500 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const data = {
+        // [패턴 1] What do you have for [술 종류]?
+        types: [
+            { kr: "생맥주", en: "draft beer" },
+            { kr: "로컬 수제 맥주", en: "local craft beer" },
+            { kr: "하우스 와인", en: "house wine" },
+            { kr: "레드 와인", en: "red wine" },
+            { kr: "달콤한 칵테일", en: "sweet cocktails" },
+            { kr: "무알코올 음료", en: "non-alcoholic drinks" },
+            { kr: "과일 맥주", en: "fruity beers" },
+            { kr: "시그니처 드링크", en: "signature drinks" },
+            { kr: "가벼운 안주", en: "light snacks" }
+        ],
+        // [패턴 2] Can I get [수량/단위] of [술 종류]?
+        drinks: [
+            { kr: "생맥주 한 잔", en: "a glass of the draft beer" },
+            { kr: "로컬 맥주 피처 하나", en: "a pitcher of the local beer" },
+            { kr: "기네스 두 파인트", en: "two pints of Guinness" },
+            { kr: "기네스 한 병", en: "a bottle of Guinness" },
+            { kr: "하이네켄 한 병", en: "a bottle of Heineken" },
+            { kr: "하이네켄 두 잔", en: "two glasses of Heineken" },
+            { kr: "코로나 세 병", en: "three bottles of Corona" },
+            { kr: "버드와이저 한 병", en: "a bottle of Budweiser" },
+            { kr: "스텔라 한 병", en: "a bottle of Stella" },
+            { kr: "진앤토닉 한 잔", en: "a Gin and Tonic" },
+            { kr: "모히토 한 잔", en: "a Mojito" },
+            { kr: "모히토 두 잔", en: "two Mojitos" },
+            { kr: "코카콜라 제로 한 잔", en: "a Diet Coke" }
+        ],
+        // [패턴 3] Let's make a toast to [건배 대상]!
+        toasts: [
+            { kr: "우리의 멋진 여행", en: "our amazing trip" },
+            { kr: "우리의 건강", en: "our health" },
+            { kr: "아름다운 이 밤", en: "this beautiful night" },
+            { kr: "새로운 친구들", en: "new friends" },
+            { kr: "우리의 성공", en: "our success" },
+            { kr: "새로운 시작", en: "new beginnings" },
+            { kr: "좋은 추억", en: "good memories" },
+            { kr: "앞으로 다가올 미래", en: "the future" },
+            { kr: "주말", en: "the weekend" },
+            { kr: "우리의 안전한 여행", en: "our safe travels" },
+            { kr: "여기 모인 모든 사람", en: "everyone here tonight" }
+        ]
+    };
+
+    let currentTask = { kr: '', en: '' };
+    let history = [];
+    let playMode = 'manual';
+    let autoTimer = null;
+
+    // 한국어 조사 (을/를) 판별기
+    function getUlLeul(word) {
+        const lastChar = word.charAt(word.length - 1);
+        if (lastChar < '가' || lastChar > '힣') return '를'; 
+        const hasBatchim = (lastChar.charCodeAt(0) - 44032) % 28 !== 0;
+        return hasBatchim ? '을' : '를';
+    }
+
+    // 한국어 조사 (로/으로) 판별기
+    function getRoUro(word) {
+        const lastChar = word.charAt(word.length - 1);
+        if (lastChar < '가' || lastChar > '힣') return '로'; 
+        const unicodeVal = lastChar.charCodeAt(0) - 44032;
+        const batchimCode = unicodeVal % 28;
+        const hasBatchim = batchimCode !== 0;
+        const isRieul = batchimCode === 8; // ㄹ 받침 제외 처리
+        return (hasBatchim && !isRieul) ? '으로' : '로';
+    }
+
+    function startTrainer() {
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        const miniContainer = document.getElementById('lvl-container-mini');
+        miniContainer.innerHTML = `<button class="lvl-btn" onclick="generate()">다시 섞기 🎲</button>`;
+        generate();
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+        if (isAuto) generate();
+        else { clearTimeout(autoTimer); updateProgressBar(0, 0); }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        if (currentTask.kr) history.push({...currentTask});
+        if (history.length > 50) history.shift();
+
+        const patternRand = Math.random();
+        let kr = "", en = "";
+
+        if (patternRand < 0.33) {
+            // 패턴 1: What do you have for [Alcohol Type]?
+            const t = data.types[Math.floor(Math.random() * data.types.length)];
+            kr = `${t.kr}${getRoUro(t.kr)}는 어떤 게 있나요?`;
+            en = `What do you have for ${t.en}?`;
+        } else if (patternRand < 0.67) {
+            // 패턴 2: Can I get [Quantity/Unit] of [Alcohol Type]?
+            const d = data.drinks[Math.floor(Math.random() * data.drinks.length)];
+            kr = `${d.kr} 주시겠어요?`;
+            en = `Can I get ${d.en}?`;
+        } else {
+            // 패턴 3: Let's make a toast to [Toast Target]!
+            const toast = data.toasts[Math.floor(Math.random() * data.toasts.length)];
+            kr = `우리 ${toast.kr}${getUlLeul(toast.kr)} 위해 건배해요!`;
+            en = `Let's make a toast to ${toast.en}!`;
+        }
+
+        currentTask = { kr, en };
+        updateDisplay();
+        if (playMode === 'auto') runAutoCycle();
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000);
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000);
+            autoTimer = setTimeout(() => { generate(); }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none'; bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        currentTask = history.pop();
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.kr;
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() { document.getElementById('english-answer').classList.add('show'); }
+
+    setInterval(() => {
+        const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
+        const currentBannerIdx = Math.floor(Date.now() / 4000) % bannerMsgs.length;
+        const bIcon = document.getElementById('banner-icon');
+        const bTitle = document.getElementById('banner-title');
+        if(bIcon && bTitle) {
+            bIcon.innerText = bannerMsgs[currentBannerIdx].icon;
+            bTitle.innerText = bannerMsgs[currentBannerIdx].text;
+        }
+    }, 4000);
+</script>
+
+</body>
+</html>
