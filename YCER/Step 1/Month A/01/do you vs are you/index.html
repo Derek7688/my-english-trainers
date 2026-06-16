@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🏃 [1단계] Do/Are 주파수 판별기</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght=400;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; touch-action: manipulation; }
+    </style>
+</head>
+<body class="bg-slate-900 min-h-screen flex flex-col items-center justify-start p-4 text-white">
+
+    <div class="w-full max-w-md my-auto">
+        
+        <div id="introScreen" class="bg-slate-800 p-8 rounded-[2.5rem] shadow-2xl w-full border border-slate-700 text-center">
+            <span class="bg-indigo-900 text-indigo-300 px-4 py-1 rounded-full text-xs font-bold mb-3 inline-block uppercase tracking-widest border border-indigo-700">Step 1: Warm-up</span>
+            <h1 class="text-3xl font-black text-white mb-2 tracking-tight">Do/Are 주파수 판별기</h1>
+            <p class="text-indigo-400 font-bold text-sm italic mb-4">50문장 코어 엔진 예열</p>
+            <p class="text-slate-400 font-medium text-sm mb-8 leading-relaxed">의문사는 잠시 접어두고, 한국어를 보자마자<br><span class="text-indigo-400 font-bold">Do you(행동)</span>인지, <span class="text-indigo-400 font-bold">Are you(상태/장소)</span>인지<br>설정한 시간 내에 빠르게 판별하는 훈련입니다.</p>
+            
+            <div class="mb-8 px-2 text-left">
+                <label class="text-slate-300 font-bold text-sm block mb-2" for="introTimeSelect">⏱️ 목표 반사 신경 제한 시간</label>
+                <select id="introTimeSelect" class="w-full p-4 rounded-2xl border-2 border-slate-700 font-bold text-slate-200 bg-slate-900 outline-none cursor-pointer text-base">
+                    <option value="0">⏱️ 시간 제한 없음 (개별 자습용)</option>
+                    <option value="1500">1.5초 (원어민 반사 신경)</option>
+                    <option value="2000" selected>2초 (추천 표준 세팅)</option>
+                    <option value="3000">3초 (초보자 워밍업용)</option>
+                    <option value="4000">4초 (슬로우 훈련)</option>
+                    <option value="5000">5초 (여유로운 세팅)</option>
+                </select>
+            </div>
+            
+            <button class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-5 rounded-2xl font-bold text-lg shadow-xl transition-all active:scale-95" onclick="startWarmup(false)">예열 시작하기 🚀</button>
+        </div>
+
+        <div id="quizScreen" class="hidden w-full">
+            <div class="flex justify-between items-center mb-4 px-2">
+                <button onclick="goToIntro()" class="p-2 hover:bg-slate-800 rounded-full transition-colors text-slate-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                </button>
+                <div class="text-slate-400 font-black text-sm tracking-widest uppercase text-center flex-1" id="progress">0 / 50</div>
+                <div class="w-10"></div>
+            </div>
+            
+            <div id="timerContainer" class="w-full h-[6px] bg-slate-800 rounded-full overflow-hidden mb-6">
+                <div id="timerBar" class="h-full bg-indigo-500" style="width: 100%;"></div>
+            </div>
+
+            <div class="bg-white p-10 rounded-[3rem] shadow-2xl h-[240px] text-center border border-slate-200 relative overflow-hidden mb-6 select-none flex flex-col justify-center items-center">
+                <div class="absolute top-4 left-0 right-0">
+                    <span class="bg-slate-100 text-slate-400 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border border-slate-200">CORE SIGNAL</span>
+                </div>
+                
+                <div class="w-[95%] text-2xl font-bold text-slate-800 tracking-tight leading-relaxed break-keep mt-2" id="korText">가져오는 중...</div>
+                
+                <div class="absolute bottom-5 left-1/2 -translate-x-1/2 w-[90%] text-base font-black text-indigo-600 opacity-0 transition-opacity duration-150 break-keep" id="engText">English...</div>
+            </div>
+
+            <div id="effectMsg" class="text-center font-black text-lg h-6 mb-4 text-slate-500">⏱️ 타이머가 멈추기 전에 선택하세요!</div>
+
+            <div class="grid grid-cols-2 gap-4 mb-6 w-full" id="actionBtnGroup">
+                <button class="bg-gradient-to-b from-emerald-500 to-emerald-600 text-white py-6 rounded-3xl font-black text-xl active:scale-95 transition-all shadow-lg shadow-emerald-950/30 flex flex-col items-center justify-center gap-0.5" onclick="chooseAnswer('Do you')">
+                    <span class="text-xs font-medium uppercase tracking-wider opacity-80">Action (행동)</span>
+                    <span>DO YOU</span>
+                </button>
+                <button class="bg-gradient-to-b from-blue-500 to-blue-600 text-white py-6 rounded-3xl font-black text-xl active:scale-95 transition-all shadow-lg shadow-blue-950/30 flex flex-col items-center justify-center gap-0.5" onclick="chooseAnswer('Are you')">
+                    <span class="text-xs font-medium uppercase tracking-wider opacity-80">Status (상태)</span>
+                    <span>ARE YOU</span>
+                </button>
+            </div>
+
+            <div class="hidden w-full mb-6" id="nextBtnGroup">
+                <button class="w-full bg-slate-700 hover:bg-slate-600 text-white py-4 rounded-2xl font-bold text-base transition-all" onclick="nextQuestion()">다음 문제로 패스 ➡️</button>
+            </div>
+        </div>
+
+        <div id="resultScreen" class="hidden bg-slate-800 p-8 rounded-[2.5rem] shadow-2xl w-full border border-slate-700 text-left">
+            <div class="text-2xl font-black text-center mb-1 text-white">🎉 웜업 격파 성적표</div>
+            <div id="scoreRatioSummary" class="font-bold text-slate-400 mb-1 text-center text-sm">성공률: 0 / 50 (0%)</div>
+            <div id="totalTimeSummary" class="font-black text-indigo-400 mb-6 text-center text-base tracking-tight">⏱️ 전체 격파 속도: 0초</div>
+            
+            <div class="max-h-[220px] overflow-y-auto mb-6 pr-1 space-y-3" id="resultList"></div>
+            
+            <div class="flex flex-col gap-2 w-full">
+                <button id="review-failed-btn" class="hidden w-full bg-orange-500 text-white py-4 rounded-2xl font-bold text-lg shadow-xl transition-all active:scale-95" onclick="startWarmup(true)">❌ 틀린 문제만 다시 도전하기 🔄</button>
+                <button class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg shadow-xl transition-all active:scale-95" onclick="goToIntro()">다시 처음부터 도전 🔄</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const warmupDataset = [
+            { kor: "너 {운동해}?", ans: "Do you", eng: "Do you work out?" },
+            { kor: "너 {담배 피워}?", ans: "Do you", eng: "Do you smoke?" },
+            { kor: "너 {요리해}?", ans: "Do you", eng: "Do you cook?" },
+            { kor: "너 {커피 마셔}?", ans: "Do you", eng: "Do you drink coffee?" },
+            { kor: "너 {운전해}?", ans: "Do you", eng: "Do you drive?" },
+            { kor: "너 {일해}?", ans: "Do you", eng: "Do you work?" },
+            { kor: "너 {공부해}?", ans: "Do you", eng: "Do you study?" },
+            { kor: "너 {쇼핑해}?", ans: "Do you", eng: "Do you shop?" },
+            { kor: "너 {술 마셔}?", ans: "Do you", eng: "Do you drink?" },
+            { kor: "너 {게임해}?", ans: "Do you", eng: "Do you play games?" },
+            { kor: "너 그거 {알아}?", ans: "Do you", eng: "Do you know that?" },
+            { kor: "너 그거 {좋아해}?", ans: "Do you", eng: "Do you like it?" },
+            { kor: "너 그거 {원해}?", ans: "Do you", eng: "Do you want it?" },
+            { kor: "너 그거 {기억해}?", ans: "Do you", eng: "Do you remember that?" },
+            { kor: "너 그거 {필요해}?", ans: "Do you", eng: "Do you need it?" },
+            { kor: "너 {혼자 살아}?", ans: "Do you", eng: "Do you live alone?" },
+            { kor: "너 {야근해}?", ans: "Do you", eng: "Do you work overtime?" },
+            { kor: "너 {운동 자주 해}?", ans: "Do you", eng: "Do you work out often?" },
+            { kor: "너 {넷플릭스 봐}?", ans: "Do you", eng: "Do you watch Netflix?" },
+            { kor: "너 {인스타 해}?", ans: "Do you", eng: "Do you use Instagram?" },
+            { kor: "너 {주식 투자 해}?", ans: "Do you", eng: "Do you invest in stocks?" },
+            { kor: "너 {비타민 챙겨 먹어}?", ans: "Do you", eng: "Do you take vitamins?" },
+            { kor: "너 {유튜브 자주 봐}?", ans: "Do you", eng: "Do you watch YouTube often?" },
+            { kor: "너 보통 {늦잠 자}?", ans: "Do you", eng: "Do you usually oversleep?" },
+            { kor: "너 일찍 {퇴근해}?", ans: "Do you", eng: "Do you get off work early?" },
+            { kor: "너 {바빠}?", ans: "Are you", eng: "Are you busy?" },
+            { kor: "너 {한가해}?", ans: "Are you", eng: "Are you free?" },
+            { kor: "너 {시간 괜찮아}?", ans: "Are you", eng: "Are you free?" },
+            { kor: "너 {피곤해}?", ans: "Are you", eng: "Are you tired?" },
+            { kor: "너 {아파}?", ans: "Are you", eng: "Are you sick?" },
+            { kor: "너 {집이야}?", ans: "Are you", eng: "Are you at home?" },
+            { kor: "너 {회사야}?", ans: "Are you", eng: "Are you at work?" },
+            { kor: "너 {바깥이야}?", ans: "Are you", eng: "Are you outside?" },
+            { kor: "너 {준비됐어}?", ans: "Are you", eng: "Are you ready?" },
+            { kor: "너 {방 안이야}?", ans: "Are you", eng: "Are you in the room?" },
+            { kor: "너 {카페야}?", ans: "Are you", eng: "Are you at the cafe?" },
+            { kor: "너 {학생이야}?", ans: "Are you", eng: "Are you a student?" },
+            { kor: "너 {진심이야}?", ans: "Are you", eng: "Are you serious?" },
+            { kor: "너 {우울해}?", ans: "Are you", eng: "Are you depressed?" },
+            { kor: "너 {행복해}?", ans: "Are you", eng: "Are you happy?" },
+            { kor: "너 {몸 괜찮아}?", ans: "Are you", eng: "Are you okay?" },
+            { kor: "너 {화났어}?", ans: "Are you", eng: "Are you angry?" },
+            { kor: "너 {무서워}?", ans: "Are you", eng: "Are you scared?" },
+            { kor: "너 {배고파}?", ans: "Are you", eng: "Are you hungry?" },
+            { kor: "너 {목말라}?", ans: "Are you", eng: "Are you thirsty?" },
+            { kor: "너 {취했어}?", ans: "Are you", eng: "Are you drunk?" },
+            { kor: "너 진짜 {확실해}?", ans: "Are you", eng: "Are you sure?" },
+            { kor: "너 {심심해}?", ans: "Are you", eng: "Are you bored?" },
+            { kor: "너 {걱정돼}?", ans: "Are you", eng: "Are you worried?" },
+            { kor: "너 {혼자야}?", ans: "Are you", eng: "Are you alone?" }
+        ];
+
+        let currentPool = [];
+        let currentIndex = 0;
+        let score = 0;
+        let timeLimit = 2000;
+        let timerInterval = null;
+        let startTime = 0;
+        let warmupStartTime = 0;
+        let results = [];
+        let isLocked = false;
+
+        function startWarmup(isReviewMode) {
+            const introSelect = document.getElementById('introTimeSelect');
+            timeLimit = parseInt(introSelect.value);
+
+            document.getElementById('introScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+
+            if (timeLimit === 0) {
+                document.getElementById('timerContainer').classList.add('hidden');
+            } else {
+                document.getElementById('timerContainer').classList.remove('hidden');
+            }
+
+            currentIndex = 0;
+            score = 0;
+            isLocked = false;
+
+            if (isReviewMode) {
+                currentPool = results.filter(r => !r.success).map(r => ({
+                    kor: r.kor,
+                    ans: r.ans,
+                    eng: r.eng
+                }));
+            } else {
+                currentPool = [...warmupDataset];
+            }
+
+            results = [];
+            currentPool.sort(() => Math.random() - 0.5);
+            warmupStartTime = Date.now();
+
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if (currentIndex >= currentPool.length) {
+                finishWarmup();
+                return;
+            }
+
+            isLocked = false;
+            document.getElementById('progress').innerText = `${currentIndex + 1} / ${currentPool.length}`;
+            
+            const currentItem = currentPool[currentIndex];
+            let rawKor = currentItem.kor;
+            let formattedKor = rawKor.replace("{", "<span class='text-indigo-600 font-black text-3xl mx-0.5 border-b-2 border-indigo-200/60'>").replace("}", "</span>");
+            
+            document.getElementById('korText').innerHTML = formattedKor;
+            document.getElementById('engText').innerText = currentItem.eng;
+            document.getElementById('engText').classList.add('opacity-0');
+            
+            if (timeLimit === 0) {
+                document.getElementById('effectMsg').innerText = "♾️ 시간 제한이 없습니다. 편하게 정답을 고르세요.";
+                document.getElementById('effectMsg').className = "text-center font-black text-sm h-6 mb-4 text-slate-400";
+            } else {
+                document.getElementById('effectMsg').innerText = "⏱️ 타이머가 멈추기 전에 선택하세요!";
+                document.getElementById('effectMsg').className = "text-center font-black text-lg h-6 mb-4 text-slate-400";
+                startTimer();
+            }
+
+            document.getElementById('actionBtnGroup').classList.remove('hidden');
+            document.getElementById('nextBtnGroup').classList.add('hidden');
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            const timerBar = document.getElementById('timerBar');
+            timerBar.className = "h-full bg-indigo-500 transition-none";
+            timerBar.style.width = "100%";
+
+            startTime = Date.now();
+            
+            timerInterval = setInterval(() => {
+                if (isLocked || timeLimit === 0) return;
+                const elapsedTime = Date.now() - startTime;
+                const remainingRatio = Math.max(0, (timeLimit - elapsedTime) / timeLimit) * 100;
+                
+                timerBar.style.width = `${remainingRatio}%`;
+
+                if (remainingRatio < 30) {
+                    timerBar.className = "h-full bg-rose-500";
+                } else if (remainingRatio < 60) {
+                    timerBar.className = "h-full bg-amber-500";
+                }
+
+                if (elapsedTime >= timeLimit) {
+                    clearInterval(timerInterval);
+                    timerBar.style.width = "0%";
+                    handleTimeout();
+                }
+            }, 20);
+        }
+
+        function chooseAnswer(userChoice) {
+            if (isLocked) return;
+            isLocked = true;
+            clearInterval(timerInterval);
+
+            const currentItem = currentPool[currentIndex];
+            const isCorrect = (userChoice === currentItem.ans);
+
+            if (isCorrect) {
+                score++;
+                document.getElementById('effectMsg').innerText = `⭕ 정답! (${currentItem.ans})`;
+                document.getElementById('effectMsg').className = "text-center font-black text-xl h-6 mb-4 text-emerald-400 animate-bounce";
+                
+                results.push({ kor: currentItem.kor.replace("{","").replace("}",""), ans: currentItem.ans, eng: currentItem.eng, success: true });
+                
+                setTimeout(() => {
+                    currentIndex++;
+                    showQuestion();
+                }, 400);
+            } else {
+                document.getElementById('effectMsg').innerText = `❌ 오답입니다. 정답은 [${currentItem.ans}]`;
+                document.getElementById('effectMsg').className = "text-center font-black text-xl h-6 mb-4 text-rose-500";
+                document.getElementById('engText').classList.remove('opacity-0');
+                
+                results.push({ kor: currentItem.kor.replace("{","").replace("}",""), ans: currentItem.ans, eng: currentItem.eng, success: false });
+
+                document.getElementById('actionBtnGroup').classList.add('hidden');
+                document.getElementById('nextBtnGroup').classList.remove('hidden');
+            }
+        }
+
+        function handleTimeout() {
+            isLocked = true;
+            const currentItem = currentPool[currentIndex];
+            
+            document.getElementById('effectMsg').innerText = `⏰ 시간 초과! 정답은 [${currentItem.ans}]`;
+            document.getElementById('effectMsg').className = "text-center font-black text-xl h-6 mb-4 text-amber-500";
+            document.getElementById('engText').classList.remove('opacity-0');
+
+            results.push({ kor: currentItem.kor.replace("{","").replace("}",""), ans: currentItem.ans, eng: currentItem.eng, success: false });
+
+            document.getElementById('actionBtnGroup').classList.add('hidden');
+            document.getElementById('nextBtnGroup').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            showQuestion();
+        }
+
+        function finishWarmup() {
+            clearInterval(timerInterval);
+            
+            const totalElapsedTimeMs = Date.now() - warmupStartTime;
+            const totalSeconds = (totalElapsedTimeMs / 1000).toFixed(1);
+            document.getElementById('totalTimeSummary').innerText = `⏱️ 전체 격파 속도: ${totalSeconds}초`;
+
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+
+            const ratio = Math.round((score / currentPool.length) * 100);
+            document.getElementById('scoreRatioSummary').innerText = `성공률: ${score} / ${currentPool.length} (${ratio}%)`;
+
+            let failedAnswers = results.filter(r => !r.success);
+            const reviewBtn = document.getElementById('review-failed-btn');
+            
+            if (failedAnswers.length > 0) {
+                reviewBtn.classList.remove('hidden');
+                reviewBtn.innerText = `❌ 틀린 문제 ${failedAnswers.length}개만 다시 도전하기 🔄`;
+            } else {
+                reviewBtn.classList.add('hidden');
+            }
+
+            const resultList = document.getElementById('resultList');
+            resultList.innerHTML = '';
+
+            results.forEach(res => {
+                const item = document.createElement('div');
+                item.className = `p-3 rounded-2xl border ${res.success ? 'bg-emerald-950/40 border-emerald-800' : 'bg-rose-950/40 border-rose-800'} text-sm flex flex-col gap-0.5`;
+                
+                item.innerHTML = `
+                    <div class="flex items-center gap-1.5 font-bold">
+                        <span>${res.success ? '⭕' : '❌'}</span>
+                        <span class="${res.success ? 'text-emerald-400' : 'text-rose-400'}">[${res.ans}] ${res.kor}</span>
+                    </div>
+                    <div class="text-slate-400 text-xs pl-6 italic font-medium">${res.eng}</div>
+                `;
+                resultList.appendChild(item);
+            });
+        }
+
+        function goToIntro() {
+            clearInterval(timerInterval);
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('introScreen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
