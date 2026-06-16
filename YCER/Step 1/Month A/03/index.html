@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>영어 패턴 훈련소</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght=400;700;900&display=swap');
+        
+        :root {
+            --primary: #f97316; 
+            --dark: #1e293b;
+            --light: #f8fafc;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
+        body { background-color: var(--light); padding: 15px; display: flex; flex-direction: column; min-height: 100vh; }
+        
+        header { padding: 12px 20px; background: var(--dark); color: white; border-radius: 12px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
+        header h1 { font-size: 18px; font-weight: 900; text-align: center; flex: 1; }
+        
+        .main-container { flex: 1; max-width: 500px; margin: 0 auto; width: 100%; }
+        
+        /* 전광판 */
+        .display-board { background: var(--dark); color: white; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 50px 20px; text-align: center; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); min-height: 250px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; }
+        .display-board:active { transform: scale(0.98); }
+        
+        .start-btn { background: var(--primary); color: white; font-size: 32px; font-weight: 900; padding: 20px 60px; border-radius: 50px; border: none; cursor: pointer; box-shadow: 0 10px 20px rgba(249, 115, 22, 0.4); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        .kor-hint { font-size: 24px; font-weight: 900; line-height: 1.5; margin-bottom: 25px; word-break: keep-all; z-index: 10; }
+        .eng-display { font-size: 20px; font-weight: 800; color: #fbbf24; z-index: 10; }
+        
+        /* 🚀 [신규 추가] 전광판 하단 붙박이 카운트다운 바 스타일 */
+        .timer-container { width: 100%; height: 6px; background: #334155; position: absolute; bottom: 0; left: 0; display: none; }
+        .timer-bar { width: 100%; height: 100%; background: var(--primary); width: 100%; }
+
+        /* 패턴 선택 카드 스타일 */
+        .pattern-card { background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 15px; cursor: pointer; transition: all 0.2s; -webkit-tap-highlight-color: transparent; position: relative; }
+        .pattern-card:hover { border-color: #cbd5e1; }
+        .pattern-card.selected { border-color: var(--primary); background: #fff7ed; transform: scale(1.01); box-shadow: 0 4px 6px rgba(249, 115, 22, 0.1); }
+        
+        .drawer-toggle-btn { background: #e2e8f0; color: #475569; font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 6px; border: none; cursor: pointer; transition: all 0.2s; }
+        .drawer-toggle-btn:hover { background: #cbd5e1; }
+        .drawer-toggle-btn.active-btn { background: #ffedd5; color: #ea580c; border: 1px solid rgba(234, 88, 12, 0.3); }
+        
+        .chunk-drawer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, opacity 0.2s ease; opacity: 0; background: #ffffff; border-radius: 10px; margin-bottom: 10px; }
+        .chunk-drawer.open { max-height: 350px; opacity: 1; border: 1px dashed #f97316; padding: 12px 14px; margin-top: -6px; margin-bottom: 10px; }
+
+        .mode-toggle-btn { background: #475569; color: white; font-size: 11px; font-weight: bold; padding: 6px 12px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .mode-toggle-btn:hover { background: #334155; }
+        .mode-toggle-btn.active-mix { background: var(--primary); box-shadow: 0 2px 4px rgba(249, 115, 22, 0.2); }
+        .mode-toggle-btn.active-auto { background: #10b981; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2); }
+
+        /* 메인 속도 토글 탭 */
+        .speed-tab-container { display: flex; background: #e2e8f0; border-radius: 8px; padding: 2px; }
+        .speed-tab-btn { padding: 4px 8px; font-size: 11px; font-weight: 800; color: #475569; border-radius: 6px; transition: all 0.2s; }
+        .speed-tab-btn.active-speed { background: var(--primary); color: white; box-shadow: 0 2px 4px rgba(249, 115, 22, 0.2); }
+
+        .banner-inner { transition: all 0.5s ease; }
+    </style>
+</head>
+<body>
+
+    <template id="banner-template">
+        <div class="promo-banner bg-white border border-blue-50 p-4 rounded-[2.2rem] mb-4 cursor-pointer shadow-lg transition-all active:scale-95 w-full mx-auto" 
+             onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+            <div class="banner-inner flex items-center gap-4">
+                <div class="banner-icon w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+                <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center text-left">
+                    <h3 class="banner-title font-black text-slate-800 text-[14px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                    <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <header>
+        <button onclick="location.reload()" class="text-xl hover:scale-110 transition-transform">🏠</button>
+        <h1>🛡️ 영어 패턴 훈련소</h1>
+        <div class="w-8"></div>
+    </header>
+
+    <div class="main-container">
+        <div id="main-banner-area" class="w-full"></div>
+
+        <div class="display-board" id="board" onclick="handleBoardClick()">
+            <button class="start-btn" onclick="event.stopPropagation(); startMission('all')">시작!</button>
+        </div>
+
+        <div class="mt-6 flex flex-col gap-2">
+            <div class="text-xs font-black text-slate-400 mb-2 flex justify-between items-center gap-2">
+                <div class="flex items-center gap-1.5">
+                    <button class="mode-toggle-btn active-mix" id="mix-switch" onclick="setAllRandomMode()">🎲 전체 랜덤</button>
+                    <button class="mode-toggle-btn" id="auto-switch" onclick="toggleAutoTrainMode()">🤖 자동 OFF</button>
+                </div>
+                
+                <div class="speed-tab-container" id="speed-gearbox">
+                    <button class="speed-tab-btn" id="spd-3" onclick="changeAutoSpeed(3)">3초</button>
+                    <button class="speed-tab-btn active-speed" id="spd-5" onclick="changeAutoSpeed(5)">5초</button>
+                    <button class="speed-tab-btn" id="spd-7" onclick="changeAutoSpeed(7)">7초</button>
+                    <button class="speed-tab-btn" id="spd-10" onclick="changeAutoSpeed(10)">10초</button>
+                </div>
+            </div>
+            
+            <div class="pattern-card" id="card-p1" onclick="selectFixedPattern('p1')">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="text-[10px] font-black bg-blue-100 text-blue-600 px-2 py-0.5 rounded">패턴 1</span>
+                        <p class="font-bold mt-1">It will be ready by [시점].</p>
+                        <p class="text-xs text-slate-400 mt-0.5">...까지 완료 가능 / 다 준비될 거야</p>
+                    </div>
+                    <button class="drawer-toggle-btn" id="btn-toggle-p1" onclick="event.stopPropagation(); toggleDrawer('p1')">📄 단어 보기</button>
+                </div>
+            </div>
+            <div class="chunk-drawer" id="drawer-p1">
+                <div class="text-[11px] font-black text-blue-500 mb-1.5">📦 갈아 끼울 시점 부품 (명사 10개)</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-slate-600 font-medium">
+                    <div>• this afternoon (오늘 오후)</div>
+                    <div>• tomorrow morning (내일 아침)</div>
+                    <div>• the end of this week (이번 주말)</div>
+                    <div>• our next meeting (다음 미팅)</div>
+                    <div>• noon (오늘 정오/낮 12시)</div>
+                    <div>• 5 PM today (오늘 오후 5시)</div>
+                    <div>• next Monday (다음주 월요일)</div>
+                    <div>• the end of this month (이번 달 말)</div>
+                    <div>• lunch (점심 시간 전까지)</div>
+                    <div>• the deadline (마감 시한)</div>
+                </div>
+            </div>
+            
+            <div class="pattern-card" id="card-p2" onclick="selectFixedPattern('p2')">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="text-[10px] font-black bg-purple-100 text-purple-600 px-2 py-0.5 rounded mr-1">패턴 2</span>
+                        <p class="font-bold mt-1">I need more time to [동사].</p>
+                        <p class="text-xs text-slate-400 mt-0.5">...하는 데 시간이 더 필요해</p>
+                    </div>
+                    <button class="drawer-toggle-btn" id="btn-toggle-p2" onclick="event.stopPropagation(); toggleDrawer('p2')">📄 단어 보기</button>
+                </div>
+            </div>
+            <div class="chunk-drawer" id="drawer-p2">
+                <div class="text-[11px] font-black text-purple-500 mb-1.5">⚙️ 갈아 끼울 지연 사유 (동사 10개)</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-slate-600 font-medium">
+                    <div>• check the details (디테일 확인)</div>
+                    <div>• fix the errors (에러 수정)</div>
+                    <div>• review the feedback (피드백 검토)</div>
+                    <div>• confirm with the team (팀원 확인)</div>
+                    <div>• prepare the slides (PPT 슬라이드 준비)</div>
+                    <div>• translate the report (보고서 번역)</div>
+                    <div>• test the system (시스템 테스트)</div>
+                    <div>• double-check the figures (숫자 더블체크)</div>
+                    <div>• get approval (승인 받기)</div>
+                    <div>• update the data (데이터 업데이트)</div>
+                </div>
+            </div>
+            
+            <div class="pattern-card" id="card-p3" onclick="selectFixedPattern('p3')">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="text-[10px] font-black bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded mr-1">패턴 3</span>
+                        <p class="font-bold mt-1">Everything is [상태] right now.</p>
+                        <p class="text-xs text-slate-400 mt-0.5">지금 상황이 너무 ...해 / 다 ...된 상태야</p>
+                    </div>
+                    <button class="drawer-toggle-btn" id="btn-toggle-p3" onclick="event.stopPropagation(); toggleDrawer('p3')">📄 단어 보기</button>
+                </div>
+            </div>
+            <div class="chunk-drawer" id="drawer-p3">
+                <div class="text-[11px] font-black text-emerald-500 mb-1.5">🎨 갈아 끼울 현재 상태 (형용사/분사 10개)</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-slate-600 font-medium">
+                    <div>• delayed (지연된 / 늦어지는)</div>
+                    <div>• busy (바쁜 / 정신없는)</div>
+                    <div>• stuck (완전히 꽉 막힌)</div>
+                    <div>• messed up (꼬여서 엉망진창인)</div>
+                    <div>• on hold (보류된 / 일시정지된)</div>
+                    <div>• changing (계속 바뀌는 중인)</div>
+                    <div>• complicated (복잡하게 꼬인)</div>
+                    <div>• chaotic (전부 대 혼란인)</div>
+                    <div>• overloaded (완전히 과부하 걸린)</div>
+                    <div>• uncertain (모든 게 불확실한)</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const missions = [
+            { kor: "오늘 오후까지 다 준비될 겁니다.", p: "p1", eng: "It will be ready by this afternoon." },
+            { kor: "이번 주까진 다 완료될 거예요.", p: "p1", eng: "It will be ready by the end of this week." },
+            { kor: "내일 아침까진 완료될 겁니다.", p: "p1", eng: "It will be ready by tomorrow morning." },
+            { kor: "다음 미팅 때까지 다 준비될 예정입니다.", p: "p1", eng: "It will be ready by our next meeting." },
+            { kor: "오늘 정오까지 다 준비될 겁니다.", p: "p1", eng: "It will be ready by noon." },
+            { kor: "오늘 오후 5시까지 다 완료될 예정입니다.", p: "p1", eng: "It will be ready by 5 PM today." },
+            { kor: "다음주 월요일까지 다 완료될 거예요.", p: "p1", eng: "It will be ready by next Monday." },
+            { kor: "이번 달 말까지 다 준비될 수 있습니다.", p: "p1", eng: "It will be ready by the end of this month." },
+            { kor: "점심 시간 전까지 다 완료될 겁니다.", p: "p1", eng: "It will be ready by lunch." },
+            { kor: "마감 시한까지 다 준비될 거예요.", p: "p1", eng: "It will be ready by the deadline." },
+
+            { kor: "디테일 확인하는 데 시간이 더 필요해요.", p: "p2", eng: "I need more time to check the details." },
+            { kor: "에러 수정하는 데 시간이 더 필요합니다.", p: "p2", eng: "I need more time to fix the errors." },
+            { kor: "피드백 검토하는 데 시간이 더 필요해요.", p: "p2", eng: "I need more time to review the feedback." },
+            { kor: "팀이랑 확인을 거치는 데 시간이 더 필요해.", p: "p2", eng: "I need more time to confirm with the team." },
+            { kor: "PPT 슬라이드 준비하는 데 시간이 더 필요해요.", p: "p2", eng: "I need more time to prepare the slides." },
+            { kor: "보고서 번역하는 데 시간이 더 필요합니다.", p: "p2", eng: "I need more time to translate the report." },
+            { kor: "시스템 테스트하는 데 시간이 더 필요해요.", p: "p2", eng: "I need more time to test the system." },
+            { kor: "숫자를 더블체크하는 데 시간이 더 필요합니다.", p: "p2", eng: "I need more time to double-check the figures." },
+            { kor: "승인을 받는 게 시간이 더 필요해요.", p: "p2", eng: "I need more time to get approval." },
+            { kor: "데이터를 업데이트 하는 데 시간이 더 필요해요.", p: "p2", eng: "I need more time to update the data." },
+
+            { kor: "지금 모든 게 지연된 상태야.", p: "p3", eng: "Everything is delayed right now." },
+            { kor: "지금 상황이 너무 바빠서 정신없습니다.", p: "p3", eng: "Everything is busy right now." },
+            { kor: "지금 완전히 꽉 막힌 상태예요.", p: "p3", eng: "Everything is stuck right now." },
+            { kor: "지금 상황이 꼬여서 엉망진창입니다.", p: "p3", eng: "Everything is messed up right now." },
+            { kor: "지금 모든 게 보류된 상태입니다.", p: "p3", eng: "Everything is on hold right now." },
+            { kor: "지금 모든 상황이 계속 바뀌는 중이에요.", p: "p3", eng: "Everything is changing right now." },
+            { kor: "지금 상황이 복잡하게 꼬였어요.", p: "p3", eng: "Everything is complicated right now." },
+            { kor: "지금 전부 대 혼란이에요.", p: "p3", eng: "Everything is chaotic right now." },
+            { kor: "지금 완전히 과부하 걸린 상태입니다.", p: "p3", eng: "Everything is overloaded right now." },
+            { kor: "지금 모든 게 불확실해요.", p: "p3", eng: "Everything is uncertain right now." }
+        ];
+
+        let currentMission = null;
+        let revealed = false;
+        let currentMode = "all"; 
+        let lastRevealedKor = ""; 
+
+        let isAutoPlay = false;
+        let autoPlayTimer = null;
+        let configAnswerWaitTime = 5000; 
+        
+        // 🚀 실시간 미니 애니메이션 바를 위한 프레임 연산 타이머 변수계
+        let animationFrameId = null;
+        let progressStartTimestamp = null;
+
+        const bannerMsgs = [
+            { icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" },
+            { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }
+        ];
+        let currentBannerIdx = 0;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            injectBanners();
+            setInterval(rotateBanners, 4000);
+        });
+
+        function changeAutoSpeed(seconds) {
+            configAnswerWaitTime = seconds * 1000;
+            document.querySelectorAll('.speed-tab-btn').forEach(b => b.classList.remove('active-speed'));
+            document.getElementById('spd-' + seconds).classList.add('active-speed');
+            
+            if(isAutoPlay && !revealed) {
+                runAutoCycle();
+            }
+        }
+
+        function injectBanners() {
+            const template = document.getElementById('banner-template');
+            const area = document.getElementById('main-banner-area');
+            if (area) area.appendChild(template.content.cloneNode(true));
+        }
+
+        function rotateBanners() {
+            currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+            const msg = bannerMsgs[currentBannerIdx];
+            document.querySelectorAll('.promo-banner').forEach(banner => {
+                const inner = banner.querySelector('.banner-inner');
+                if(!inner) return;
+                inner.style.opacity = 0;
+                inner.style.transform = "translateY(3px)";
+                setTimeout(() => {
+                    banner.querySelector('.banner-icon').innerText = msg.icon;
+                    banner.querySelector('.banner-title').innerText = msg.text;
+                    inner.style.opacity = 1;
+                    inner.style.transform = "translateY(0)";
+                }, 500);
+            });
+        }
+
+        function toggleDrawer(type) {
+            const drawer = document.getElementById('drawer-' + type);
+            const btn = document.getElementById('btn-toggle-' + type);
+            if (drawer.classList.contains('open')) {
+                drawer.classList.remove('open');
+                btn.classList.remove('active-btn');
+            } else {
+                drawer.classList.add('open');
+                btn.classList.add('active-btn');
+            }
+        }
+
+        function toggleAutoTrainMode() {
+            isAutoPlay = !isAutoPlay;
+            const btn = document.getElementById('auto-switch');
+            clearTimeout(autoPlayTimer);
+            cancelAnimationFrame(animationFrameId);
+
+            if(isAutoPlay) {
+                btn.innerText = "🤖 자동 ON";
+                btn.classList.add('active-auto');
+                if(!currentMission) startMission(currentMode);
+                else runAutoCycle();
+            } else {
+                btn.innerText = "🤖 자동 OFF";
+                btn.classList.remove('active-auto');
+                document.getElementById('mini-progressbar-container').style.display = 'none';
+            }
+        }
+
+        function runAutoCycle() {
+            clearTimeout(autoPlayTimer);
+            cancelAnimationFrame(animationFrameId);
+            if (!isAutoPlay) return;
+
+            const barContainer = document.getElementById('mini-progressbar-container');
+            const barFill = document.getElementById('mini-progressbar-fill');
+
+            if (!revealed) {
+                // 🚀 미니바 기동: 정답이 닫힌 대기 상태일 때만 싱크 시작
+                barContainer.style.display = 'block';
+                barFill.style.width = '100%';
+                progressStartTimestamp = performance.now();
+                
+                // 프레임단위의 정밀한 이징 드로우 함수 구동
+                function updateBar(now) {
+                    let elapsed = now - progressStartTimestamp;
+                    let remainingPercent = 100 - (elapsed / configAnswerWaitTime * 100);
+                    
+                    if (remainingPercent <= 0) {
+                        barFill.style.width = '0%';
+                    } else {
+                        barFill.style.width = remainingPercent + '%';
+                        animationFrameId = requestAnimationFrame(updateBar);
+                    }
+                }
+                animationFrameId = requestAnimationFrame(updateBar);
+
+                autoPlayTimer = setTimeout(() => { revealAnswer(); }, configAnswerWaitTime);
+            } else {
+                // 정답 오픈 상태일 때는 미니바를 잠시 가려둡니다.
+                barContainer.style.display = 'none';
+                autoPlayTimer = setTimeout(() => { startMission(currentMode); }, 3000);
+            }
+        }
+
+        function selectFixedPattern(type) {
+            currentMode = type;
+            document.getElementById('mix-switch').classList.remove('active-mix');
+            document.querySelectorAll('.pattern-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('card-' + type).classList.add('selected');
+            startMission(type);
+        }
+
+        function setAllRandomMode() {
+            currentMode = "all";
+            document.getElementById('mix-switch').classList.add('active-mix');
+            document.querySelectorAll('.pattern-card').forEach(c => c.classList.remove('selected'));
+            startMission('all');
+        }
+
+        function startMission(mode) {
+            clearTimeout(autoPlayTimer);
+            cancelAnimationFrame(animationFrameId);
+            let pool = missions;
+            if (mode !== "all") {
+                pool = missions.filter(m => m.p === mode);
+            }
+
+            let idx = Math.floor(Math.random() * pool.length);
+            if (pool.length > 1 && pool[idx].kor === lastRevealedKor) {
+                idx = (idx + 1) % pool.length; 
+            }
+
+            currentMission = pool[idx];
+            lastRevealedKor = currentMission.kor; 
+            revealed = false;
+            renderBoard();
+
+            if(isAutoPlay) runAutoCycle();
+        }
+
+        function renderBoard() {
+            const board = document.getElementById('board');
+            if (currentMode === "all") {
+                document.querySelectorAll('.pattern-card').forEach(c => c.classList.remove('selected'));
+                document.getElementById('card-' + currentMission.p).classList.add('selected');
+            }
+            // 🚀 미니 프로그레스 바 레이아웃 노드 내장 연동 완공
+            board.innerHTML = `
+                <div class="kor-hint">"${currentMission.kor}"</div>
+                <div class="eng-display" id="eng-area">${revealed ? currentMission.eng : "대기 중..."}</div>
+                <div class="timer-container" id="mini-progressbar-container">
+                    <div class="timer-bar" id="mini-progressbar-fill"></div>
+                </div>
+            `;
+        }
+
+        function handleBoardClick() {
+            if (!currentMission) return;
+            clearTimeout(autoPlayTimer);
+            cancelAnimationFrame(animationFrameId);
+
+            if (!revealed) {
+                revealAnswer();
+            } else {
+                startMission(currentMode); 
+            }
+        }
+
+        function revealAnswer() {
+            revealed = true;
+            cancelAnimationFrame(animationFrameId);
+            document.getElementById('mini-progressbar-container').style.display = 'none'; // 정답 노출 시 미니바 홀드 처리
+            
+            const area = document.getElementById('eng-area');
+            if(area) area.innerText = currentMission.eng;
+            if(isAutoPlay) runAutoCycle();
+        }
+    </script>
+</body>
+</html>
