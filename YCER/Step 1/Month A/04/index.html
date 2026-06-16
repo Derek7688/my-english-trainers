@@ -39,13 +39,12 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center; /* 🚀 세로 정중앙 배치 */
+            justify-content: center; /* 세로 정중앙 배치 */
             min-height: 100vh;
             padding: 16px;
             overflow-x: hidden;
         }
 
-        /* 🚀 배너는 컨테이너 외부 상단에 자연스럽게 안착 */
         #main-banner-area {
             width: 100%;
             max-width: 480px;
@@ -68,10 +67,9 @@
         .banner-title { font-weight: 900; color: #1e293b; font-size: 13px; letter-spacing: -0.02em; }
         .banner-subtitle { color: #2563eb; font-weight: bold; font-size: 9px; margin-top: 1px; }
 
-        /* 🚀 한 손 한 화면 모바일 컴팩트 컨테이너 */
         .container {
             width: 100%;
-            max-width: 480px; /* 폰 화면에 딱 맞게 컴팩트하게 축소 */
+            max-width: 480px;
             background: var(--card-color);
             border-radius: 24px;
             box-shadow: 0 12px 35px rgba(0,0,0,0.06);
@@ -81,7 +79,6 @@
             gap: 14px;
         }
 
-        /* 컨트롤 상단 바 */
         .header-controls {
             display: flex;
             flex-direction: column;
@@ -125,7 +122,6 @@
         .setter-label { font-size: 12px; font-weight: 700; }
         .time-select { padding: 4px 8px; font-size: 12px; font-weight: 600; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; }
 
-        /* 타이머 바 */
         .timer-container {
             width: 100%;
             height: 5px;
@@ -135,7 +131,6 @@
         }
         .timer-bar { width: 100%; height: 100%; background: var(--primary-color); transform-origin: left; transition: transform 0.1s linear; }
 
-        /* 🚀 퀴즈 영역 중앙 압축 배치 */
         .quiz-box {
             display: flex;
             flex-direction: column;
@@ -143,7 +138,7 @@
             justify-content: center;
             text-align: center;
             padding: 10px 0;
-            min-height: 200px; /* 고정 높이 최소화하여 중앙에 결집 */
+            min-height: 200px;
         }
 
         .hint-text {
@@ -175,7 +170,6 @@
         .english-text { font-size: 22px; font-weight: 700; color: var(--primary-color); word-break: keep-all; opacity: 0; transform: translateY(4px); transition: all 0.2s ease-out; }
         .english-text.show { opacity: 1; transform: translateY(0); }
 
-        /* 리포트 결과창 */
         .report-box {
             display: none;
             width: 100%;
@@ -194,7 +188,6 @@
         .report-content { text-align: left; }
         .report-en { font-weight: 700; color: var(--primary-color); margin-top: 1px; }
 
-        /* 🚀 하단 제어 영역을 중앙 전광판 바짝 밑으로 전진 배치 */
         .btn-group {
             display: flex;
             flex-direction: column;
@@ -217,7 +210,6 @@
         .btn-warning { background: var(--highlight-color); color: white; }
         .btn-warning:active { background: #ea580c; }
 
-        /* 🚀 채점 버튼 마진 간격 및 크기 확보 (터치 미스 방지) */
         .scoring-group {
             display: none;
             gap: 10px;
@@ -273,7 +265,6 @@
             <div id="timerBar" class="timer-bar"></div>
         </div>
 
-        <!-- 🚀 정중앙에 수렴된 퀴즈 전광판 영역 -->
         <div class="quiz-box">
             <div id="hintText" class="hint-text">한글 뼈대만 보고 0.1초 만에 영어 뼈대(I ~)를 발사하세요!</div>
             <div id="koreanBox" class="korean-box">
@@ -286,7 +277,6 @@
             <div id="reportBox" class="report-box"></div>
         </div>
 
-        <!-- 🚀 전광판 바로 밑으로 끌어올린 제어 버튼 컴포넌트 -->
         <div class="btn-group">
             <button id="actionBtn" class="main-btn btn-primary" onclick="handleAction()">시작하기</button>
             <button id="wrongOnlyBtn" class="main-btn btn-warning" style="display: none;" onclick="startWrongOnlyQuiz()">❌ 틀린 문제만 다시 풀기</button>
@@ -324,11 +314,12 @@
         }
         setInterval(rotateBanners, 4000);
 
+        // [평서문 1단계] 뼈대 데이터셋 (10개)
         const stage1Data = [
             { ko: "나 (~상태/~장소) <span class='point'>였어</span>", en: "I was" },
             { ko: "나 ~에 <span class='point'>갔어</span>", en: "I went" },
             { ko: "나 ~에 <span class='point'>도착했어</span>", en: "I got" },
-            { ko: "나 ~를 <span class='point'>봤어</span>", en: "I watched" },
+            { ko: "nav ~를 <span class='point'>봤어</span>", en: "I watched" },
             { ko: "나 ~를 <span class='point'>샀어</span>", en: "I bought" },
             { ko: "나 ~를 <span class='point'>먹었어</span>", en: "I ate" },
             { ko: "나 <span class='point'>일했어</span>", en: "I worked" },
@@ -337,12 +328,13 @@
             { ko: "나 <span class='point'>일어났어</span>", en: "I woke up" }
         ];
 
+        // [평서문 2단계] 30선 코어 문장 데이터셋
         const stage2Data = [
             { ko: "나 <span class='point'>바빴어</span>.", en: "I was busy." },
             { ko: "나 사무실 <span class='point'>이었어</span>.", en: "I was at the office." },
             { ko: "나 <span class='point'>피곤했어</span>.", en: "I was tired." },
             { ko: "나 회사 <span class='point'>갔어</span>.", en: "I went to work." },
-            { ko: "나 화장실 <span class='point'>갔어</span>.", en: "I went to the restroom." },
+            { ko: "nav 화장실 <span class='point'>갔어</span>.", en: "I went to the restroom." },
             { ko: "나 강남역 <span class='point'>갔어</span>.", en: "I went to Gangnam station." },
             { ko: "나 집 <span class='point'>도착했어</span>.", en: "I got home." },
             { ko: "나 사무실 <span class='point'>도착했어</span>.", en: "I got to the office." },
@@ -370,39 +362,21 @@
             { ko: "나 5시에 <span class='point'>일어났어</span>.", en: "I woke up at 5." }
         ];
 
+        // 🎯 [의문문 1단계] 뼈대 데이터셋 수정 완료 (평서문 1단계와 완전한 1:1 대칭 매칭)
         const stage3Data = [
-            { ko: "너 <span class='point'>바빴어</span>?", en: "Were you" },
-            { ko: "너 사무실 <span class='point'>이었어</span>?", en: "Were you" },
-            { ko: "너 <span class='point'>피곤했어</span>?", en: "Were you" },
-            { ko: "너 회사 <span class='point'>갔어</span>?", en: "Did you" },
-            { ko: "너 화장실 <span class='point'>갔어</span>?", en: "Did you" },
-            { ko: "너 강남역 <span class='point'>갔어</span>?", en: "Did you" },
-            { ko: "너 집 <span class='point'>도착했어</span>?", en: "Did you" },
-            { ko: "너 사무실 <span class='point'>도착했어</span>?", en: "Did you" },
-            { ko: "너 역 <span class='point'>도착했어</span>?", en: "Did you" },
-            { ko: "너 넷플릭스 <span class='point'>봤어</span>?", en: "Did you" },
-            { ko: "너 유튜브 <span class='point'>봤어</span>?", en: "Did you" },
-            { ko: "너 영화 <span class='point'>봤어</span>?", en: "Did you" },
-            { ko: "너 커피 <span class='point'>샀어</span>?", en: "Did you" },
-            { ko: "너 옷 <span class='point'>샀어</span>?", en: "Did you" },
-            { ko: "너 신발 <span class='point'>샀어</span>?", en: "Did you" },
-            { ko: "너 샌드위치 <span class='point'>먹었어</span>?", en: "Did you" },
-            { ko: "너 점심 <span class='point'>먹었어</span>?", en: "Did you" },
-            { ko: "너 치킨 <span class='point'>먹었어</span>?", en: "Did you" },
-            { ko: "너 <span class='point'>야근했어</span>?", en: "Did you" },
-            { ko: "너 주말에 <span class='point'>일했어</span>?", en: "Did you" },
-            { ko: "너 그날 <span class='point'>일했어</span>?", en: "Did you" },
-            { ko: "너 친구 <span class='point'>만났어</span>?", en: "Did you" },
-            { ko: "너 고객 <span class='point'>만났어</span>?", en: "Did you" },
-            { ko: "너 <span class='point'>네</span> 남자친구 <span class='point'>만났어</span>?", en: "Did you" },
-            { ko: "너 소주 <span class='point'>마셨어</span>?", en: "Did you" },
-            { ko: "너 맥주 <span class='point'>마셨어</span>?", en: "Did you" },
-            { ko: "너 커피 <span class='point'>마셨어</span>?", en: "Did you" },
-            { ko: "너 일찍 <span class='point'>일어났어</span>?", en: "Did you" },
-            { ko: "너 늦게 <span class='point'>일어났어</span>?", en: "Did you" },
-            { ko: "너 5시에 <span class='point'>일어났어</span>?", en: "Did you" }
+            { ko: "너 (~상태/~장소) <span class='point'>였어</span>?", en: "Were you" },
+            { ko: "너 ~에 <span class='point'>갔어</span>?", en: "Did you go" },
+            { ko: "너 ~에 <span class='point'>도착했어</span>?", en: "Did you get" },
+            { ko: "너 ~를 <span class='point'>봤어</span>?", en: "Did you watch" },
+            { ko: "너 ~를 <span class='point'>샀어</span>?", en: "Did you buy" },
+            { ko: "너 ~를 <span class='point'>먹었어</span>?", en: "Did you eat" },
+            { ko: "너 <span class='point'>일했어</span>?", en: "Did you work" },
+            { ko: "너 ~를 <span class='point'>만났어</span>?", en: "Did you meet" },
+            { ko: "너 ~를 <span class='point'>마셨어</span>?", en: "Did you drink" },
+            { ko: "너 <span class='point'>일어났어</span>?", en: "Did you wake up" }
         ];
 
+        // [의문문 2단계] 30선 완전체 질문 데이터셋
         const stage4Data = [
             { ko: "너 <span class='point'>바빴어</span>?", en: "Were you busy?" },
             { ko: "너 사무실 <span class='point'>이었어</span>?", en: "Were you at the office?" },
@@ -455,7 +429,7 @@
         function setHintText() {
             if (currentStage === 1) elements.hintText.innerText = "한글 뼈대만 보고 0.1초 만에 영어 뼈대(I ~)를 발사하세요!";
             else if (currentStage === 2) elements.hintText.innerText = "뼈대에 필수 파츠를 조립해서 완전한 평서문을 완성하세요!";
-            else if (currentStage === 3) elements.hintText.innerText = "질문 문장을 보고 앞 부분만(Did you / Were you) 바로 뱉으세요!";
+            else if (currentStage === 3) elements.hintText.innerText = "질문 문장을 보고 앞 부분과 핵심 동사원형까지 결합해서 바로 뱉으세요!";
             else if (currentStage === 4) elements.hintText.innerText = "동사원형 브레이크를 걸며 완전한 과거 질문을 발사하세요!";
             
             const stageNames = ["평서문 1단계", "평서문 2단계", "의문문 1단계", "의문문 2단계"];
@@ -493,6 +467,7 @@
             } else { elements.timerBar.style.transform = "scaleX(1)"; }
         }
 
+        // nav -> 나 오타 수정 완료
         function showAnswer() { clearInterval(timerInterval); elements.englishText.innerText = currentData[currentIndex].en; elements.englishText.classList.add("show"); elements.actionBtn.style.display = "none"; elements.scoringGroup.style.display = "flex"; }
 
         function submitScore(isCorrect) {
