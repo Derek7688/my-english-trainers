@@ -2,7 +2,8 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 🚀 모바일 자동 줌인 버그 원천 차단 (최대 비율 고정 및 user-scalable 방어) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <title>4강 2교시: 과거 시제 레고 블록 조립소</title>
     <style>
         :root {
@@ -16,7 +17,6 @@
             --text-main: #1e293b;
             --text-muted: #64748b;
             
-            /* 탭 전용 세련된 컬러 바리에이션 */
             --tab-bg-statement: #eff6ff;
             --tab-text-statement: #1d4ed8;
             --tab-bg-question: #f5f3ff;
@@ -28,6 +28,9 @@
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            /* 🚀 터치 시 발생하는 파란색 하이라이트 박스 및 더블탭 확대 동작 억제 */
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         body {
@@ -36,336 +39,204 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center; /* 🚀 세로 정중앙 배치 */
             min-height: 100vh;
-            padding: 20px;
+            padding: 16px;
+            overflow-x: hidden;
         }
 
-        .container {
+        /* 🚀 배너는 컨테이너 외부 상단에 자연스럽게 안착 */
+        #main-banner-area {
             width: 100%;
-            max-width: 700px;
-            background: var(--card-color);
-            border-radius: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
-            padding: 28px;
-            margin-top: 10px;
-            display: flex;
-            flex-direction: column;
-            min-height: 580px;
-            position: relative;
+            max-width: 480px;
+            margin-bottom: 12px;
         }
 
-        /* 🚀 [배너 순수 CSS 디자인] 기존 스타일 파괴 방지용 */
         .promo-banner {
             background-color: #ffffff;
-            border: 1px solid #f0f4f8;
-            padding: 16px;
-            border-radius: 26px;
-            margin-bottom: 24px;
+            border: 1px solid #edf2f7;
+            padding: 14px;
+            border-radius: 20px;
             cursor: pointer;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
             transition: all 0.2s;
+        }
+        .promo-banner:active { transform: scale(0.98); }
+        .banner-inner { display: flex; align-items: center; gap: 12px; transition: all 0.5s ease; }
+        .banner-icon { width: 36px; height: 36px; background-color: #2563eb; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; font-weight: bold; }
+        .banner-text-area { flex: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: center; text-align: left; }
+        .banner-title { font-weight: 900; color: #1e293b; font-size: 13px; letter-spacing: -0.02em; }
+        .banner-subtitle { color: #2563eb; font-weight: bold; font-size: 9px; margin-top: 1px; }
+
+        /* 🚀 한 손 한 화면 모바일 컴팩트 컨테이너 */
+        .container {
             width: 100%;
-            user-select: none;
-        }
-        .promo-banner:active {
-            transform: scale(0.98);
-        }
-        .banner-inner {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            transition: all 0.5s ease;
-        }
-        .banner-icon {
-            width: 40px;
-            height: 40px;
-            background-color: #2563eb;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
-            color: white;
-            font-weight: bold;
-        }
-        .banner-text-area {
-            flex: 1;
-            overflow: hidden;
-            height: 40px;
+            max-width: 480px; /* 폰 화면에 딱 맞게 컴팩트하게 축소 */
+            background: var(--card-color);
+            border-radius: 24px;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.06);
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            text-align: left;
-        }
-        .banner-title {
-            font-weight: 900;
-            color: #1e293b;
-            font-size: 14px;
-            letter-spacing: -0.02em;
-            line-height: 1.2;
-        }
-        .banner-subtitle {
-            color: #2563eb;
-            font-weight: bold;
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-top: 2px;
+            gap: 14px;
         }
 
         /* 컨트롤 상단 바 */
         .header-controls {
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            margin-bottom: 24px;
+            gap: 10px;
         }
 
-        /* ✨ 고급스러운 프리미엄 4단계 탭 디자인 */
         .tab-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 6px;
             background: #f1f5f9;
-            padding: 8px;
-            border-radius: 16px;
+            padding: 5px;
+            border-radius: 14px;
         }
 
         .tab-btn {
             border: 2px solid transparent;
             background: var(--card-color);
-            padding: 12px 8px;
-            font-size: 14px;
+            padding: 10px 4px;
+            font-size: 12px;
             font-weight: 700;
             color: var(--text-muted);
             cursor: pointer;
             border-radius: 10px;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.01);
         }
+        .tab-btn.active.statement-tab { background: var(--tab-bg-statement); color: var(--tab-text-statement); border-color: #bfdbfe; }
+        .tab-btn.active.question-tab { background: var(--tab-bg-question); color: var(--tab-text-question); border-color: #ddd6fe; }
 
-        .tab-btn:hover {
-            transform: translateY(-1px);
-            color: var(--text-main);
-        }
-
-        /* 평서문 그룹 활성화 스타일 (블루 테마) */
-        .tab-btn.active.statement-tab {
-            background: var(--tab-bg-statement);
-            color: var(--tab-text-statement);
-            border-color: #bfdbfe;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
-        }
-
-        /* 의문문 그룹 활성화 스타일 (퍼플 테마) */
-        .tab-btn.active.question-tab {
-            background: var(--tab-bg-question);
-            color: var(--tab-text-question);
-            border-color: #ddd6fe;
-            box-shadow: 0 4px 12px rgba(109, 40, 217, 0.08);
-        }
-
-        /* 제한 시간 설정 */
         .timer-setter {
             display: flex;
             align-items: center;
             justify-content: space-between;
             background: #f8fafc;
-            padding: 10px 14px;
-            border-radius: 12px;
+            padding: 8px 12px;
+            border-radius: 10px;
             border: 1px solid #e2e8f0;
         }
-
-        .setter-label {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        .time-select {
-            padding: 6px 12px;
-            font-size: 14px;
-            font-weight: 600;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            background-color: white;
-            color: var(--primary-color);
-            cursor: pointer;
-            outline: none;
-        }
+        .setter-label { font-size: 12px; font-weight: 700; }
+        .time-select { padding: 4px 8px; font-size: 12px; font-weight: 600; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; }
 
         /* 타이머 바 */
         .timer-container {
             width: 100%;
-            height: 6px;
+            height: 5px;
             background: #e2e8f0;
             border-radius: 3px;
-            margin-bottom: 25px;
             overflow: hidden;
         }
+        .timer-bar { width: 100%; height: 100%; background: var(--primary-color); transform-origin: left; transition: transform 0.1s linear; }
 
-        .timer-bar {
-            width: 100%;
-            height: 100%;
-            background: var(--primary-color);
-            transform-origin: left;
-            transition: transform 0.1s linear;
-        }
-
-        /* 메인 퀴즈 박스 (높이 절대 고정) */
+        /* 🚀 퀴즈 영역 중앙 압축 배치 */
         .quiz-box {
-            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: center;
             text-align: center;
-            margin-bottom: 20px;
+            padding: 10px 0;
+            min-height: 200px; /* 고정 높이 최소화하여 중앙에 결집 */
         }
 
         .hint-text {
-            font-size: 15px;
+            font-size: 13px;
             color: var(--text-muted);
-            margin-bottom: 20px;
+            margin-bottom: 12px;
             font-weight: 600;
-            height: 22px;
+            min-height: 18px;
         }
 
         .korean-box {
-            height: 90px;
+            min-height: 70px;
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
         }
-
-        .korean-text {
-            font-size: 30px;
-            font-weight: 800;
-            color: var(--text-main);
-            word-break: keep-all;
-            line-height: 1.3;
-        }
-
-        .korean-text span.point {
-            color: var(--highlight-color);
-            font-weight: 900;
-        }
+        .korean-text { font-size: 24px; font-weight: 800; color: var(--text-main); word-break: keep-all; line-height: 1.35; }
+        .korean-text span.point { color: var(--highlight-color); font-weight: 900; }
 
         .english-box {
-            height: 80px;
+            min-height: 70px;
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
-            margin-top: 10px;
+            margin-top: 4px;
         }
-
-        .english-text {
-            font-size: 26px;
-            font-weight: 700;
-            color: var(--primary-color);
-            word-break: keep-all;
-            opacity: 0;
-            transform: translateY(5px);
-            transition: all 0.2s ease-out;
-        }
-
-        .english-text.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .english-text { font-size: 22px; font-weight: 700; color: var(--primary-color); word-break: keep-all; opacity: 0; transform: translateY(4px); transition: all 0.2s ease-out; }
+        .english-text.show { opacity: 1; transform: translateY(0); }
 
         /* 리포트 결과창 */
         .report-box {
             display: none;
             width: 100%;
-            max-height: 260px;
+            max-height: 220px;
             overflow-y: auto;
             border: 1px solid #e2e8f0;
             border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 20px;
+            padding: 10px;
             background: #f8fafc;
         }
-
-        .report-item {
-            display: flex;
-            align-items: flex-start;
-            padding: 10px;
-            border-bottom: 1px solid #edf2f7;
-            font-size: 15px;
-            line-height: 1.4;
-        }
-
-        .report-item:last-child {
-            border-bottom: none;
-        }
-
-        .report-badge {
-            font-weight: 800;
-            margin-right: 10px;
-            padding: 2px 6px;
-            border-radius: 6px;
-            font-size: 12px;
-            color: white;
-            white-space: nowrap;
-        }
-
+        .report-item { display: flex; align-items: flex-start; padding: 8px; border-bottom: 1px solid #edf2f7; font-size: 14px; }
+        .report-item:last-child { border-bottom: none; }
+        .report-badge { font-weight: 800; margin-right: 8px; padding: 2px 5px; border-radius: 5px; font-size: 11px; color: white; }
         .badge-success { background-color: var(--success-color); }
         .badge-danger { background-color: var(--danger-color); }
-
         .report-content { text-align: left; }
-        .report-en { font-weight: 700; color: var(--primary-color); margin-top: 2px; }
+        .report-en { font-weight: 700; color: var(--primary-color); margin-top: 1px; }
 
-        /* 하단 컨트롤 버튼 */
+        /* 🚀 하단 제어 영역을 중앙 전광판 바짝 밑으로 전진 배치 */
         .btn-group {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             width: 100%;
-            margin-top: auto;
         }
 
         .main-btn {
             width: 100%;
             border: none;
-            padding: 16px;
-            font-size: 18px;
+            padding: 15px;
+            font-size: 16px;
             font-weight: 700;
             border-radius: 14px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background 0.15s;
         }
-
         .btn-primary { background: var(--primary-color); color: white; }
         .btn-primary:active { background: var(--primary-hover); }
         .btn-warning { background: var(--highlight-color); color: white; }
         .btn-warning:active { background: #ea580c; }
 
+        /* 🚀 채점 버튼 마진 간격 및 크기 확보 (터치 미스 방지) */
         .scoring-group {
             display: none;
-            gap: 12px;
+            gap: 10px;
             width: 100%;
         }
-
         .btn-success { flex: 1; background: var(--success-color); color: white; }
         .btn-danger { flex: 1; background: var(--danger-color); color: white; }
 
         .score-board {
             text-align: center;
-            font-size: 14px;
+            font-size: 13px;
             color: var(--text-muted);
-            margin-top: 16px;
             font-weight: 500;
         }
     </style>
 </head>
 <body>
 
-    <div id="main-banner-area" style="width: 100%;">
+    <div id="main-banner-area">
         <div class="promo-banner" onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
             <div class="banner-inner" id="bannerInner">
                 <div class="banner-icon" id="bannerIcon">🔥</div>
@@ -380,14 +251,14 @@
     <div class="container">
         <div id="headerControls" class="header-controls">
             <div class="tab-grid">
-                <button class="tab-btn active statement-tab" onclick="switchStage(1)">평서문 1단계: 뼈대 훈련</button>
-                <button class="tab-btn statement-tab" onclick="switchStage(2)">평서문 2단계: 문장 완성</button>
-                <button class="tab-btn question-tab" onclick="switchStage(3)">의문문 1단계: 뼈대 훈련</button>
-                <button class="tab-btn question-tab" onclick="switchStage(4)">의문문 2단계: 질문 완성</button>
+                <button class="tab-btn active statement-tab" onclick="switchStage(1)">평서문 1단계</button>
+                <button class="tab-btn statement-tab" onclick="switchStage(2)">평서문 2단계</button>
+                <button class="tab-btn question-tab" onclick="switchStage(3)">의문문 1단계</button>
+                <button class="tab-btn question-tab" onclick="switchStage(4)">의문문 2단계</button>
             </div>
 
             <div class="timer-setter">
-                <span class="setter-label">⏱️ 제한 시간 설정</span>
+                <span class="setter-label">⏱️ 제한 시간</span>
                 <select id="timeSelect" class="time-select" onchange="changeTimeLimit()">
                     <option value="2000" selected>2초 (스피드전)</option>
                     <option value="3000">3초 (보통)</option>
@@ -402,6 +273,7 @@
             <div id="timerBar" class="timer-bar"></div>
         </div>
 
+        <!-- 🚀 정중앙에 수렴된 퀴즈 전광판 영역 -->
         <div class="quiz-box">
             <div id="hintText" class="hint-text">한글 뼈대만 보고 0.1초 만에 영어 뼈대(I ~)를 발사하세요!</div>
             <div id="koreanBox" class="korean-box">
@@ -414,6 +286,7 @@
             <div id="reportBox" class="report-box"></div>
         </div>
 
+        <!-- 🚀 전광판 바로 밑으로 끌어올린 제어 버튼 컴포넌트 -->
         <div class="btn-group">
             <button id="actionBtn" class="main-btn btn-primary" onclick="handleAction()">시작하기</button>
             <button id="wrongOnlyBtn" class="main-btn btn-warning" style="display: none;" onclick="startWrongOnlyQuiz()">❌ 틀린 문제만 다시 풀기</button>
@@ -427,7 +300,6 @@
     </div>
 
     <script>
-        // --- 🚀 배너 롤링 스크립트 추가 ---
         const bannerMsgs = [
             { icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" },
             { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }
@@ -441,7 +313,7 @@
             if(!inner) return;
             
             inner.style.opacity = 0;
-            inner.style.transform = "translateY(3px)";
+            inner.style.transform = "translateY(2px)";
             
             setTimeout(() => {
                 document.getElementById('bannerIcon').innerText = msg.icon;
@@ -452,8 +324,6 @@
         }
         setInterval(rotateBanners, 4000);
 
-
-        // [평서문 1단계] 뼈대 데이터셋
         const stage1Data = [
             { ko: "나 (~상태/~장소) <span class='point'>였어</span>", en: "I was" },
             { ko: "나 ~에 <span class='point'>갔어</span>", en: "I went" },
@@ -467,7 +337,6 @@
             { ko: "나 <span class='point'>일어났어</span>", en: "I woke up" }
         ];
 
-        // [평서문 2단계] 30선 코어 문장 데이터셋
         const stage2Data = [
             { ko: "나 <span class='point'>바빴어</span>.", en: "I was busy." },
             { ko: "나 사무실 <span class='point'>이었어</span>.", en: "I was at the office." },
@@ -501,7 +370,6 @@
             { ko: "나 5시에 <span class='point'>일어났어</span>.", en: "I woke up at 5." }
         ];
 
-        // [의문문 1단계] 30개 문장의 앞 부분 감각 훈련
         const stage3Data = [
             { ko: "너 <span class='point'>바빴어</span>?", en: "Were you" },
             { ko: "너 사무실 <span class='point'>이었어</span>?", en: "Were you" },
@@ -535,7 +403,6 @@
             { ko: "너 5시에 <span class='point'>일어났어</span>?", en: "Did you" }
         ];
 
-        // [의문문 2단계] 30선 완전체 질문 발사
         const stage4Data = [
             { ko: "너 <span class='point'>바빴어</span>?", en: "Were you busy?" },
             { ko: "너 사무실 <span class='point'>이었어</span>?", en: "Were you at the office?" },
@@ -569,50 +436,20 @@
             { ko: "너 5시에 <span class='point'>일어났어</span>?", en: "Did you wake up at 5?" }
         ];
 
-        let currentData = [];
-        let currentIndex = 0;
-        let isAnswerPhase = false;
-        let timerInterval = null;
-        let startTime = 0;
-        let timeLimit = 2000;
-        let userHistory = []; 
-        let currentStage = 1;
+        let currentData = []; let currentIndex = 0; let isAnswerPhase = false; let timerInterval = null; let startTime = 0; let timeLimit = 2000; let userHistory = []; let currentStage = 1;
 
         const elements = {
-            hintText: document.getElementById("hintText"),
-            koreanText: document.getElementById("koreanText"),
-            englishText: document.getElementById("englishText"),
-            actionBtn: document.getElementById("actionBtn"),
-            wrongOnlyBtn: document.getElementById("wrongOnlyBtn"),
-            scoringGroup: document.getElementById("scoringGroup"),
-            timerBar: document.getElementById("timerBar"),
-            scoreBoard: document.getElementById("scoreBoard"),
-            tabBtns: document.querySelectorAll(".tab-btn"),
-            timeSelect: document.getElementById("timeSelect"),
-            koreanBox: document.getElementById("koreanBox"),
-            englishBox: document.getElementById("englishBox"),
-            reportBox: document.getElementById("reportBox"),
-            timerContainer: document.getElementById("timerContainer"),
-            headerControls: document.getElementById("headerControls")
+            hintText: document.getElementById("hintText"), koreanText: document.getElementById("koreanText"), englishText: document.getElementById("englishText"), actionBtn: document.getElementById("actionBtn"), wrongOnlyBtn: document.getElementById("wrongOnlyBtn"), scoringGroup: document.getElementById("scoringGroup"), timerBar: document.getElementById("timerBar"), scoreBoard: document.getElementById("scoreBoard"), tabBtns: document.querySelectorAll(".tab-btn"), timeSelect: document.getElementById("timeSelect"), koreanBox: document.getElementById("koreanBox"), englishBox: document.getElementById("englishBox"), reportBox: document.getElementById("reportBox"), timerContainer: document.getElementById("timerContainer"), headerControls: document.getElementById("headerControls")
         };
 
         function initQuiz() {
             clearInterval(timerInterval);
-            
             if (currentStage === 1) currentData = [...stage1Data];
             else if (currentStage === 2) currentData = [...stage2Data];
             else if (currentStage === 3) currentData = [...stage3Data];
             else if (currentStage === 4) currentData = [...stage4Data];
-
-            shuffleArray(currentData);
-            currentIndex = 0;
-            isAnswerPhase = false;
-            userHistory = []; 
-            
-            changeTimeLimit();
-            resetUI();
-            setHintText();
-            updateScoreBoard();
+            shuffleArray(currentData); currentIndex = 0; isAnswerPhase = false; userHistory = [];
+            changeTimeLimit(); resetUI(); setHintText(); updateScoreBoard();
         }
 
         function setHintText() {
@@ -621,196 +458,72 @@
             else if (currentStage === 3) elements.hintText.innerText = "질문 문장을 보고 앞 부분만(Did you / Were you) 바로 뱉으세요!";
             else if (currentStage === 4) elements.hintText.innerText = "동사원형 브레이크를 걸며 완전한 과거 질문을 발사하세요!";
             
-            const stageNames = ["평서문 1단계: 뼈대 훈련", "평서문 2단계: 문장 완성", "의문문 1단계: 뼈대 훈련", "의문문 2단계: 질문 완성"];
+            const stageNames = ["평서문 1단계", "평서문 2단계", "의문문 1단계", "의문문 2단계"];
             elements.koreanText.innerHTML = `${stageNames[currentStage-1]} 준비 완료!`;
         }
 
         function resetUI() {
-            elements.koreanBox.style.display = "flex";
-            elements.englishBox.style.display = "flex";
-            elements.reportBox.style.display = "none";
-            elements.timerContainer.style.display = "block";
-            elements.headerControls.style.display = "flex";
-            elements.englishText.innerText = "";
-            elements.englishText.classList.remove("show");
-            elements.actionBtn.style.display = "block";
-            elements.actionBtn.innerText = "시작하기";
-            elements.wrongOnlyBtn.style.display = "none";
-            elements.scoringGroup.style.display = "none";
-            elements.timerBar.style.transform = "scaleX(1)";
+            elements.koreanBox.style.display = "flex"; elements.englishBox.style.display = "flex"; elements.reportBox.style.display = "none"; elements.timerContainer.style.display = "block"; elements.headerControls.style.display = "flex"; elements.englishText.innerText = ""; elements.englishText.classList.remove("show"); elements.actionBtn.style.display = "block"; elements.actionBtn.innerText = "시작하기"; elements.wrongOnlyBtn.style.display = "none"; elements.scoringGroup.style.display = "none"; elements.timerBar.style.transform = "scaleX(1)";
         }
 
         function changeTimeLimit() {
             const value = elements.timeSelect.value;
-            if (value === "none") {
-                timeLimit = null;
-                elements.timerBar.style.transform = "scaleX(1)";
-                clearInterval(timerInterval);
-            } else {
-                timeLimit = parseInt(value, 10);
-            }
+            if (value === "none") { timeLimit = null; elements.timerBar.style.transform = "scaleX(1)"; clearInterval(timerInterval); }
+            else { timeLimit = parseInt(value, 10); }
         }
 
         function switchStage(stage) {
-            if (currentStage === stage) return;
-            currentStage = stage;
-            elements.tabBtns.forEach((btn, idx) => {
-                if (idx + 1 === stage) btn.classList.add("active");
-                else btn.classList.remove("active");
-            });
+            if (currentStage === stage) return; currentStage = stage;
+            elements.tabBtns.forEach((btn, idx) => { if (idx + 1 === stage) btn.classList.add("active"); else btn.classList.remove("active"); });
             initQuiz();
         }
 
-        function handleAction() {
-            if (!isAnswerPhase) {
-                showQuestion();
-            } else {
-                showAnswer();
-            }
-        }
+        function handleAction() { if (!isAnswerPhase) { showQuestion(); } else { showAnswer(); } }
 
         function showQuestion() {
-            if (currentIndex >= currentData.length) {
-                initQuiz();
-                return;
-            }
-
-            isAnswerPhase = true;
-            elements.englishText.classList.remove("show");
-            elements.koreanText.innerHTML = currentData[currentIndex].ko;
-            elements.actionBtn.innerText = "정답 확인";
-            
+            if (currentIndex >= currentData.length) { initQuiz(); return; }
+            isAnswerPhase = true; elements.englishText.classList.remove("show"); elements.koreanText.innerHTML = currentData[currentIndex].ko; elements.actionBtn.innerText = "정답 확인";
             clearInterval(timerInterval);
-            
             if (timeLimit !== null) {
-                elements.timerBar.style.transform = "scaleX(1)";
-                startTime = Date.now();
+                elements.timerBar.style.transform = "scaleX(1)"; startTime = Date.now();
                 timerInterval = setInterval(() => {
-                    let elapsedTime = Date.now() - startTime;
-                    let remainingRatio = Math.max(0, (timeLimit - elapsedTime) / timeLimit);
-                    elements.timerBar.style.transform = `scaleX(${remainingRatio})`;
-                    
-                    if (remainingRatio <= 0) {
-                        clearInterval(timerInterval);
-                    }
+                    let elapsedTime = Date.now() - startTime; let remainingRatio = Math.max(0, (timeLimit - elapsedTime) / timeLimit); elements.timerBar.style.transform = `scaleX(${remainingRatio})`;
+                    if (remainingRatio <= 0) { clearInterval(timerInterval); }
                 }, 50);
-            } else {
-                elements.timerBar.style.transform = "scaleX(1)";
-            }
+            } else { elements.timerBar.style.transform = "scaleX(1)"; }
         }
 
-        function showAnswer() {
-            clearInterval(timerInterval);
-            elements.englishText.innerText = currentData[currentIndex].en;
-            elements.englishText.classList.add("show");
-            
-            elements.actionBtn.style.display = "none";
-            elements.scoringGroup.style.display = "flex";
-        }
+        function showAnswer() { clearInterval(timerInterval); elements.englishText.innerText = currentData[currentIndex].en; elements.englishText.classList.add("show"); elements.actionBtn.style.display = "none"; elements.scoringGroup.style.display = "flex"; }
 
         function submitScore(isCorrect) {
-            userHistory.push({
-                ko: currentData[currentIndex].ko,
-                en: currentData[currentIndex].en,
-                result: isCorrect
-            });
-
-            currentIndex++;
-            isAnswerPhase = false;
-            updateScoreBoard();
-            
-            elements.scoringGroup.style.display = "none";
-            elements.actionBtn.style.display = "block";
-            
-            if (currentIndex < currentData.length) {
-                elements.actionBtn.innerText = "다음 문제";
-                showQuestion();
-            } else {
-                showReport(); 
-            }
+            userHistory.push({ ko: currentData[currentIndex].ko, en: currentData[currentIndex].en, result: isCorrect });
+            currentIndex++; isAnswerPhase = false; updateScoreBoard(); elements.scoringGroup.style.display = "none"; elements.actionBtn.style.display = "block";
+            if (currentIndex < currentData.length) { elements.actionBtn.innerText = "다음 문제"; showQuestion(); } else { showReport(); }
         }
 
         function showReport() {
-            clearInterval(timerInterval);
-            
-            elements.koreanBox.style.display = "none";
-            elements.englishBox.style.display = "none";
-            elements.timerContainer.style.display = "none";
-            elements.headerControls.style.display = "none"; 
-
+            clearInterval(timerInterval); elements.koreanBox.style.display = "none"; elements.englishBox.style.display = "none"; elements.timerContainer.style.display = "none"; elements.headerControls.style.display = "none";
             elements.hintText.innerText = `🎉 세션 격파 완료! 피드백 성적표를 확인하세요.`;
-            
-            const wrongs = userHistory.filter(item => !item.result);
-            const correctCount = userHistory.length - wrongs.length;
-            
-            let reportHtml = `<div style="font-size: 18px; font-weight: 800; text-align: center; margin-bottom: 15px; color: var(--primary-color);">
-                총 ${userHistory.length}문장 중 ${correctCount}문장 통과!
-            </div>`;
-
+            const wrongs = userHistory.filter(item => !item.result); const correctCount = userHistory.length - wrongs.length;
+            let reportHtml = `<div style="font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 12px; color: var(--primary-color);">총 ${userHistory.length}문장 중 ${correctCount}문장 통과!</div>`;
             userHistory.forEach(item => {
-                const badgeClass = item.result ? "badge-success" : "badge-danger";
-                const badgeText = item.result ? "⭕ 맞춤" : "❌ 틀림";
-                
-                reportHtml += `
-                    <div class="report-item">
-                        <span class="report-badge ${badgeClass}">${badgeText}</span>
-                        <div class="report-content">
-                            <div class="report-ko">${item.ko}</div>
-                            <div class="report-en">${item.en}</div>
-                        </div>
-                    </div>
-                `;
+                const badgeClass = item.result ? "badge-success" : "badge-danger"; const badgeText = item.result ? "⭕ 맞춤" : "❌ 틀림";
+                reportHtml += `<div class="report-item"><span class="report-badge ${badgeClass}">${badgeText}</span><div class="report-content"><div class="report-ko">${item.ko}</div><div class="report-en">${item.en}</div></div></div>`;
             });
-
-            elements.reportBox.innerHTML = reportHtml;
-            elements.reportBox.style.display = "block";
-            
-            elements.actionBtn.innerText = "처음부터 다시 도전";
-            
-            if (wrongs.length > 0) {
-                elements.wrongOnlyBtn.style.display = "block";
-                elements.wrongOnlyBtn.innerText = `❌ 틀린 문제만 다시 풀기 (${wrongs.length}개)`;
-            } else {
-                elements.wrongOnlyBtn.style.display = "none";
-            }
+            elements.reportBox.innerHTML = reportHtml; elements.reportBox.style.display = "block"; elements.actionBtn.innerText = "처음부터 다시 도전";
+            if (wrongs.length > 0) { elements.wrongOnlyBtn.style.display = "block"; elements.wrongOnlyBtn.innerText = `❌ 틀린 문제만 다시 풀기 (${wrongs.length}개)`; } else { elements.wrongOnlyBtn.style.display = "none"; }
         }
 
         function startWrongOnlyQuiz() {
-            const wrongItems = userHistory.filter(item => !item.result);
-            
-            currentData = wrongItems.map(item => ({ ko: item.ko, en: item.en }));
-            shuffleArray(currentData); 
-            
-            currentIndex = 0;
-            isAnswerPhase = false;
-            userHistory = []; 
-            
-            elements.koreanBox.style.display = "flex";
-            elements.englishBox.style.display = "flex";
-            elements.reportBox.style.display = "none";
-            elements.timerContainer.style.display = "block";
-            
-            elements.englishText.innerText = "";
-            elements.englishText.classList.remove("show");
-            elements.actionBtn.style.display = "block";
-            elements.actionBtn.innerText = "오답 격파 시작";
-            elements.wrongOnlyBtn.style.display = "none";
-            
+            const wrongItems = userHistory.filter(item => !item.result); currentData = wrongItems.map(item => ({ ko: item.ko, en: item.en })); shuffleArray(currentData); currentIndex = 0; isAnswerPhase = false; userHistory = [];
+            elements.koreanBox.style.display = "flex"; elements.englishBox.style.display = "flex"; elements.reportBox.style.display = "none"; elements.timerContainer.style.display = "block";
+            elements.englishText.innerText = ""; elements.englishText.classList.remove("show"); elements.actionBtn.style.display = "block"; elements.actionBtn.innerText = "오답 격파 시작"; elements.wrongOnlyBtn.style.display = "none";
             elements.hintText.innerText = "🔥 서바이벌! 방금 틀렸던 문제들만 완벽히 복습합니다.";
-            updateScoreBoard();
-            changeTimeLimit();
+            updateScoreBoard(); changeTimeLimit();
         }
 
-        function updateScoreBoard() {
-            elements.scoreBoard.innerText = `진행도: ${currentIndex} / ${currentData.length}`;
-        }
-
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
+        function updateScoreBoard() { elements.scoreBoard.innerText = `진행도: ${currentIndex} / ${currentData.length}`; }
+        function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } }
 
         initQuiz();
     </script>
