@@ -171,7 +171,6 @@
         .english-text.show { opacity: 1; transform: translateY(0); }
 
         .report-box {
-            display: none;
             width: 100%;
             max-height: 220px;
             overflow-y: auto;
@@ -274,7 +273,7 @@
                 <div id="englishText" class="english-text"></div>
             </div>
 
-            <div id="reportBox" class="report-box"></div>
+            <div id="reportBox" class="report-box" style="display: none;"></div>
         </div>
 
         <div class="btn-group">
@@ -314,12 +313,12 @@
         }
         setInterval(rotateBanners, 4000);
 
-        // [평서문 1단계] 뼈대 데이터셋 (10개)
+        // 🎯 [평서문 1단계] 뼈대 데이터셋 오타 교정 완료 (nav -> 나)
         const stage1Data = [
             { ko: "나 (~상태/~장소) <span class='point'>였어</span>", en: "I was" },
             { ko: "나 ~에 <span class='point'>갔어</span>", en: "I went" },
             { ko: "나 ~에 <span class='point'>도착했어</span>", en: "I got" },
-            { ko: "nav ~를 <span class='point'>봤어</span>", en: "I watched" },
+            { ko: "나 ~를 <span class='point'>봤어</span>", en: "I watched" },
             { ko: "나 ~를 <span class='point'>샀어</span>", en: "I bought" },
             { ko: "나 ~를 <span class='point'>먹었어</span>", en: "I ate" },
             { ko: "나 <span class='point'>일했어</span>", en: "I worked" },
@@ -328,13 +327,13 @@
             { ko: "나 <span class='point'>일어났어</span>", en: "I woke up" }
         ];
 
-        // [평서문 2단계] 30선 코어 문장 데이터셋
+        // 🎯 [평서문 2단계] 코어 문장 데이터셋 오타 교정 완료 (nav -> 나)
         const stage2Data = [
             { ko: "나 <span class='point'>바빴어</span>.", en: "I was busy." },
             { ko: "나 사무실 <span class='point'>이었어</span>.", en: "I was at the office." },
             { ko: "나 <span class='point'>피곤했어</span>.", en: "I was tired." },
             { ko: "나 회사 <span class='point'>갔어</span>.", en: "I went to work." },
-            { ko: "nav 화장실 <span class='point'>갔어</span>.", en: "I went to the restroom." },
+            { ko: "나 화장실 <span class='point'>갔어</span>.", en: "I went to the restroom." },
             { ko: "나 강남역 <span class='point'>갔어</span>.", en: "I went to Gangnam station." },
             { ko: "나 집 <span class='point'>도착했어</span>.", en: "I got home." },
             { ko: "나 사무실 <span class='point'>도착했어</span>.", en: "I got to the office." },
@@ -362,7 +361,6 @@
             { ko: "나 5시에 <span class='point'>일어났어</span>.", en: "I woke up at 5." }
         ];
 
-        // 🎯 [의문문 1단계] 뼈대 데이터셋 수정 완료 (평서문 1단계와 완전한 1:1 대칭 매칭)
         const stage3Data = [
             { ko: "너 (~상태/~장소) <span class='point'>였어</span>?", en: "Were you" },
             { ko: "너 ~에 <span class='point'>갔어</span>?", en: "Did you go" },
@@ -376,7 +374,6 @@
             { ko: "너 <span class='point'>일어났어</span>?", en: "Did you wake up" }
         ];
 
-        // [의문문 2단계] 30선 완전체 질문 데이터셋
         const stage4Data = [
             { ko: "너 <span class='point'>바빴어</span>?", en: "Were you busy?" },
             { ko: "너 사무실 <span class='point'>이었어</span>?", en: "Were you at the office?" },
@@ -467,7 +464,6 @@
             } else { elements.timerBar.style.transform = "scaleX(1)"; }
         }
 
-        // nav -> 나 오타 수정 완료
         function showAnswer() { clearInterval(timerInterval); elements.englishText.innerText = currentData[currentIndex].en; elements.englishText.classList.add("show"); elements.actionBtn.style.display = "none"; elements.scoringGroup.style.display = "flex"; }
 
         function submitScore(isCorrect) {
