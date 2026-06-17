@@ -111,9 +111,9 @@
         <div class="stage w-full">
             <div id="main-banner-area" class="w-full"></div>
 
-            <!-- 전광판 -->
+            <!-- 전광판 (오직 여기 텍스트 노드만 수정 완료) -->
             <div class="display-board" onclick="handleBoardClick()">
-                <div class="kor-hint" id="kor-display">원하는 주말 블록들을 조합하세요!</div>
+                <div class="kor-hint" id="kor-display">원하는 블록들을 조합하세요!</div>
                 <div class="eng-sentence" id="eng-display"></div>
                 <div id="challenge-btn-zone" class="w-full flex justify-center mt-2">
                     <button class="inline-challenge-btn" onclick="event.stopPropagation(); startChallenge();">🔥 도전</button>
@@ -272,31 +272,23 @@
             }
         }
 
-        // 🧠 [선생님 지시 완벽 수렴 연산구] 단일 수식어 혹은 0개 조합만 수용하는 철벽 검수 필터링
         function checkLogicValidity(pattern, verb, mods) {
-            // 🚀 대원칙: 살 붙이기(mods) 개수가 2개 이상이면 논리 검사 단계에서 통째로 소멸 (랜덤 중복 모순 원천 박멸)
             if (mods.length >= 2) return false;
 
             if (mods.length === 1) {
                 const mid = mods[0];
-                // '혼자' 결합 차단 
                 if (mid === 5) {
                     if (verb.engPos === "busy" || verb.engPos === "in a bad mood" || verb.engPos === "bored" || verb.engPos === "overslept" || verb.engPos === "get some rest") return false;
                 }
-                // 늦잠 모순 차단
                 if (verb.engPos === "overslept" && (mid === 6 || mid === 8)) return false;
-                // 친구랑 한잔 모순 차단
                 if (verb.engPos === "had a drink with friends" && (mid === 5 || mid === 2)) return false;
-                // 여행 모순 차단
                 if (verb.engPos === "went on a trip" && (mid === 2 || mid === 6 || mid === 8)) return false;
-                // 쇼핑 모순 차단
                 if (verb.engPos === "went shopping" && mid === 6) return false;
             }
 
             return true;
         }
 
-        // 🚀 비복원 단일 결합 전용 순환 구조 셔플 엔진
         function rebuildAndShufflePool() {
             const fixPattern = document.getElementById('fixPatternCheck').checked;
             const fixVerb = document.getElementById('fixVerbCheck').checked;
@@ -305,7 +297,6 @@
             const patternsPool = fixPattern ? [currentPattern] : ['pos', 'neg', 'ques', 'neg_ques'];
             const verbsPool = fixVerb ? (currentVerb ? [currentVerb] : verbs) : verbs;
 
-            // 🚀 단일 결합 구조식으로 풀링 한계 압축 (0개 또는 1개만 허용)
             let modCombinations = [[]]; 
             if (!noMod) {
                 modifiers.forEach(m => modCombinations.push([m.id]));
@@ -322,7 +313,6 @@
                 });
             });
 
-            // 피셔-예이츠 셔플
             for (let i = shuffledQuizPool.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [shuffledQuizPool[i], shuffledQuizPool[j]] = [shuffledQuizPool[j], shuffledQuizPool[i]];
@@ -365,14 +355,12 @@
         function setPattern(pattern, btnObj) { currentPattern = pattern; document.querySelectorAll('#pattern-grid .pattern-mini-btn').forEach(b => b.classList.remove('active')); btnObj.classList.add('active'); shuffledQuizPool = []; resetChallengeState(); renderModifiers(); updateDisplay(); }
         function selectVerb(eng, btnObj) { currentVerb = verbs.find(v => v.engPos === eng); document.querySelectorAll('#verb-list .list-btn').forEach(b => b.classList.remove('active')); btnObj.classList.add('active'); shuffledQuizPool = []; resetChallengeState(); updateDisplay(); }
 
-        // 🚀 [수동 조작 제어] 사용자가 임의로 마구 누를 때도 단 1개만 상호 단일 선택되도록 동기화 보정
         function toggleModifier(id) {
             const index = selectedMods.indexOf(id);
-            
             if (index > -1) {
-                selectedMods = []; // 이미 켜져있는 걸 누르면 초기화
+                selectedMods = []; 
             } else {
-                selectedMods = [id]; // 새로운 걸 누르면 무조건 1개만 단독 덮어쓰기 고정
+                selectedMods = [id]; 
             }
             
             document.querySelectorAll('#mod-storage .mod-btn').forEach(b => b.classList.remove('active'));
@@ -399,7 +387,7 @@
 
         function updateDisplay() {
             const korDisplay = document.getElementById('kor-display'); const engDisplay = document.getElementById('eng-display');
-            if (!currentVerb) { korDisplay.innerText = "원하는 주말 블록들을 조합하세요!"; document.getElementById('challenge-btn-zone').innerHTML = `<button class="inline-challenge-btn" onclick="event.stopPropagation(); startChallenge();">🔥 도전</button>`; engDisplay.innerHTML = ""; return; }
+            if (!currentVerb) { korDisplay.innerText = "원하는 블록들을 조합하세요!"; document.getElementById('challenge-btn-zone').innerHTML = `<button class="inline-challenge-btn" onclick="event.stopPropagation(); startChallenge();">🔥 도전</button>`; engDisplay.innerHTML = ""; return; }
 
             const isQues = (currentPattern === 'ques' || currentPattern === 'neg_ques');
             let subject = isQues ? "너 " : "나 ";
