@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>영어 패턴 훈련소</title>
+    <title>🛡️ 영어 패턴 훈련소</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght=400;700;900&display=swap');
@@ -31,7 +31,7 @@
         .kor-hint { font-size: 24px; font-weight: 900; line-height: 1.5; margin-bottom: 25px; word-break: keep-all; z-index: 10; }
         .eng-display { font-size: 20px; font-weight: 800; color: #fbbf24; z-index: 10; }
         
-        /* 🚀 [신규 추가] 전광판 하단 붙박이 카운트다운 바 스타일 */
+        /* 전광판 하단 붙박이 카운트다운 바 스타일 */
         .timer-container { width: 100%; height: 6px; background: #334155; position: absolute; bottom: 0; left: 0; display: none; }
         .timer-bar { width: 100%; height: 100%; background: var(--primary); width: 100%; }
 
@@ -45,7 +45,7 @@
         .drawer-toggle-btn.active-btn { background: #ffedd5; color: #ea580c; border: 1px solid rgba(234, 88, 12, 0.3); }
         
         .chunk-drawer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, opacity 0.2s ease; opacity: 0; background: #ffffff; border-radius: 10px; margin-bottom: 10px; }
-        .chunk-drawer.open { max-height: 350px; opacity: 1; border: 1px dashed #f97316; padding: 12px 14px; margin-top: -6px; margin-bottom: 10px; }
+        .chunk-drawer.open { max-height: 800px; opacity: 1; border: 1px dashed #f97316; padding: 12px 14px; margin-top: -6px; margin-bottom: 10px; overflow-y: auto; }
 
         .mode-toggle-btn { background: #475569; color: white; font-size: 11px; font-weight: bold; padding: 6px 12px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
         .mode-toggle-btn:hover { background: #334155; }
@@ -114,18 +114,18 @@
                 </div>
             </div>
             <div class="chunk-drawer" id="drawer-p1">
-                <div class="text-[11px] font-black text-blue-500 mb-1.5">📦 갈아 끼울 시점 부품 (명사 10개)</div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-slate-600 font-medium">
-                    <div>• this afternoon (오늘 오후)</div>
-                    <div>• tomorrow morning (내일 아침)</div>
-                    <div>• the end of this week (이번 주말)</div>
-                    <div>• our next meeting (다음 미팅)</div>
-                    <div>• noon (오늘 정오/낮 12시)</div>
-                    <div>• 5 PM today (오늘 오후 5시)</div>
-                    <div>• next Monday (다음주 월요일)</div>
-                    <div>• the end of this month (이번 달 말)</div>
-                    <div>• lunch (점심 시간 전까지)</div>
-                    <div>• the deadline (마감 시한)</div>
+                <div class="text-[11px] font-black text-blue-500 mb-2">📦 갈아 끼울 시점 부품 (명사 10개)</div>
+                <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-xs font-medium">
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">this afternoon</p><p class="text-[10px] text-slate-400 mt-0.5">오늘 오후</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">tomorrow morning</p><p class="text-[10px] text-slate-400 mt-0.5">내일 아침</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">the end of this week</p><p class="text-[10px] text-slate-400 mt-0.5">이번 주말</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">our next meeting</p><p class="text-[10px] text-slate-400 mt-0.5">다음 미팅</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">noon</p><p class="text-[10px] text-slate-400 mt-0.5">오늘 정오/낮 12시</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">5 PM today</p><p class="text-[10px] text-slate-400 mt-0.5">오늘 오후 5시</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">next Monday</p><p class="text-[10px] text-slate-400 mt-0.5">다음주 월요일</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">the end of this month</p><p class="text-[10px] text-slate-400 mt-0.5">이번 달 말</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">lunch</p><p class="text-[10px] text-slate-400 mt-0.5">점심 시간 전까지</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">the deadline</p><p class="text-[10px] text-slate-400 mt-0.5">마감 시한</p></div>
                 </div>
             </div>
             
@@ -140,18 +140,18 @@
                 </div>
             </div>
             <div class="chunk-drawer" id="drawer-p2">
-                <div class="text-[11px] font-black text-purple-500 mb-1.5">⚙️ 갈아 끼울 지연 사유 (동사 10개)</div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-slate-600 font-medium">
-                    <div>• check the details (디테일 확인)</div>
-                    <div>• fix the errors (에러 수정)</div>
-                    <div>• review the feedback (피드백 검토)</div>
-                    <div>• confirm with the team (팀원 확인)</div>
-                    <div>• prepare the slides (PPT 슬라이드 준비)</div>
-                    <div>• translate the report (보고서 번역)</div>
-                    <div>• test the system (시스템 테스트)</div>
-                    <div>• double-check the figures (숫자 더블체크)</div>
-                    <div>• get approval (승인 받기)</div>
-                    <div>• update the data (데이터 업데이트)</div>
+                <div class="text-[11px] font-black text-purple-500 mb-2">⚙️ 갈아 끼울 지연 사유 (동사 10개)</div>
+                <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-xs font-medium">
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">check the details</p><p class="text-[10px] text-slate-400 mt-0.5">디테일 확인</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">fix the errors</p><p class="text-[10px] text-slate-400 mt-0.5">에러 수정</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">review the feedback</p><p class="text-[10px] text-slate-400 mt-0.5">피드백 검토</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">confirm with the team</p><p class="text-[10px] text-slate-400 mt-0.5">팀원 확인</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">prepare the slides</p><p class="text-[10px] text-slate-400 mt-0.5">PPT 슬라이드 준비</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">translate the report</p><p class="text-[10px] text-slate-400 mt-0.5">보고서 번역</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">test the system</p><p class="text-[10px] text-slate-400 mt-0.5">시스템 테스트</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">double-check the figures</p><p class="text-[10px] text-slate-400 mt-0.5">숫자 더블체크</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">get approval</p><p class="text-[10px] text-slate-400 mt-0.5">승인 받기</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">update the data</p><p class="text-[10px] text-slate-400 mt-0.5">데이터 업데이트</p></div>
                 </div>
             </div>
             
@@ -166,18 +166,18 @@
                 </div>
             </div>
             <div class="chunk-drawer" id="drawer-p3">
-                <div class="text-[11px] font-black text-emerald-500 mb-1.5">🎨 갈아 끼울 현재 상태 (형용사/분사 10개)</div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-slate-600 font-medium">
-                    <div>• delayed (지연된 / 늦어지는)</div>
-                    <div>• busy (바쁜 / 정신없는)</div>
-                    <div>• stuck (완전히 꽉 막힌)</div>
-                    <div>• messed up (꼬여서 엉망진창인)</div>
-                    <div>• on hold (보류된 / 일시정지된)</div>
-                    <div>• changing (계속 바뀌는 중인)</div>
-                    <div>• complicated (복잡하게 꼬인)</div>
-                    <div>• chaotic (전부 대 혼란인)</div>
-                    <div>• overloaded (완전히 과부하 걸린)</div>
-                    <div>• uncertain (모든 게 불확실한)</div>
+                <div class="text-[11px] font-black text-emerald-500 mb-2">🎨 갈아 끼울 현재 상태 (형용사/분사 10개)</div>
+                <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-xs font-medium">
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">delayed</p><p class="text-[10px] text-slate-400 mt-0.5">지연된 / 늦어지는</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">busy</p><p class="text-[10px] text-slate-400 mt-0.5">바쁜 / 정신없는</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">stuck</p><p class="text-[10px] text-slate-400 mt-0.5">완전히 꽉 막힌</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">messed up</p><p class="text-[10px] text-slate-400 mt-0.5">꼬여서 엉망진창인</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">on hold</p><p class="text-[10px] text-slate-400 mt-0.5">보류된 / 일시정지된</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">changing</p><p class="text-[10px] text-slate-400 mt-0.5">계속 바뀌는 중인</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">complicated</p><p class="text-[10px] text-slate-400 mt-0.5">복잡하게 꼬인</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">chaotic</p><p class="text-[10px] text-slate-400 mt-0.5">전부 대 혼란인</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">overloaded</p><p class="text-[10px] text-slate-400 mt-0.5">완전히 과부하 걸린</p></div>
+                    <div class="bg-slate-50 p-1.5 rounded border border-slate-100"><p class="text-slate-800 font-bold">uncertain</p><p class="text-[10px] text-slate-400 mt-0.5">모든 게 불확실한</p></div>
                 </div>
             </div>
 
@@ -220,16 +220,15 @@
             { kor: "지금 모든 게 불확실해요.", p: "p3", eng: "Everything is uncertain right now." }
         ];
 
+        let shuffledMissions = [];
         let currentMission = null;
         let revealed = false;
         let currentMode = "all"; 
-        let lastRevealedKor = ""; 
 
         let isAutoPlay = false;
         let autoPlayTimer = null;
         let configAnswerWaitTime = 5000; 
         
-        // 🚀 실시간 미니 애니메이션 바를 위한 프레임 연산 타이머 변수계
         let animationFrameId = null;
         let progressStartTimestamp = null;
 
@@ -316,12 +315,10 @@
             const barFill = document.getElementById('mini-progressbar-fill');
 
             if (!revealed) {
-                // 🚀 미니바 기동: 정답이 닫힌 대기 상태일 때만 싱크 시작
                 barContainer.style.display = 'block';
                 barFill.style.width = '100%';
                 progressStartTimestamp = performance.now();
                 
-                // 프레임단위의 정밀한 이징 드로우 함수 구동
                 function updateBar(now) {
                     let elapsed = now - progressStartTimestamp;
                     let remainingPercent = 100 - (elapsed / configAnswerWaitTime * 100);
@@ -337,7 +334,6 @@
 
                 autoPlayTimer = setTimeout(() => { revealAnswer(); }, configAnswerWaitTime);
             } else {
-                // 정답 오픈 상태일 때는 미니바를 잠시 가려둡니다.
                 barContainer.style.display = 'none';
                 autoPlayTimer = setTimeout(() => { startMission(currentMode); }, 3000);
             }
@@ -345,6 +341,7 @@
 
         function selectFixedPattern(type) {
             currentMode = type;
+            shuffledMissions = [];
             document.getElementById('mix-switch').classList.remove('active-mix');
             document.querySelectorAll('.pattern-card').forEach(c => c.classList.remove('selected'));
             document.getElementById('card-' + type).classList.add('selected');
@@ -353,26 +350,33 @@
 
         function setAllRandomMode() {
             currentMode = "all";
+            shuffledMissions = [];
             document.getElementById('mix-switch').classList.add('active-mix');
             document.querySelectorAll('.pattern-card').forEach(c => c.classList.remove('selected'));
             startMission('all');
         }
 
-        function startMission(mode) {
-            clearTimeout(autoPlayTimer);
-            cancelAnimationFrame(animationFrameId);
+        function refillAndShuffle(mode) {
             let pool = missions;
             if (mode !== "all") {
                 pool = missions.filter(m => m.p === mode);
             }
+            shuffledMissions = [...pool];
+            for (let i = shuffledMissions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledMissions[i], shuffledMissions[j]] = [shuffledMissions[j], shuffledMissions[i]];
+            }
+        }
 
-            let idx = Math.floor(Math.random() * pool.length);
-            if (pool.length > 1 && pool[idx].kor === lastRevealedKor) {
-                idx = (idx + 1) % pool.length; 
+        function startMission(mode) {
+            clearTimeout(autoPlayTimer);
+            cancelAnimationFrame(animationFrameId);
+            
+            if (shuffledMissions.length === 0) {
+                refillAndShuffle(mode);
             }
 
-            currentMission = pool[idx];
-            lastRevealedKor = currentMission.kor; 
+            currentMission = shuffledMissions.pop();
             revealed = false;
             renderBoard();
 
@@ -385,7 +389,6 @@
                 document.querySelectorAll('.pattern-card').forEach(c => c.classList.remove('selected'));
                 document.getElementById('card-' + currentMission.p).classList.add('selected');
             }
-            // 🚀 미니 프로그레스 바 레이아웃 노드 내장 연동 완공
             board.innerHTML = `
                 <div class="kor-hint">"${currentMission.kor}"</div>
                 <div class="eng-display" id="eng-area">${revealed ? currentMission.eng : "대기 중..."}</div>
@@ -410,7 +413,7 @@
         function revealAnswer() {
             revealed = true;
             cancelAnimationFrame(animationFrameId);
-            document.getElementById('mini-progressbar-container').style.display = 'none'; // 정답 노출 시 미니바 홀드 처리
+            document.getElementById('mini-progressbar-container').style.display = 'none';
             
             const area = document.getElementById('eng-area');
             if(area) area.innerText = currentMission.eng;
