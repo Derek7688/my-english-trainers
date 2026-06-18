@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🎬 티키타카 도전! 보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght=700;900&display=swap');
+        * { font-family: 'Pretendard', sans-serif; box-sizing: border-box; }
+        
+        body { background-color: #f8fafc; color: #0f172a; }
+        
+        .interactive-card {
+            transition: all 0.2s ease;
+            cursor: pointer;
+            background-color: #ffffff;
+            border: 3px solid #cbd5e1;
+        }
+        .interactive-card:hover {
+            transform: scale(1.01);
+        }
+
+        /* 팝업 모달 스타일 */
+        #zoomModal {
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-6 min-h-screen flex flex-col justify-between select-none">
+
+    <!-- 상단 타이틀 헤더 -->
+    <div class="text-center mb-6 md:mb-4">
+        <h1 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">⚡ 티키타카 도전!</h1>
+        <p class="text-sm md:text-lg font-bold text-slate-600 mt-1">내 이야기도 하고 배우고 연습한 모든 것을 총동원해 자유롭게 질문해보세요!</p>
+    </div>
+
+    <!-- 메인 하이브리드 레이아웃 -->
+    <div class="flex flex-col md:grid md:grid-cols-12 gap-6 items-stretch my-auto w-full max-w-7xl mx-auto">
+        
+        <!-- [영역 1] ✍️ 내 이야기를 써보기 (질문 5선 - 시제 표식 완벽 제거) -->
+        <div class="md:col-span-6 flex flex-col gap-3">
+            <div class="text-base font-black text-blue-700 tracking-wider uppercase pl-1">✍️ 내 이야기를 써보기</div>
+            
+            <div class="interactive-card rounded-2xl p-5 flex flex-col justify-center min-h-[105px]" onclick="zoomCard(this)">
+                <div class="text-xl md:text-2xl font-black text-slate-900 tracking-tight">What do you usually do on the weekend?</div>
+                <div class="text-sm font-bold text-slate-500 mt-1">너 보통 주말에 뭐 해?</div>
+            </div>
+
+            <div class="interactive-card rounded-2xl p-5 flex flex-col justify-center min-h-[105px]" onclick="zoomCard(this)">
+                <div class="text-xl md:text-2xl font-black text-slate-900 tracking-tight">What did you do last weekend?</div>
+                <div class="text-sm font-bold text-slate-500 mt-1">너 지난 주말에는 뭐 했어?</div>
+            </div>
+
+            <div class="interactive-card rounded-2xl p-5 flex flex-col justify-center min-h-[105px]" onclick="zoomCard(this)">
+                <div class="text-xl md:text-2xl font-black text-slate-900 tracking-tight">How are you today?</div>
+                <div class="text-sm font-bold text-slate-500 mt-1">너 오늘 컨디션 어때? / 기분 어때?</div>
+            </div>
+
+            <div class="interactive-card rounded-2xl p-5 flex flex-col justify-center min-h-[105px]" onclick="zoomCard(this)">
+                <div class="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Did you eat lunch?</div>
+                <div class="text-sm font-bold text-slate-500 mt-1">너 점심 먹었어?</div>
+            </div>
+
+            <div class="interactive-card rounded-2xl p-5 flex flex-col justify-center min-h-[105px]" onclick="zoomCard(this)">
+                <div class="text-xl md:text-2xl font-black text-slate-900 tracking-tight">What is your favorite movie or Netflix series these days?</div>
+                <div class="text-sm font-bold text-slate-500 mt-1">너 요즘 가장 좋아하는 영화나 넷플릭스 시리즈가 뭐야?</div>
+            </div>
+        </div>
+
+        <!-- [영역 2] 👀 대화를 이어가기 (리액션 & 의문사 나침반) -->
+        <div class="md:col-span-6 flex flex-col gap-4">
+            
+            <!-- 🫢 간단한 리액션 & 취향 고백 -->
+            <div class="interactive-card rounded-3xl p-4 md:p-5" onclick="zoomCard(this)">
+                <div class="text-base font-black text-emerald-700 tracking-wider uppercase mb-3">🫢 대화를 이어가기 : 간단한 리액션</div>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div class="bg-slate-50 border border-slate-300 rounded-xl p-3 text-center flex flex-col justify-center min-h-[68px]">
+                        <span class="text-lg md:text-xl font-black text-emerald-600 block">👍 Nice!</span>
+                        <span class="text-xs font-bold text-slate-600 mt-0.5">오 좋네!</span>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-300 rounded-xl p-3 text-center flex flex-col justify-center min-h-[68px]">
+                        <span class="text-lg md:text-xl font-black text-blue-600 block">😊 That's good.</span>
+                        <span class="text-xs font-bold text-slate-600 mt-0.5">그거 잘됐다!</span>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-300 rounded-xl p-3 text-center flex flex-col justify-center min-h-[68px]">
+                        <span class="text-lg md:text-xl font-black text-slate-700 block">💡 Oh, I see.</span>
+                        <span class="text-xs font-bold text-slate-600 mt-0.5">아, 그렇구나</span>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-300 rounded-xl p-3 text-center flex flex-col justify-center min-h-[68px]">
+                        <span class="text-lg md:text-xl font-black text-rose-600 block">🥲 That's too bad.</span>
+                        <span class="text-xs font-bold text-slate-600 mt-0.5">안됐다...</span>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-300 rounded-xl p-3 text-center flex flex-col justify-center min-h-[68px]">
+                        <span class="text-base md:text-lg font-black text-indigo-700 block">🙋‍♂️ I like it, too!</span>
+                        <span class="text-xs font-bold text-slate-600 mt-0.5">나도 그거 좋아해!</span>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-300 rounded-xl p-3 text-center flex flex-col justify-center min-h-[68px]">
+                        <span class="text-base md:text-lg font-black text-slate-700 block">🙅‍♂️ Oh, I don't like it.</span>
+                        <span class="text-xs font-bold text-slate-600 mt-0.5">오, 나 그거 싫어해</span>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-300 rounded-xl p-3 text-center flex flex-col justify-center min-h-[68px]">
+                        <span class="text-base md:text-lg font-black text-violet-700 block">🧠 Oh, I know that!</span>
+                        <span class="text-xs font-bold text-slate-600 mt-0.5">헉, 나 그거 알아!</span>
+                    </div>
+                    <div class="bg-amber-100/80 border border-amber-400 rounded-xl p-3 text-center flex flex-col justify-center min-h-[68px]">
+                        <span class="text-lg md:text-xl font-black text-amber-700 block">💥 No way!</span>
+                        <span class="text-xs font-bold text-amber-900 mt-0.5">헐! 진짜? 말도 안 돼!</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ❓ 궁금한 거 물어보기 (요청하신 의문사 한국어 맵핑 가이드 적용) -->
+            <div class="interactive-card rounded-3xl p-4 md:p-5 flex-1 flex flex-col justify-between gap-4" onclick="zoomCard(this)">
+                <div>
+                    <div class="text-base font-black text-purple-700 tracking-wider uppercase">❓ 궁금한 거 물어보기</div>
+                    <p class="text-xs font-bold text-slate-500 mt-0.5">상대방 답변의 단어를 낚아채서 의문사 무기로 자율 질문을 던지세요.</p>
+                </div>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 my-auto">
+                    <div class="bg-purple-50 border border-purple-300 rounded-xl p-2.5 text-center flex flex-col justify-center">
+                        <span class="text-xl font-black text-purple-700 block">WHO</span>
+                        <span class="text-xs font-bold text-purple-950 mt-0.5">누구?</span>
+                    </div>
+                    <div class="bg-purple-50 border border-purple-300 rounded-xl p-2.5 text-center flex flex-col justify-center">
+                        <span class="text-xl font-black text-purple-700 block">WHERE</span>
+                        <span class="text-xs font-bold text-purple-950 mt-0.5">어디?</span>
+                    </div>
+                    <div class="bg-purple-50 border border-purple-300 rounded-xl p-2.5 text-center flex flex-col justify-center">
+                        <span class="text-xl font-black text-purple-700 block">WHEN</span>
+                        <span class="text-xs font-bold text-purple-950 mt-0.5">언제?</span>
+                    </div>
+                    <div class="bg-purple-50 border border-purple-300 rounded-xl p-2.5 text-center flex flex-col justify-center">
+                        <span class="text-xl font-black text-purple-700 block">WHAT</span>
+                        <span class="text-xs font-bold text-purple-950 mt-0.5">무엇을?</span>
+                    </div>
+                    <div class="bg-purple-50 border border-purple-300 rounded-xl p-2.5 text-center flex flex-col justify-center">
+                        <span class="text-xl font-black text-purple-700 block">WHY</span>
+                        <span class="text-xs font-bold text-purple-950 mt-0.5">왜?</span>
+                    </div>
+                    <div class="bg-purple-50 border border-purple-300 rounded-xl p-2.5 text-center flex flex-col justify-center">
+                        <span class="text-xl font-black text-purple-700 block">HOW</span>
+                        <span class="text-xs font-bold text-purple-950 mt-0.5">어떻게? / 어때?</span>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 border-2 border-dashed border-amber-500 rounded-xl p-3 text-center">
+                    <span class="text-xs font-black text-amber-700 uppercase tracking-wide block">↩️ 대화 주도권 마무리는 무조건 토스!</span>
+                    <span class="text-2xl md:text-3xl font-black text-amber-600">How about you? <span class="text-sm md:text-base font-bold text-slate-700">(너는?)</span></span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 하단 도움말 지침 -->
+    <div class="text-center text-xs font-bold text-slate-500 mt-6 md:mt-4">
+        💡 특정 영역을 누르면 화면 중앙에 대형 화면으로 확대(팝업)됩니다. 다시 누르면 원래대로 돌아갑니다.
+    </div>
+
+    <!-- ====== [초대형 모달 팝업 레이어] ====== -->
+    <div id="zoomModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm invisible opacity-0 flex items-center justify-center p-4 z-50" onclick="closeModal()">
+        <div id="modalContent" class="bg-white border-4 border-blue-600 rounded-3xl p-8 max-w-2xl w-full text-center shadow-2xl transform scale-95 transition-transform duration-200" onclick="event.stopPropagation()">
+            <!-- 내부 콘텐츠는 스크립트로 동적 복사 주입됨 -->
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('zoomModal');
+        const modalContent = document.getElementById('modalContent');
+
+        function zoomCard(cardElement) {
+            modalContent.innerHTML = cardElement.innerHTML;
+            
+            // 팝업 가시성을 위한 내부 서체 반응형 확장 보정
+            const textContainers = modalContent.querySelectorAll('.text-xl, .text-2xl, .text-base, .grid');
+            textContainers.forEach(el => {
+                if(el.classList.contains('text-xl') || el.classList.contains('text-2xl')) {
+                    el.className = "text-3xl md:text-4xl font-black text-slate-950 tracking-tight my-4 block";
+                }
+                if(el.classList.contains('text-sm')) {
+                    el.className = "text-lg md:text-xl font-bold text-blue-600 block mt-2";
+                }
+            });
+
+            modal.classList.remove('invisible', 'opacity-0');
+            modal.classList.add('visible', 'opacity-100');
+            modalContent.classList.remove('scale-95');
+            modalContent.classList.add('scale-100');
+        }
+
+        function closeModal() {
+            modal.classList.remove('visible', 'opacity-100');
+            modal.classList.add('invisible', 'opacity-0');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+        }
+    </script>
+</body>
+</html>
