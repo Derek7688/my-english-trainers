@@ -293,7 +293,6 @@
 <div id="game-container">
     <div class="academy-logo-bar">프린서플 어학원 - 영출어람</div>
 
-    <!-- 시작 스크린 -->
     <div id="start-screen">
         <div class="brand-title">✨ 영출어람 by 프린서플 어학원 ✨</div>
         <div class="main-title">💼 K-직장생활<br>오피스 월드 RPG</div>
@@ -305,7 +304,6 @@
         <button class="start-btn" onclick="startGame()">오피스 입장 ▶</button>
     </div>
 
-    <!-- 상단 스탯바 -->
     <div class="top-bar">
         <div class="status-group">
             <div class="status-item">내 평판(HP): <span id="heart-display" class="hearts">❤️❤️❤️</span></div>
@@ -314,26 +312,22 @@
         <button class="ingame-reset-btn" onclick="confirmReset()">🔄 리셋</button>
     </div>
 
-    <!-- 🗺️ 메인 연출 구역 -->
     <div id="view-container">
-        <!-- 1. 탐색용 맵 화면 -->
         <div id="map-screen">
             <canvas id="map-canvas"></canvas>
-            <!-- 가상 디패드 -->
             <div id="dpad-container">
                 <div class="dbtn empty"></div>
-                <div class="dbtn" onmousedown="startMove('up')" onmouseup="stopMove()" ontouchstart="startMove('up')" ontouchend="stopMove()">▲</div>
+                <div class="dbtn" onmousedown="startMove('up')" onmouseup="stopMove()" ontouchstart="startMove('up'); event.preventDefault();" ontouchend="stopMove()">▲</div>
                 <div class="dbtn empty"></div>
-                <div class="dbtn" onmousedown="startMove('left')" onmouseup="stopMove()" ontouchstart="stopMove('left')" ontouchstart="startMove('left')" ontouchend="stopMove()">◀</div>
+                <div class="dbtn" onmousedown="startMove('left')" onmouseup="stopMove()" ontouchstart="startMove('left'); event.preventDefault();" ontouchend="stopMove()">◀</div>
                 <div class="dbtn empty" style="background:rgba(0,0,0,0.1)"></div>
-                <div class="dbtn" onmousedown="startMove('right')" onmouseup="stopMove()" ontouchstart="startMove('right')" ontouchend="stopMove()">▶</div>
+                <div class="dbtn" onmousedown="startMove('right')" onmouseup="stopMove()" ontouchstart="startMove('right'); event.preventDefault();" ontouchend="stopMove()">▶</div>
                 <div class="dbtn empty"></div>
-                <div class="dbtn" onmousedown="startMove('down')" onmouseup="stopMove()" ontouchstart="startMove('down')" ontouchend="stopMove()">▼</div>
+                <div class="dbtn" onmousedown="startMove('down')" onmouseup="stopMove()" ontouchstart="startMove('down'); event.preventDefault();" ontouchend="stopMove()">▼</div>
                 <div class="dbtn empty"></div>
             </div>
         </div>
 
-        <!-- 2. 오리지널 도트 그래픽 배틀 화면 -->
         <div id="battle-screen">
             <div class="enemy-status-box">
                 <div class="enemy-name" id="enemy-name">오피스 챌린저</div>
@@ -345,20 +339,17 @@
         </div>
     </div>
 
-    <!-- 하단 UI 창 -->
     <div id="bottom-ui">
         <div class="dialogue-box" id="dialogue-text">방향키나 패드로 조작해 사내 빌런들에게 다가가세요.</div>
         <div class="options-area" id="options-area"></div>
     </div>
 
-    <!-- 결과 피드백 레이어 -->
     <div class="feedback-overlay" id="feedback-overlay">
         <div class="feedback-content" id="feedback-content">결과</div>
         <div class="feedback-explanation" id="feedback-explanation"></div>
         <button class="next-btn" id="next-stage-btn">오피스로 복귀 ▶</button>
     </div>
 
-    <!-- 최종 결과 화면 -->
     <div class="result-screen" id="result-screen">
         <div class="result-title" id="result-title">결과 타이틀</div>
         <div class="result-desc" id="result-desc">사유 요약</div>
@@ -389,7 +380,7 @@
         { level: 10, enemy: "기습 퀴즈를 던진 부장님", situation: "❓ 임원 회의 도중 부장님이 내 담당이 아닌 파트의 숫자를 질문했다. '제가 그 부분은 확실하게는 잘 모르겠습니다'라며 품격 있게 유턴하자.", correctText: "I'm not entirely sure.", correctExplain: "100% 명확히 짚고 있지는 못하다며 무지를 세련되게 숨기면서 시간을 버는 스마트 비즈니스 문장입니다.", summary: "무책임한 무지를 세련되게 숨기면서 확인 후 재보고할 시간을 버는 방어 대사", options: [{ text: "I don't know.", isCorrect: false, wrongExplain: "회의실에서 부장님 면전에 대고 '나 몰라요'라고 성의 없이 툭 던져버려 무능해 보이기 딱 좋습니다." }, { text: "I'm not entirely sure.", isCorrect: true }, { text: "Ask someone else.", isCorrect: false, wrongExplain: "'딴 사람한테 물어보쇼'라며 날아온 질문 스매싱을 부장님 머리 위로 받아치는 하극상 유발 대사입니다." }], seed: "director", mapIcon: "🧙‍♂️" },
         { level: 11, enemy: "내 아이디어를 극찬하는 본부장", situation: "💡 기획안 발표 후 본부장님이 극찬을 쏟아낸다. '아이구 과찬이십니다, 부끄럽습니다!'라고 유연하게 겸손해보자.", correctText: "I'm flattered.", correctExplain: "과분한 칭찬에 몸 둘 바를 모르겠다며 호의를 기분 좋게 인정하면서 격식을 차리는 표현입니다.", summary: "상대의 거대한 과찬에 기분 좋게 리액션하면서 격식을 챙기는 사회생활용 겸손", options: [{ text: "I am best.", isCorrect: false, wrongExplain: "칭찬을 받자마자 턱을 치켜들며 '내가 최고지'라고 자만심을 폭발시켜 시기 질투를 삽니다." }, { text: "I'm flattered.", isCorrect: true }, { text: "Don't fly airplane.", isCorrect: false, wrongExplain: "'비행기 태우지 마라'는 한국어 유행어를 직역한 참혹한 콩글리시입니다." }], seed: "vp", mapIcon: "🧝‍♂️" },
         { level: 12, enemy: "회의실 분위기 못 읽는 후배", situation: "🙄 클라이언트와의 협상 자리에서 눈치 없이 농담을 던져 갑분싸를 만든 후배. '눈치 좀 챙겨, 분위기 파악 좀 해!'라고 경고하자.", correctText: "Read the room.", correctExplain: "이 방의 공기와 흐름을 정밀하게 읽으라는 뜻으로 눈치 빠르게 사태를 파악하라고 지적하는 세련된 표현입니다.", summary: "현재 미팅 분위기와 공기의 흐름을 신속하게 눈치채라고 하급자에게 경고할 때", options: [{ text: "Read the room.", isCorrect: true }, { text: "Look at the wall.", isCorrect: false, wrongExplain: "눈치 보라는 한자어를 그대로 번역해 '벽면을 바라보라'고 지시한 황당 문장입니다." }, { text: "You have no eye.", isCorrect: false, wrongExplain: "'너는 안구가 없다'는 무시무시한 신체 훼손적 저주성 폭언일 뿐입니다." }], seed: "junior", mapIcon: "👶" },
-        { level: 13, enemy: "이직 고민을 상담하는 과장", situation: "💭 헤드헌터의 제안을 받고 흔들리는 옆 자리 과장님. '제 소신을 조심스럽게 말씀드리자면요...'라며 사견을 얹어보자.", correctText: "If you ask me.", correctExplain: "제 개인적인 시각과 소신을 조심스레 얹어보자면~ 하고 선을 지키며 진입하는 고급 원어민 쿠션 화법입니다.", summary: "상대의 사적인 고민 조언 요청에 선을 지키며 사견을 조심스레 얹는 쿠션 장치", options: [{ text: "If you ask me.", isCorrect: true }, { text: "Listen to me.", isCorrect: false, wrongExplain: "'내 말 똑바로 경청해라'라며 사적인 고민을 털어놓은 상사를 훈계하겠다는 고압적 대사입니다." }, { text: "Honestly speaking.", isCorrect: false, wrongExplain: "비즈니스 생태계에서 과도하게 남용하면 오히려 신뢰도가 깎이고 투박해 보입니다." }], seed: "senior2", mapIcon: "👩" },
+        { level: 13, enemy: "이직 고민을 상담하는 과장", situation: "💭 헤드헌터의 제안을 받고 흔든리는 옆 자리 과장님. '제 소신을 조심스럽게 말씀드리자면요...'라며 사견을 얹어보자.", correctText: "If you ask me.", correctExplain: "제 개인적인 시각과 소신을 조심스레 얹어보자면~ 하고 선을 지키며 진입하는 고급 원어민 쿠션 화법입니다.", summary: "상대의 사적인 고민 조언 요청에 선을 지키며 사견을 조심스레 얹는 쿠션 장치", options: [{ text: "If you ask me.", isCorrect: true }, { text: "Listen to me.", isCorrect: false, wrongExplain: "'내 말 똑바로 경청해라'라며 사적인 고민을 털어놓은 상사를 훈계하겠다는 고압적 대사입니다." }, { text: "Honestly speaking.", isCorrect: false, wrongExplain: "비즈니스 생태계에서 과도하게 남용하면 오히려 신뢰도가 깎이고 투박해 보입니다." }], seed: "senior2", mapIcon: "👩" },
         { level: 14, enemy: "결론 없이 서론만 긴 대리", situation: "🗣️ 주간 회의에서 타 부서 대리가 변명만 늘어놓으며 서론을 길게 뺀다. '그래서 최종 결론이자 핵심 요점이 뭡니까?'라고 예리하게 짚어내자.", correctText: "What is the bottom line?", correctExplain: "회계 장부 최종 손익 요약줄에서 따온 비즈니스어로, 감정을 상하지 않으면서 핵심 결론을 도출하는 세련된 화법입니다.", summary: "감정을 상하지 않으면서 서론이 긴 상대방에게 최종 핵심 요약을 유도할 때", options: [{ text: "What is your main point?", isCorrect: false, wrongExplain: "칼날이 너무 벼려져 있어서 회의실을 순식간에 난투극 싸움터로 만드는 도발 문장입니다." }, { text: "What is the bottom line?", isCorrect: true }, { text: "Shut up please.", isCorrect: false, wrongExplain: "뒤에 please만 달았을 뿐 알맹이는 '닥쳐라'라는 징계위원회 프리패스 폭탄 대사입니다." }], seed: "talk1", mapIcon: "🗣️" },
         { level: 15, enemy: "결정을 재촉하는 바이어", situation: "🏃‍♂️ 계약 리스크 검토가 덜 끝났는데 해외 바이어가 싸인을 독촉한다. '하룻밤만 더 신중히 생각할 시간이 필요해요'라며 브레이크를 밟자.", correctText: "I need to sleep on it.", correctExplain: "하룻밤 잠을 청하면서 신중하게 심사숙고해 보겠다며 격식을 완벽히 사수하며 연장을 따내는 기술입니다.", summary: "하룻밤 신중히 생각해보겠다며 비즈니스 매너를 지키며 연장권을 따내는 연기 기술", options: [{ text: "I need to sleep on it.", isCorrect: true }, { text: "I will think in my bed.", isCorrect: false, wrongExplain: "바이어에게 굳이 본인의 침실과 이불 속 레이아웃을 상상하게 만드는 무례하고 불필요한 TMI입니다." }, { text: "Give me time.", isCorrect: false, wrongExplain: "'나한테 시간 내놔'라는 투박하고 거친 협박조에 가까워 신뢰를 파괴합니다." }], seed: "buyer", mapIcon: "💼" },
         { level: 16, enemy: "해외 컨설턴트", situation: "🤷‍♂️ 컨설턴트가 가져온 영어 보고서 데이터 흐름이 엉망이다. '자, 내가 오해 없게 명확히 짚고 넘어가 볼게. 그러니까...'라며 판을 리드하자.", correctText: "Let me get this straight.", correctExplain: "복잡하게 엉켜있는 상대방의 스토리를 일직선으로 쭉 정렬해서 명확하게 교통정리 해오겠다는 실력자 대사입니다.", summary: "꼬여버린 맥락과 회의 논점을 오해 없게 일직선으로 요약 정리하겠다는 리더의 선언", options: [{ text: "Am I on the same page?", isCorrect: false, wrongExplain: "주어 매칭 오류입니다. 주로 'Are we on the same page?(우리 의견 일치하나요?)'처럼 씁니다." }, { text: "Let me get this straight.", isCorrect: true }, { text: "Your Korean is bad.", isCorrect: false, wrongExplain: "대안 없이 '너 한국어 진짜 못한다'며 뜬금없이 국적 인신공격을 가하는 빌런 오답입니다." }], seed: "consult", mapIcon: "🤓" },
@@ -436,6 +427,7 @@
     const resultScreen = document.getElementById('result-screen');
     const startScreen = document.getElementById('start-screen');
     const resultSummaryArea = document.getElementById('result-summary-area');
+    const stageViewArea = document.getElementById('stage-view-area');
 
     function startGame() {
         startScreen.style.display = 'none';
@@ -595,11 +587,9 @@
             ctx.fillText("Lv." + npc.data.level, npc.x, npc.y + 24);
         });
 
-        // 🎯 모바일/PC 완벽 정렬 연산 처리 구역
         const px = player.x + player.size / 2;
         const py = player.y + player.size / 2;
 
-        // 1. 역삼각형 가이드 화살표 드로잉
         ctx.fillStyle = "#00ffcc"; 
         ctx.strokeStyle = "#000000";
         ctx.lineWidth = 1.5;
@@ -614,16 +604,14 @@
         ctx.fill();
         ctx.stroke();
 
-        // 2. 🛠️ 이모지 글자공백 버그 해결: Canvas 도형 연산 처리 (네온 그린 도트 플레이어)
         ctx.beginPath();
-        ctx.arc(px, py + 2, 11, 0, Math.PI * 2); // 정중앙 좌표축 px 기반 원형 패스 생성
-        ctx.fillStyle = "#00ffcc"; // 형광 네온 민트 그린
+        ctx.arc(px, py + 2, 11, 0, Math.PI * 2); 
+        ctx.fillStyle = "#00ffcc"; 
         ctx.fill();
-        ctx.strokeStyle = "#000000"; // 오락실 느낌의 검은 테두리
+        ctx.strokeStyle = "#000000"; 
         ctx.lineWidth = 3;
         ctx.stroke();
 
-        // 미니 디테일: 코어로고 아이 형태 픽셀
         ctx.fillStyle = "#000000";
         ctx.fillRect(px - 3, py, 2, 3);
         ctx.fillRect(px + 1, py, 2, 3);
