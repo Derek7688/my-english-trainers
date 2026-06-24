@@ -270,7 +270,7 @@
         }
         .result-title { font-size: 17px; color: #ffd700; margin-top: 5px; margin-bottom: 4px; text-shadow: 2px 2px 0px #000; line-height: 1.4; }
         .result-desc { font-size: 11.5px; color: #aaa; line-height: 1.5; margin: 0 5px 12px 5px; background-color:#1c1c1c; padding:8px; border: 2px solid #333; }
-        .result-screen { font-size: 13px; margin-bottom: 10px; font-weight: bold; }
+        .result-score { font-size: 13px; margin-bottom: 10px; font-weight: bold; }
         
         .summary-container {
             width: 100%; background: #222; border: 3px solid #444; padding: 10px; text-align: left; margin-bottom: 12px; flex: 1; min-height: 140px; overflow-y: auto;
@@ -447,21 +447,22 @@
         canvas.height = canvas.parentElement.clientHeight;
     }
 
-    // ✨ 수정 포인트: NPC들을 한 구획에 가두지 않고 맵 전체(5x5 바둑판 셀)로 비중복 넓게 분산 배치 + 가구 밀도 대폭 상향
     function initNPCsForSection() {
         npcs = [];
         officeProps = []; 
 
-        // 맵 화면을 촘촘한 5x5(총 25개) 고유 셀 격자로 분할하여 대규모 노드 풀 생성
-        let gridCells = [];
         const cols = 5;
         const rows = 5;
         const cellWidth = canvas.width / cols;
         const cellHeight = canvas.height / rows;
+        let gridCells = [];
 
         for(let r = 0; r < rows; r++) {
             for(let c = 0; c < cols; c++) {
-                // 각 셀의 중심 좌표 계산
+                // 🚨 핵심 수정: 가상 컨트롤 디패드가 가리는 우측 하단 30% 영역(행4~5, 열4~5 쪽 영역) 필터링 배제선 가동
+                if (c >= 3 && r >= 3) {
+                    continue; // 이 셀 구역은 패드가 막고 있으므로 생성 안 함
+                }
                 gridCells.push({
                     cx: cellWidth * c + cellWidth / 2,
                     cy: cellHeight * r + cellHeight / 2
@@ -469,13 +470,13 @@
             }
         }
 
-        // 플레이어 시작 포인트(주로 좌하단 부근)와 충돌하는 최인접 셀 제거 안정선 확보
+        // 플레이어 시작 포인트 근처 세이프티 필터링
         gridCells = gridCells.filter(cell => Math.hypot(cell.cx - player.x, cell.cy - player.y) > 60);
 
-        // 무작위 셔플 알고리즘으로 격자 셀 배열 섞기
+        // 격자 순서 랜덤 셔플
         gridCells.sort(() => Math.random() - 0.5);
 
-        // 1. 빌런 NPC 배치 처리 (가장 먼저 완전히 독립된 넓은 위치 노드 선점)
+        // 1. 빌런 NPC 분산 배치 처리
         const startIndex = (currentMapSection - 1) * npcsPerSection;
         const endIndex = Math.min(startIndex + npcsPerSection, gameData.length);
 
@@ -483,7 +484,6 @@
             if (gridCells.length === 0) break;
             const pickedCell = gridCells.pop();
 
-            // 셀 중심 기준 약간의 미세 변형 유동성 부여
             const randomOffsetX = Math.floor(Math.random() * 15) - 7;
             const randomOffsetY = Math.floor(Math.random() * 15) - 7;
 
@@ -497,13 +497,12 @@
             });
         }
 
-        // 2. 남은 격자 공간 전체를 사무실 가구 및 인테리어 오브젝트로 빽빽하게 전면 도배 (밀도 대폭 상향)
+        // 2. 남은 필드 유휴 격자망 전체에 고밀도 가구 배치 자동 도배 (오피스 밀도 상향)
         while(gridCells.length > 0) {
             const cell = gridCells.pop();
             const propIcon = propIcons[Math.floor(Math.random() * propIcons.length)];
             
-            // 한 격자 셀 내부에 미니어처 소품 가구 1~2개씩 촘촘하게 추가 유도
-            const loopAmt = Math.random() > 0.4 ? 2 : 1; 
+            const loopAmt = Math.random() > 0.3 ? 2 : 1; 
             for(let k=0; k<loopAmt; k++) {
                 officeProps.push({
                     icon: propIcon,
@@ -568,42 +567,43 @@
         for(let i=0; i<canvas.width; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke(); }
         for(let j=0; j<canvas.height; j+=40) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width, j); ctx.stroke(); }
 
-        // 🟢 1단계: 사무실 전용 배경 가구 오브젝트 출력 (가독성 유지용 반투명 0.3)
-        ctx.globalAlpha = 0.3;
+        // 🟢 1단계: 반투명 오피스 장식용 가구 출력
+        ctx.globalAlpha = 0.25;
         ctx.font = "18px Arial";
         ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
         officeProps.forEach(prop => {
-            ctx.fillText(prop.icon, prop.x, prop.y + 8);
+            ctx.fillText(prop.icon, prop.x, prop.y);
         });
         ctx.globalAlpha = 1.0; 
 
-        // 🔵 2단계: 빌런 NPC 렌더링 (헤드 인디케이터 태그 탑재)
+        // 🔵 2단계: 빌런 NPC 렌더링
         ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
         npcs.forEach(npc => {
             if (!npc.active) return;
             
             ctx.fillStyle = "#ffcc00";
-            ctx.fillRect(npc.x - 26, npc.y - 26, 52, 13);
+            ctx.fillRect(npc.x - 26, npc.y - 24, 52, 13);
             ctx.fillStyle = "#000";
             ctx.font = "bold 9px Arial";
-            ctx.fillText(" BATTLE! ", npc.x, npc.y - 16);
+            ctx.fillText(" BATTLE! ", npc.x, npc.y - 18);
 
             ctx.font = "24px Arial";
-            ctx.fillText(npc.data.mapIcon, npc.x, npc.y + 12);
+            ctx.fillText(npc.data.mapIcon, npc.x, npc.y + 4);
             
             ctx.fillStyle = "rgba(0,0,0,0.6)";
-            ctx.fillRect(npc.x - 22, npc.y + 16, 44, 11);
+            ctx.fillRect(npc.x - 22, npc.y + 18, 44, 11);
             ctx.fillStyle = "#00ffcc"; ctx.font = "9px 'Galmuri11'";
             ctx.fillText("Lv." + npc.data.level, npc.x, npc.y + 24);
         });
 
-        // 🟡 3단계: 플레이어 및 회전형 녹색(Neon Green) 원형 오라 정렬 정밀 수정
-        // 연산을 위해 플레이어의 중심점을 잡고 드로우합니다.
+        // 🟡 3단계: 플레이어 및 녹색(Neon Green) 원형 오라 정밀 정중앙 완전 일치 고정
         const px = player.x + player.size / 2;
         const py = player.y + player.size / 2;
 
         ctx.save();
-        ctx.translate(px, py + 2); // 캐릭터 허리-발밑 가중치 조절 오프셋
+        ctx.translate(px, py); // 드로우 중심 좌표 축 정위치 일치 이동
         ctx.rotate(auraAngle);
         ctx.strokeStyle = "#2ecc71";
         ctx.lineWidth = 2;
@@ -613,10 +613,11 @@
         ctx.stroke();
         ctx.restore();
 
-        // ✨ 핵심 수정: 플레이어 캐릭터 이모지를 중앙 정렬(textAlign='center')하여 정확히 원 중앙에 그립니다.
+        // ✨ 핵심 모바일 버그 수정 포인트: 수평뿐 아니라 수직 정렬(middle)기준을 완전 정의 후 원점(px, py)에 다이렉트로 결합
         ctx.font = "26px Arial";
         ctx.textAlign = "center";
-        ctx.fillText("🧑‍💼", px, py + 10);
+        ctx.textBaseline = "middle";
+        ctx.fillText("🧑‍💼", px, py);
     }
 
     function updateStageBackground(level) {
