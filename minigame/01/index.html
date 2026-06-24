@@ -150,7 +150,6 @@
             box-shadow: 2px 2px 0px #997a00;
         }
 
-        /* 🗺️ 메인 콘텐츠 스크린 구역 */
         #view-container {
             flex: 1;
             position: relative;
@@ -159,7 +158,6 @@
             background-color: #2c3e50;
         }
 
-        /* 탐색용 맵 화면 */
         #map-screen {
             position: absolute;
             top:0; left:0; width:100%; height:100%;
@@ -171,7 +169,6 @@
             display: block;
         }
 
-        /* ⚔️ 기존 도트 인물 배틀 화면 */
         #battle-screen {
             position: absolute;
             top:0; left:0; width:100%; height:100%;
@@ -204,7 +201,6 @@
         @keyframes bounceAnim { from { transform: translateY(0); } to { transform: translateY(-10px); } }
         @keyframes shakeAnim { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
 
-        /* 🕹️ 가상 모바일 패드 구역 */
         #dpad-container {
             position: absolute;
             bottom: 15px; right: 15px;
@@ -223,7 +219,6 @@
         .dbtn:active { background: #555; }
         .dbtn.empty { background: transparent; border: none; cursor: default; }
 
-        /* 하단 UI 창 */
         #bottom-ui {
             display: flex;
             flex-direction: column;
@@ -245,7 +240,6 @@
         .option-btn:hover { background-color: #e8f4fd; }
         .option-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0px #ccc; }
         
-        /* 피드백 오버레이 */
         .feedback-overlay {
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.95); flex-direction: column; justify-content: center; align-items: center; z-index: 40; padding: 15px;
@@ -262,7 +256,6 @@
         }
         .next-btn:active { transform: translateY(4px); box-shadow: 0px 1px 0px #b35d00; }
 
-        /* 결과 화면 */
         .result-screen {
             display: none; position: absolute; top: 31px; left: 0; width: 100%; height: calc(100% - 31px);
             background-color: #111; flex-direction: column; justify-content: flex-start; align-items: center;
@@ -300,7 +293,6 @@
 <div id="game-container">
     <div class="academy-logo-bar">프린서플 어학원 - 영출어람</div>
 
-    <!-- 시작 스크린 -->
     <div id="start-screen">
         <div class="brand-title">✨ 영출어람 by 프린서플 어학원 ✨</div>
         <div class="main-title">💼 K-직장생활<br>오피스 월드 RPG</div>
@@ -312,7 +304,6 @@
         <button class="start-btn" onclick="startGame()">오피스 입장 ▶</button>
     </div>
 
-    <!-- 상단 스탯바 -->
     <div class="top-bar">
         <div class="status-group">
             <div class="status-item">내 평판(HP): <span id="heart-display" class="hearts">❤️❤️❤️</span></div>
@@ -321,12 +312,9 @@
         <button class="ingame-reset-btn" onclick="confirmReset()">🔄 리셋</button>
     </div>
 
-    <!-- 🗺️ 메인 연출 구역 -->
     <div id="view-container">
-        <!-- 1. 탐색용 맵 화면 -->
         <div id="map-screen">
             <canvas id="map-canvas"></canvas>
-            <!-- 가상 디패드 -->
             <div id="dpad-container">
                 <div class="dbtn empty"></div>
                 <div class="dbtn" onmousedown="startMove('up')" onmouseup="stopMove()" ontouchstart="startMove('up')" ontouchend="stopMove()">▲</div>
@@ -340,7 +328,6 @@
             </div>
         </div>
 
-        <!-- 2. 오리지널 도트 그래픽 배틀 화면 -->
         <div id="battle-screen">
             <div class="enemy-status-box">
                 <div class="enemy-name" id="enemy-name">오피스 챌린저</div>
@@ -352,20 +339,17 @@
         </div>
     </div>
 
-    <!-- 하단 UI 창 -->
     <div id="bottom-ui">
         <div class="dialogue-box" id="dialogue-text">방향키나 패드로 조작해 사내 빌런들에게 다가가세요.</div>
         <div class="options-area" id="options-area"></div>
     </div>
 
-    <!-- 결과 피드백 레이어 -->
     <div class="feedback-overlay" id="feedback-overlay">
         <div class="feedback-content" id="feedback-content">결과</div>
         <div class="feedback-explanation" id="feedback-explanation"></div>
         <button class="next-btn" id="next-stage-btn">오피스로 복귀 ▶</button>
     </div>
 
-    <!-- 최종 결과 화면 -->
     <div class="result-screen" id="result-screen">
         <div class="result-title" id="result-title">결과 타이틀</div>
         <div class="result-desc" id="result-desc">사유 요약</div>
@@ -391,7 +375,7 @@
         { level: 5, enemy: "구내식당 직원", situation: "🍽️ 음식이 아직 남았는데 식당 직원이 그릇을 정리하려고 한다. '아, 저 아직 먹고 있는 중이에요!'라고 우아하게 대화를 건네자.", correctText: "I'm still working on it.", correctExplain: "식사 접시나 서류 등 어떤 타겟을 여전히 진행 중임을 완곡하고 교양 있게 표현하는 문장입니다.", summary: "식사나 서류 등 대상을 아직 진행하고 있음을 뜻하는 교양 있는 표현", options: [{ text: "I'm still eating.", isCorrect: false, wrongExplain: "실제 뉘앙스로는 '나 지금 처먹고 있잖아(건들지 마)'라며 퉁명스럽게 들립니다." }, { text: "I'm still working on it.", isCorrect: true }, { text: "Stop touch my plate.", isCorrect: false, wrongExplain: "식당 직원에게 거의 맹수급 위협을 가하는 거친 대사입니다." }], seed: "worker", mapIcon: "👩‍🍳" },
         { level: 6, enemy: "사소한 말실수에 오해한 사수", situation: "😰 내 메신저 뉘앙스 때문에 사수가 단단히 오해했다. '내 말 오해하지 말고 들어봐요'라며 진화에 나서자.", correctText: "Don't get me wrong.", correctExplain: "해명이나 반론 전 의도를 오해하지 말아달라며 감정적 쿠션을 까는 오프너입니다.", summary: "반론 직전 상대방의 감정이 상하지 않도록 안전 필터를 까는 필수 치트키", options: [{ text: "Don't get me wrong.", isCorrect: true }, { text: "You are wrong.", isCorrect: false, wrongExplain: "대놓고 '선배가 틀렸어'라고 사정없이 낙인을 찍는 폭탄 대사입니다." }, { text: "Listen carefully.", isCorrect: false, wrongExplain: "'내 말 똑바로 잘 들어봐'라며 하급자 타이르듯 꼰대 모드를 시전하는 대사입니다." }], seed: "senior", mapIcon: "🧔" },
         { level: 7, enemy: "다급하게 전화를 건 타 부서 대리", situation: "📞 업무가 밀려있는데 타 부서에서 다급하게 전화가 왔다. '지금 바빠서 그런데, 확인하고 금방 바로 전화 걸게요!'라며 신뢰를 주자.", correctText: "I'll get right back to you.", correctExplain: "업무 상황을 전광석화처럼 정리해서 즉각 우선순위로 피드백하겠다는 신뢰의 표현입니다.", summary: "상황을 빠르게 파악하고 우선순위로 빠르게 즉시 회신하겠다는 프로의 전화 매너", options: [{ text: "I will call you back soon.", isCorrect: false, wrongExplain: "나중에 한가해지면 언젠가 회신하겠다는 느낌이라 상대의 피를 말립니다." }, { text: "I'll get right back to you.", isCorrect: true }, { text: "Wait a minute.", isCorrect: false, wrongExplain: "'야 잠깐 대기해'라며 상대를 하염없이 방치하겠다는 무례한 차단어입니다." }], seed: "call1", mapIcon: "📞" },
-        { level: 8, enemy: "회의실에서 굳어버린 동기", situation: "😢 경쟁 피티에서 탈락해 멘탈이 나간 동기를 마주쳤다. '동기야 너무 기죽지 마, 고개 들어!'라며 위로해주자.", correctText: "Keep your chin up.", correctExplain: "턱(chin)을 치켜들라는 은유로, 낙담한 동료에게 당당하게 정면을 보라고 에너지를 주는 표현입니다.", summary: "실패로 낙담하여 고개를 숙인 동료의 당당함과 기운을 북돋아주는 은유적 위로", options: [{ text: "Don't be sad.", isCorrect: false, wrongExplain: "슬퍼하지 말라는 영혼 없는 로봇 리액션에 가깝습니다." }, { text: "Keep your chin up.", isCorrect: true }, { text: "You failed.", isCorrect: false, wrongExplain: "우는 동기 뒤에 '너 실패함'이라고 낙인을 찍어 인간관계를 파괴하는 확인사살형 오답입니다." }], seed: "friend2", mapIcon: "🧑" },
+        { level: 8, enemy: "회의실에서 굳어버린 동기", situation: "😢 경쟁 피티에서 탈락해 멘탈이 나간 동기를 마주쳤다. '동기야 너무 기죽지 마, 고개 들어!'라며 위로해주자.", correctText: "Keep your chin up.", correctExplain: "턱(chin)을 하늘로 치켜들라는 은유로, 낙담한 동료에게 당당하게 정면을 보라고 에너지를 주는 표현입니다.", summary: "실패로 낙담하여 고개를 숙인 동료의 당당함과 기운을 북돋아주는 은유적 위로", options: [{ text: "Don't be sad.", isCorrect: false, wrongExplain: "슬퍼하지 말라는 영혼 없는 로봇 리액션에 가깝습니다." }, { text: "Keep your chin up.", isCorrect: true }, { text: "You failed.", isCorrect: false, wrongExplain: "우는 동기 뒤에 '너 실패함'이라고 낙인을 찍어 인간관계를 파괴하는 확인사살형 오답입니다." }], seed: "friend2", mapIcon: "🧑" },
         { level: 9, enemy: "해외 법인 직원", situation: "💬 해외 법인 팀원이 메신저로 협업 프로젝트 상황을 묻는다. '나한테 새로운 소식 생기면 계속 공유해 줘!'라며 판을 깔자.", correctText: "Keep me posted.", correctExplain: "상황에 진전이 생기거나 변경될 때마다 지속적으로 포스팅해달라는 협업 필수 표현입니다.", summary: "진행 여건 및 스케줄 변동 사항이 있을 때마다 실시간으로 공유를 요청할 때", options: [{ text: "Keep me posted.", isCorrect: true }, { text: "Send me messages continuously.", isCorrect: false, wrongExplain: "'나에게 쉬지 않고 무한 연속으로 카톡테러를 해라'라는 무서운 주문입니다." }, { text: "Report to me.", isCorrect: false, wrongExplain: "수평적인 파트너에게 뜬금없이 상사 코스프레를 시전하며 꼰대 갑질을 부리는 오만한 표현입니다." }], seed: "global", mapIcon: "💻" },
         { level: 10, enemy: "기습 퀴즈를 던진 부장님", situation: "❓ 임원 회의 도중 부장님이 내 담당이 아닌 파트의 숫자를 질문했다. '제가 그 부분은 확실하게는 잘 모르겠습니다'라며 품격 있게 유턴하자.", correctText: "I'm not entirely sure.", correctExplain: "100% 명확히 짚고 있지는 못하다며 무지를 세련되게 숨기면서 시간을 버는 스마트 비즈니스 문장입니다.", summary: "무책임한 무지를 세련되게 숨기면서 확인 후 재보고할 시간을 버는 방어 대사", options: [{ text: "I don't know.", isCorrect: false, wrongExplain: "회의실에서 부장님 면전에 대고 '나 몰라요'라고 성의 없이 툭 던져버려 무능해 보이기 딱 좋습니다." }, { text: "I'm not entirely sure.", isCorrect: true }, { text: "Ask someone else.", isCorrect: false, wrongExplain: "'딴 사람한테 물어보쇼'라며 날아온 질문 스매싱을 부장님 머리 위로 받아치는 하극상 유발 대사입니다." }], seed: "director", mapIcon: "🧙‍♂️" },
         { level: 11, enemy: "내 아이디어를 극찬하는 본부장", situation: "💡 기획안 발표 후 본부장님이 극찬을 쏟아낸다. '아이구 과찬이십니다, 부끄럽습니다!'라고 유연하게 겸손해보자.", correctText: "I'm flattered.", correctExplain: "과분한 칭찬에 몸 둘 바를 모르겠다며 호의를 기분 좋게 인정하면서 격식을 차리는 표현입니다.", summary: "상대의 거대한 과찬에 기분 좋게 리액션하면서 격식을 챙기는 사회생활용 겸손", options: [{ text: "I am best.", isCorrect: false, wrongExplain: "칭찬을 받자마자 턱을 치켜들며 '내가 최고지'라고 자만심을 폭발시켜 시기 질투를 삽니다." }, { text: "I'm flattered.", isCorrect: true }, { text: "Don't fly airplane.", isCorrect: false, wrongExplain: "'비행기 태우지 마라'는 한국어 유행어를 직역한 참혹한 콩글리시입니다." }], seed: "vp", mapIcon: "🧝‍♂️" },
@@ -484,7 +468,6 @@
         gridCells = gridCells.filter(cell => Math.hypot(cell.cx - player.x, cell.cy - player.y) > 60);
         gridCells.sort(() => Math.random() - 0.5);
 
-        // 1. 빌런 NPC 분산 배치 처리
         const startIndex = (currentMapSection - 1) * npcsPerSection;
         const endIndex = Math.min(startIndex + npcsPerSection, gameData.length);
 
@@ -505,7 +488,6 @@
             });
         }
 
-        // 2. 남은 필드 고밀도 가구 배치
         while(gridCells.length > 0) {
             const cell = gridCells.pop();
             const propIcon = propIcons[Math.floor(Math.random() * propIcons.length)];
@@ -559,7 +541,6 @@
         if (keys['ArrowRight'] || keys['d']) player.x += player.speed;
         checkBounds();
 
-        // ✨ 화살표 애니메이션 제어 연산 (위아래 통통 튀게 만듬)
         indicatorOffsetY += 0.3 * indicatorDirection;
         if (Math.abs(indicatorOffsetY) > 5) {
             indicatorDirection *= -1;
@@ -579,7 +560,6 @@
         for(let i=0; i<canvas.width; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke(); }
         for(let j=0; j<canvas.height; j+=40) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width, j); ctx.stroke(); }
 
-        // 1단계: 반투명 오피스 가구
         ctx.globalAlpha = 0.25;
         ctx.font = "18px Arial";
         ctx.textAlign = "center";
@@ -589,7 +569,6 @@
         });
         ctx.globalAlpha = 1.0; 
 
-        // 2단계: 빌런 NPC 렌더링
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         npcs.forEach(npc => {
@@ -610,30 +589,28 @@
             ctx.fillText("Lv." + npc.data.level, npc.x, npc.y + 24);
         });
 
-        // 3단계: 플레이어 및 오차 없는 역삼각형(▼) 화살표 가이드 시스템 구축
         const px = player.x + player.size / 2;
         const py = player.y + player.size / 2;
 
-        // ✨ 핵심 수정: 원형 오라 대신 머리 바로 위에 네온 그린 역삼각형 화살표를 그립니다.
-        ctx.fillStyle = "#00ffcc"; // 형광 네온 민트 그린
+        ctx.fillStyle = "#00ffcc"; 
         ctx.strokeStyle = "#000000";
         ctx.lineWidth = 1.5;
         
         const arrowTopY = py - 28 + indicatorOffsetY;
         
         ctx.beginPath();
-        ctx.moveTo(px - 7, arrowTopY);       // 좌상단 꼭짓점
-        ctx.lineTo(px + 7, arrowTopY);       // 우상단 꼭짓점
-        ctx.lineTo(px, arrowTopY + 8);       // 아래쪽 아래를 향하는 중심점
+        ctx.moveTo(px - 7, arrowTopY);       
+        ctx.lineTo(px + 7, arrowTopY);       
+        ctx.lineTo(px, arrowTopY + 8);       
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // 플레이어 본체 출력
+        // 🛠️ 모바일 환경 이모지 우측 쏠림 현상 정밀 보정치(-2px) 반영
         ctx.font = "26px Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText("🧑‍💼", px, py + 4);
+        ctx.fillText("🧑‍💼", px - 2, py + 4);
     }
 
     function updateStageBackground(level) {
