@@ -300,6 +300,7 @@
 <div id="game-container">
     <div class="academy-logo-bar">프린서플 어학원 - 영출어람</div>
 
+    <!-- 시작 스크린 -->
     <div id="start-screen">
         <div class="brand-title">✨ 영출어람 by 프린서플 어학원 ✨</div>
         <div class="main-title">💼 K-직장생활<br>오피스 월드 RPG</div>
@@ -311,6 +312,7 @@
         <button class="start-btn" onclick="startGame()">오피스 입장 ▶</button>
     </div>
 
+    <!-- 상단 스탯바 -->
     <div class="top-bar">
         <div class="status-group">
             <div class="status-item">내 평판(HP): <span id="heart-display" class="hearts">❤️❤️❤️</span></div>
@@ -319,9 +321,12 @@
         <button class="ingame-reset-btn" onclick="confirmReset()">🔄 리셋</button>
     </div>
 
+    <!-- 🗺️ 메인 연출 구역 -->
     <div id="view-container">
+        <!-- 1. 탐색용 맵 화면 -->
         <div id="map-screen">
             <canvas id="map-canvas"></canvas>
+            <!-- 가상 디패드 -->
             <div id="dpad-container">
                 <div class="dbtn empty"></div>
                 <div class="dbtn" onmousedown="startMove('up')" onmouseup="stopMove()" ontouchstart="startMove('up')" ontouchend="stopMove()">▲</div>
@@ -335,6 +340,7 @@
             </div>
         </div>
 
+        <!-- 2. 오리지널 도트 그래픽 배틀 화면 -->
         <div id="battle-screen">
             <div class="enemy-status-box">
                 <div class="enemy-name" id="enemy-name">오피스 챌린저</div>
@@ -346,17 +352,20 @@
         </div>
     </div>
 
+    <!-- 하단 UI 창 -->
     <div id="bottom-ui">
         <div class="dialogue-box" id="dialogue-text">방향키나 패드로 조작해 사내 빌런들에게 다가가세요.</div>
         <div class="options-area" id="options-area"></div>
     </div>
 
+    <!-- 결과 피드백 레이어 -->
     <div class="feedback-overlay" id="feedback-overlay">
         <div class="feedback-content" id="feedback-content">결과</div>
         <div class="feedback-explanation" id="feedback-explanation"></div>
         <button class="next-btn" id="next-stage-btn">오피스로 복귀 ▶</button>
     </div>
 
+    <!-- 최종 결과 화면 -->
     <div class="result-screen" id="result-screen">
         <div class="result-title" id="result-title">결과 타이틀</div>
         <div class="result-desc" id="result-desc">사유 요약</div>
@@ -414,7 +423,10 @@
     let npcs = [];
     let keys = {};
     let moveInterval = null;
-    let auraAngle = 0; 
+    
+    // ✨ 가이드 화살표 위아래 바운스 애니메이션 제어용 변수
+    let indicatorOffsetY = 0;
+    let indicatorDirection = 1;
 
     // DOM 요소 바인딩
     const dialogueEl = document.getElementById('dialogue-text');
@@ -459,9 +471,8 @@
 
         for(let r = 0; r < rows; r++) {
             for(let c = 0; c < cols; c++) {
-                // 🚨 핵심 수정: 가상 컨트롤 디패드가 가리는 우측 하단 30% 영역(행4~5, 열4~5 쪽 영역) 필터링 배제선 가동
                 if (c >= 3 && r >= 3) {
-                    continue; // 이 셀 구역은 패드가 막고 있으므로 생성 안 함
+                    continue; 
                 }
                 gridCells.push({
                     cx: cellWidth * c + cellWidth / 2,
@@ -470,10 +481,7 @@
             }
         }
 
-        // 플레이어 시작 포인트 근처 세이프티 필터링
         gridCells = gridCells.filter(cell => Math.hypot(cell.cx - player.x, cell.cy - player.y) > 60);
-
-        // 격자 순서 랜덤 셔플
         gridCells.sort(() => Math.random() - 0.5);
 
         // 1. 빌런 NPC 분산 배치 처리
@@ -497,7 +505,7 @@
             });
         }
 
-        // 2. 남은 필드 유휴 격자망 전체에 고밀도 가구 배치 자동 도배 (오피스 밀도 상향)
+        // 2. 남은 필드 고밀도 가구 배치
         while(gridCells.length > 0) {
             const cell = gridCells.pop();
             const propIcon = propIcons[Math.floor(Math.random() * propIcons.length)];
@@ -551,7 +559,11 @@
         if (keys['ArrowRight'] || keys['d']) player.x += player.speed;
         checkBounds();
 
-        auraAngle += 0.04;
+        // ✨ 화살표 애니메이션 제어 연산 (위아래 통통 튀게 만듬)
+        indicatorOffsetY += 0.3 * indicatorDirection;
+        if (Math.abs(indicatorOffsetY) > 5) {
+            indicatorDirection *= -1;
+        }
 
         npcs.forEach(npc => {
             if (!npc.active) return;
@@ -567,7 +579,7 @@
         for(let i=0; i<canvas.width; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke(); }
         for(let j=0; j<canvas.height; j+=40) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width, j); ctx.stroke(); }
 
-        // 🟢 1단계: 반투명 오피스 장식용 가구 출력
+        // 1단계: 반투명 오피스 가구
         ctx.globalAlpha = 0.25;
         ctx.font = "18px Arial";
         ctx.textAlign = "center";
@@ -577,7 +589,7 @@
         });
         ctx.globalAlpha = 1.0; 
 
-        // 🔵 2단계: 빌런 NPC 렌더링
+        // 2단계: 빌런 NPC 렌더링
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         npcs.forEach(npc => {
@@ -598,26 +610,30 @@
             ctx.fillText("Lv." + npc.data.level, npc.x, npc.y + 24);
         });
 
-        // 🟡 3단계: 플레이어 및 녹색(Neon Green) 원형 오라 정밀 정중앙 완전 일치 고정
+        // 3단계: 플레이어 및 오차 없는 역삼각형(▼) 화살표 가이드 시스템 구축
         const px = player.x + player.size / 2;
         const py = player.y + player.size / 2;
 
-        ctx.save();
-        ctx.translate(px, py); // 드로우 중심 좌표 축 정위치 일치 이동
-        ctx.rotate(auraAngle);
-        ctx.strokeStyle = "#2ecc71";
-        ctx.lineWidth = 2;
-        ctx.setLineDash([4, 4]); 
+        // ✨ 핵심 수정: 원형 오라 대신 머리 바로 위에 네온 그린 역삼각형 화살표를 그립니다.
+        ctx.fillStyle = "#00ffcc"; // 형광 네온 민트 그린
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 1.5;
+        
+        const arrowTopY = py - 28 + indicatorOffsetY;
+        
         ctx.beginPath();
-        ctx.arc(0, 0, 18, 0, Math.PI * 2);
+        ctx.moveTo(px - 7, arrowTopY);       // 좌상단 꼭짓점
+        ctx.lineTo(px + 7, arrowTopY);       // 우상단 꼭짓점
+        ctx.lineTo(px, arrowTopY + 8);       // 아래쪽 아래를 향하는 중심점
+        ctx.closePath();
+        ctx.fill();
         ctx.stroke();
-        ctx.restore();
 
-        // ✨ 핵심 모바일 버그 수정 포인트: 수평뿐 아니라 수직 정렬(middle)기준을 완전 정의 후 원점(px, py)에 다이렉트로 결합
+        // 플레이어 본체 출력
         ctx.font = "26px Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText("🧑‍💼", px, py);
+        ctx.fillText("🧑‍💼", px, py + 4);
     }
 
     function updateStageBackground(level) {
