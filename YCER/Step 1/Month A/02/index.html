@@ -124,16 +124,13 @@
         
         <div class="stage w-full">
             
-            <!-- 배너 광고 영역 -->
             <div id="main-banner-area" class="w-full max-w-xl mx-auto"></div>
 
-            <!-- 전광판 -->
             <div class="display-board" onclick="handleBoardClick()">
                 <div class="kor-hint" id="kor-display">원하는 블록들을 조합하세요!</div>
                 
                 <div class="eng-sentence" id="eng-display">
-                    <!-- 조립된 문장 타일들이 들어가는 곳 -->
-                </div>
+                    </div>
 
                 <div id="challenge-btn-zone" class="w-full flex justify-center mt-2">
                     <button class="inline-challenge-btn" onclick="event.stopPropagation(); startChallenge();">🔥 도전</button>
@@ -144,7 +141,6 @@
                 </div>
             </div>
 
-            <!-- 🛠️ [정치 완료] 전광판 바로 아래에 '1. 구조 선택' 배치 + 강제 한 줄 정렬 구현 -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-2">
                 <div class="panel-title">1. 구조 선택</div>
                 <div class="pattern-grid-row" id="pattern-grid">
@@ -155,27 +151,22 @@
                 </div>
             </div>
 
-            <!-- 2. 동사 선택 -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-2">
                 <div class="panel-title">2. 동사 선택</div>
-                <div id="verb-list" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    <!-- 자바스크립트에서 렌더링 -->
-                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="verb-list">
+                    </div>
             </div>
 
-            <!-- 3. 살 붙이기 (Plus) -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-2">
                 <div class="panel-title">3. 살 붙이기 (Plus)</div>
-                <div id="mod-storage" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    <!-- 자바스크립트에서 렌더링 -->
-                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="mod-storage">
+                    </div>
             </div>
 
         </div>
         
     </div>
 
-    <!-- ⚙️ 조립소 환경 설정 팝업 모달창 -->
     <div class="modal-overlay" id="setting-modal" onclick="closeSettings()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-4 border-b pb-2">
@@ -184,7 +175,6 @@
             </div>
             
             <div class="flex flex-col gap-5">
-                <!-- 한국어 + 영어 병기 옵션 토글 -->
                 <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
                     <span class="font-bold text-sm text-slate-700">🔤 한국어 + 영어 함께 보기</span>
                     <label class="toggle-label">
@@ -193,7 +183,6 @@
                     </label>
                 </div>
 
-                <!-- 제한 시간 세팅 -->
                 <div>
                     <div class="panel-title">⏱️ 제한 시간 세팅 (⏱️ <span id="time-val">3</span>초)</div>
                     <div class="time-select-container">
@@ -207,7 +196,6 @@
                     </div>
                 </div>
 
-                <!-- 🛠️ [정치 완료] 메인 화면에서 이사 온 '🎲 문제 설정(필터링)' 팝업 내부 안착 -->
                 <div class="border-t pt-4">
                     <div class="panel-title">🎲 랜덤 문제 설정</div>
                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-col gap-3">
@@ -312,6 +300,7 @@
         let timerInterval = null;
         let limitTime = 3000; 
         let lastQuizSnapshot = ""; 
+        let historyPool = []; // 💡 모든 문제를 한 번씩 거치기 전까지 기록을 누적 보관하는 저장소
 
         const bannerMsgs = [
             { icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" },
@@ -406,6 +395,59 @@
             }
         }
 
+        // 💡 [추가] 현재 설정 필터 조건하에서 생성 가능한 '논리적으로 올바른 전체 조합 수'를 미리 계산하는 함수
+        function getPossiblePoolSize(fixPattern, fixVerb, noMod) {
+            const testPatterns = fixPattern ? [currentPattern] : ['pos', 'neg', 'ques', 'neg_ques'];
+            const testVerbs = (fixVerb && currentVerb) ? [currentVerb] : verbs;
+            let totalCount = 0;
+
+            testPatterns.forEach(p => {
+                testVerbs.forEach(v => {
+                    if (noMod) {
+                        totalCount++;
+                    } else {
+                        // 살 조합 연산 (살 0개, 1개, 2개 전부 검사)
+                        // 원본 연산 규칙을 그대로 적용하여 가짓수 카운트
+                        // 1) 살 0개인 경우
+                        totalCount++;
+                        
+                        // 2) 살 1개인 경우
+                        for (let i = 0; i < modifiers.length; i++) {
+                            if (checkLogicalCombination(p, v, [modifiers[i].id])) totalCount++;
+                        }
+                        
+                        // 3) 살 2개인 경우
+                        for (let i = 0; i < modifiers.length; i++) {
+                            for (let j = i + 1; j < modifiers.length; j++) {
+                                if (checkLogicalCombination(p, v, [modifiers[i].id, modifiers[j].id])) totalCount++;
+                            }
+                        }
+                    }
+                });
+            });
+            return totalCount;
+        }
+
+        // 💡 [추가] 조합의 논리적 무결성을 체크하는 검증 함수 공통화
+        function checkLogicalCombination(pattern, verb, mods) {
+            const hasId = (id) => mods.includes(id);
+            const selectedObjects = mods.map(id => modifiers.find(m => m.id === id));
+            
+            const types = selectedObjects.map(obj => obj.type);
+            const hasDuplicateType = types.some((type, idx) => types.indexOf(type) !== idx);
+            if (hasDuplicateType) return false;
+
+            if (verb.eng === "go to good restaurants" && hasId(3)) return false; 
+            if (hasId(5) && hasId(6)) return false; 
+            
+            if (hasId(1) && hasId(2)) return false; 
+            if (hasId(1) && hasId(11)) return false; 
+            if (hasId(2) && hasId(11)) return false; 
+            if (hasId(8) && hasId(2)) return false; 
+
+            return true;
+        }
+
         function generateRandomQuiz() {
             const fixPattern = document.getElementById('fixPatternCheck').checked;
             const fixVerb = document.getElementById('fixVerbCheck').checked;
@@ -417,7 +459,15 @@
             let safetyCounter = 0; 
             let isValid = false;
 
-            while (!isValid && safetyCounter < 500) {
+            // 💡 현재 필터링 환경에서 가질 수 있는 완벽한 전체 가짓수를 받아옴
+            const totalPossibleSize = getPossiblePoolSize(fixPattern, fixVerb, noMod);
+
+            // 💡 모든 가능한 문제를 다 풀었다면 히스토리 저장소를 초기화하여 전곡 순환 가동
+            if (historyPool.length >= totalPossibleSize) {
+                historyPool = [];
+            }
+
+            while (!isValid && safetyCounter < 1000) {
                 safetyCounter++;
 
                 if (!fixPattern) {
@@ -444,27 +494,21 @@
                     targetMods = [];
                 }
 
-                isValid = true;
-                const hasId = (id) => targetMods.includes(id);
-                const selectedObjects = targetMods.map(id => modifiers.find(m => m.id === id));
-                
-                const types = selectedObjects.map(obj => obj.type);
-                const hasDuplicateType = types.some((type, idx) => types.indexOf(type) !== idx);
-                if (hasDuplicateType) { isValid = false; continue; }
+                // 무결성 검사 가동
+                if (!checkLogicalCombination(targetPattern, targetVerb, targetMods)) {
+                    continue;
+                }
 
-                if (targetVerb.eng === "go to good restaurants" && hasId(3)) isValid = false; 
-                if (hasId(5) && hasId(6)) isValid = false; 
-                
-                if (hasId(1) && hasId(2)) isValid = false; 
-                if (hasId(1) && hasId(11)) isValid = false; 
-                if (hasId(2) && hasId(11)) isValid = false; 
-                if (hasId(8) && hasId(2)) isValid = false; 
-
+                // 문제 구별용 고유 키 생성
                 const currentQuizSnapshot = `${targetPattern}_${targetVerb.eng}_${[...targetMods].sort().join(',')}`;
-                if (currentQuizSnapshot === lastQuizSnapshot) {
-                    isValid = false; 
+                
+                // 💡 [핵심 교정] 히스토리 풀 전체를 스캔하여 이미 나왔던 문제라면 루프를 다시 돌림
+                if (historyPool.includes(currentQuizSnapshot)) {
                     continue; 
                 }
+
+                // 위 필터들을 모두 통과했다면 유효한 문제로 판정
+                isValid = true;
             }
 
             currentPattern = targetPattern;
@@ -472,6 +516,9 @@
             selectedMods = targetMods;
 
             lastQuizSnapshot = `${currentPattern}_${currentVerb.eng}_${[...selectedMods].sort().join(',')}`;
+            
+            // 💡 새로운 고유 키를 히스토리 풀에 밀어 넣어 누적 기억 진행
+            historyPool.push(lastQuizSnapshot);
 
             // 💡 상단 미니 버튼 동기화 보정
             document.querySelectorAll('#pattern-grid .pattern-mini-btn').forEach(b => {
@@ -682,6 +729,7 @@
             isRevealed = false;
             currentPattern = 'pos';
             lastQuizSnapshot = ""; 
+            historyPool = []; // 💡 공장 초기화 시 히스토리 보관함도 깨끗이 비워줌
             
             document.getElementById('fixPatternCheck').checked = false;
             document.getElementById('fixVerbCheck').checked = false;
