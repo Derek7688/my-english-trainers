@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ultimate Core Pattern Trainer v2.0</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-blue: #1a365d;
+            --btn-blue: #2b6cb0;
+            --accent-green: #27ae60;
+            --bg-gray: #f8f9fa;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #333; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            text-align: center; width: 95%; max-width: 500px; border: 1px solid #eee; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 15px;
+            order: 1;
+        }
+        .top-controls.active { display: flex; }
+
+        h1 { 
+            color: var(--primary-blue); font-size: 20px !important; margin: 10px 0 5px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2; order: 2;
+        }
+
+        .progress-counter {
+            font-size: 13px; font-weight: 700; color: #718096; margin-bottom: 15px; order: 2.5;
+            background: #edf2f7; padding: 2px 10px; border-radius: 20px; display: none;
+        }
+        .progress-counter.active { display: inline-block; }
+
+        #korean-task { 
+            font-size: 19px; font-weight: 700; margin: 10px 0 15px 0; min-height: 100px; 
+            color: #2d3748; line-height: 1.6; word-break: keep-all; display: flex; align-items: center; justify-content: center; 
+            padding: 0 10px; letter-spacing: -0.02em; order: 3;
+        }
+
+        .start-container { order: 4; margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--btn-blue); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(43, 108, 176, 0.2);
+        }
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(43, 108, 176, 0.15); }
+        .lvl-btn:active { transform: scale(0.95); }
+
+        .auto-toggle {
+            display: flex; align-items: center; gap: 5px; background: #eee; padding: 4px; border-radius: 12px;
+        }
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: #868e96;
+        }
+        .toggle-btn.active { background: var(--primary-blue); color: white; }
+        
+        .answer-container {
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%; order: 5;
+        }
+
+        #english-answer { 
+            font-size: 16px; color: var(--accent-green); width: 100%; padding: 15px; 
+            background: #f0fff4; border-radius: 12px; border: 1px solid #c6f6d5; font-weight: 600; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { order: 6; width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 8px; }
+        .ans-btn { background: var(--btn-blue); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #4a5568; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #adb5bd; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #dee2e6; font-size: 13px; margin-top: 15px; width: 100%; }
+        
+        .hidden { display: none !important; }
+        #banner-container { order: 7; }
+
+        #auto-progress {
+            width: 0%; height: 4px; background: #f59e0b; position: absolute; top: 0; left: 0; border-radius: 24px 24px 0 0; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini"></div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
+    </div>
+
+    <h1>⚡ 실전 필수 문형 변형 트레이너</h1>
+
+    <!-- 필터링 완료된 총 172개 엄선 문제 카운터 바인딩 -->
+    <div id="progress-counter" class="progress-counter">[ 0 / 172 ]</div>
+    
+    <div id="korean-task">입으로 소리 내어 훈련하세요! 🗣️</div>
+    
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
+            <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+            <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center">
+                <h3 id="banner-title" class="font-black text-slate-800 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 억지 유도용 어휘들을 완벽 탈락시키고 엄선한 172개의 순수 리스트
+    const allClaims = [
+        // 1. hang out with friends
+        { "kr": "나 친구들이랑 놀고 있어.", "en": "I’m hanging out with my friends." },
+        { "kr": "너 친구들이랑 놀고 있어?", "en": "Are you hanging out with your friends?" },
+        { "kr": "걔(남자) 친구들이랑 안 놀고 있어?", "en": "Isn’t he hanging out with his friends?" },
+        { "kr": "걔(여자) 친구들이랑 놀고 있대.", "en": "She’s hanging out with her friends." },
+        { "kr": "우리 친구들이랑 놀고 있어.", "en": "We’re hanging out with our friends." },
+        { "kr": "걔들 친구들이랑 안 놀고 있어.", "en": "They aren’t hanging out with their friends." },
+        { "kr": "나 강남에서 친구들이랑 노는 중이야.", "en": "I’m hanging out with my friends in Gangnam." },
+        { "kr": "걔(남자) 강남에서 친구들이랑 놀고 있어?", "en": "Is he hanging out with his friends in Gangnam?" },
+        { "kr": "우리 바에서 친구들이랑 노는 중이야.", "en": "We’re hanging out with our friends at a bar." },
+        { "kr": "걔들 바에서 친구들이랑 안 놀고 있어?", "en": "Aren’t they hanging out with their friends at a bar?" },
+        { "kr": "나 바에서 친구들이랑 노는 거 아니야.", "en": "I’m not hanging out with my friends at a bar." },
+        { "kr": "걔(남자) 여기서 친구들이랑 노는 중이래.", "en": "He’s hanging out with his friends here." },
+        { "kr": "우리 거기서 친구들이랑 놀고 있어.", "en": "We’re hanging out with our friends there." },
+        { "kr": "걔들 거기서 친구들이랑 노는 중이래.", "en": "They’re hanging out with their friends there." },
+        { "kr": "나 거기서 친구들이랑 안 놀고 있어.", "en": "I’m not hanging out with my friends there." },
+        { "kr": "우리 여기서 시간 보내는 중이야.", "en": "We’re hanging out here." },
+        { "kr": "걔들 강남에서 안 놀고 있어.", "en": "They aren’t hanging out in Gangnam." },
+
+        // 2. lying in bed
+        { "kr": "나 침대에 누워 있어.", "en": "I’m lying in bed." },
+        { "kr": "우리 침대에 안 누워 있어?", "en": "Aren’t we lying in bed?" },
+        { "kr": "걔(남자) 침대에 누워 있대?", "en": "Is he lying in bed?" },
+        { "kr": "걔(여자) 침대에 안 누워 있대.", "en": "She isn’t lying in bed." },
+        { "kr": "우리 침대에 누워 있는 중이야.", "en": "We’re lying in bed." },
+        { "kr": "걔들 침대에 안 누워 있대?", "en": "Aren’t they lying in bed?" },
+        { "kr": "나 집에서 침대에 누워 쉬고 있어.", "en": "I’m lying in bed at home." },
+        { "kr": "걔(남자) 집에서 침대에 누워 있대?", "en": "Is he lying in bed at home?" },
+        { "kr": "나 내 방에서 침대에 누워 있어.", "en": "I’m lying in bed in my room." },
+        { "kr": "우리 방에서 침대에 누워 있어?", "en": "Are we lying in bed in our room?" },
+        { "kr": "걔(남자) 자기 방에서 침대에 안 누워 있대?", "en": "Isn’t he lying in bed in his room?" },
+        { "kr": "걔(여자) 자기 방에서 침대에 누워 있대.", "en": "She’s lying in bed in her room." },
+        { "kr": "우리 집에서 누워 쉬는 중이야.", "en": "We’re lying at home." },
+        { "kr": "나 소파에 누워 있어.", "en": "I’m lying on the sofa." },
+        { "kr": "우리 소파에 안 누워 있어?", "en": "Aren’t we lying on the sofa?" },
+        { "kr": "걔(남자) 소파에 누워 있대?", "en": "Is he lying on the sofa?" },
+        { "kr": "걔(여자) 소파에 안 누워 있대.", "en": "She isn’t lying on the sofa." },
+        { "kr": "우리 소파에 누워 있어.", "en": "We’re lying on the sofa." },
+        { "kr": "걔들 소파에 안 누워 있대?", "en": "Aren’t they lying on the sofa?" },
+        { "kr": "나 소파에 누워 있는 거 아니야.", "en": "I’m not lying on the sofa." },
+
+        // 3. talking with Mom
+        { "kr": "나 엄마랑 얘기 중이야.", "en": "I’m talking with Mom." },
+        { "kr": "너 엄마랑 얘기 중이야?", "en": "Are you talking with Mom?" },
+        { "kr": "걔(남자) 엄마랑 얘기 안 하고 있대?", "en": "Isn’t he talking with Mom?" },
+        { "kr": "걔(여자) 엄마랑 얘기 중이래.", "en": "She’s talking with Mom." },
+        { "kr": "우리 엄마랑 얘기 나누는 중이야.", "en": "We’re talking with Mom." },
+        { "kr": "걔들 엄마랑 얘기 안 하고 있대.", "en": "They aren’t talking with Mom." },
+        { "kr": "나 엄마랑 전화 통화 중이야.", "en": "I’m talking with Mom on the phone." },
+        { "kr": "너 엄마랑 전화 통화 중이야?", "en": "Are you talking with Mom on the phone?" },
+        { "kr": "걔(남자) 엄마랑 전화 통화 안 하고 있대?", "en": "Isn’t he talking with Mom on the phone?" },
+        { "kr": "걔(여자) 엄마랑 전화 통화 중이래.", "en": "She’s talking with Mom on the phone." },
+        { "kr": "우리 엄마랑 전화 통화하는 중이야.", "en": "We’re talking with Mom on the phone." },
+        { "kr": "나 엄마랑 대화 나누는 중이야.", "en": "I’m talking with Mom about it." },
+        { "kr": "너 엄마랑 얘기 중이야?", "en": "Are you talking with Mom about it?" },
+        { "kr": "걔(여자) 엄마랑 대화 중이래.", "en": "She’s talking with Mom about it." },
+        { "kr": "우리 엄마랑 얘기하는 중이야.", "en": "We’re talking with Mom about it." },
+        { "kr": "나 엄마랑 전화하는 거 아니야.", "en": "I’m not talking with Mom on the phone." },
+        { "kr": "나 엄마랑 대화하는 거 아니야.", "en": "I’m not talking with Mom." },
+
+        // 4. waiting for you
+        { "kr": "나 너 기다리고 있어.", "en": "I’m waiting for you." },
+        { "kr": "너 나 기다리는 중이야?", "en": "Are you waiting for me?" },
+        { "kr": "걔(남자) 걔(여자) 기다리는 중이래?", "en": "Is he waiting for her?" },
+        { "kr": "걔(여자) 걔(남자) 안 기다리고 있대.", "en": "She isn’t waiting for him." },
+        { "kr": "우리 너 기다리는 중이야.", "en": "We’re waiting for you." },
+        { "kr": "걔들 우리 안 기다리고 있대?", "en": "Aren’t they waiting for us?" },
+        { "kr": "나 강남역에서 너 기다리는 중이야.", "en": "I’m waiting for you at Gangnam Station." },
+        { "kr": "너 강남역에서 나 안 기다리고 있니?", "en": "Aren’t you waiting for me at Gangnam Station?" },
+        { "kr": "걔(남자) 강남역에서 우리 기다리는 중이래?", "en": "Is he waiting for us at Gangnam Station?" },
+        { "kr": "우리 이 근처에서 너 기다리는 중이야.", "en": "We’re waiting for you near here." },
+        { "kr": "걔들 이 근처에서 우리 기다리는 중이래?", "en": "Are they waiting for us near here?" },
+        { "kr": "나 이 근처에서 너 안 기다리고 있어.", "en": "I’m not waiting for you near here." },
+        { "kr": "걔(남자) 홍대에서 걔(여자) 기다린대.", "en": "He’s waiting for her in Hongdae." },
+        { "kr": "걔(여자) 홍대에서 걔(남자) 안 기다리고 있대?", "en": "Isn’t she waiting for him in Hongdae?" },
+        { "kr": "우리 홍대에서 너 기다리고 있는 거야?", "en": "Are we waiting for you in Hongdae?" },
+        { "kr": "나 홍대에서 너 안 기다리고 있어.", "en": "I’m not waiting for you in Hongdae." },
+
+        // 5. having a hard time working
+        { "kr": "나 일하느라 힘들어.", "en": "I’m having a hard time working." },
+        { "kr": "너 일하느라 힘드니?", "en": "Are you having a hard time working?" },
+        { "kr": "걔(남자) 일하느라 안 힘들대?", "en": "Isn’t he having a hard time working." },
+        { "kr": "걔(여자) 일하느라 힘들대.", "en": "She’s having a hard time working." },
+        { "kr": "우리 일하느라 고생 중이야.", "en": "We’re having a hard time working." },
+        { "kr": "나 돈 버느라 힘들어.", "en": "I’m having a hard time making money." },
+        { "kr": "너 돈 버느라 안 힘드니?", "en": "Aren’t you having a hard time making money?" },
+        { "kr": "걔(남자) 돈 버느라 힘들대?", "en": "Is he having a hard time making money?" },
+        { "kr": "우리 공부하느라 힘들어.", "en": "We’re having a hard time studying." },
+        { "kr": "걔들 공부하느라 힘들지 않대?", "en": "They aren’t having a hard time studying." },
+        { "kr": "너 공부하느라 힘드니?", "en": "Are you having a hard time studying?" },
+        { "kr": "걔(남자) 운동하느라 힘들대.", "en": "He’s having a hard time working out." },
+        { "kr": "걔(여자) 운동하느라 안 힘들대?", "en": "Isn’t she having a hard time working out?" },
+        { "kr": "우리 운동하느라 힘든 거야?", "en": "Are we having a hard time working out?" },
+        { "kr": "걔들 운동하느라 힘들대.", "en": "They’re having a hard time working out." },
+        { "kr": "걔(남자) 일찍 일어나느라 힘든가 봐.", "en": "He's having a hard time waking up early." },
+        { "kr": "걔(여자) 일찍 일어나느라 힘들대?", "en": "Is she having a hard time waking up early?" },
+        { "kr": "우리 아침에 일찍 일어나느라 안 힘들어?", "en": "Aren’t we having a hard time waking up early?" },
+
+        // 6. going out with Jack
+        { "kr": "미안해, 나 Jack이랑 사귀고 있어.", "en": "I’m sorry I’m going out with Jack." },
+        { "kr": "너 Jack이랑 사귀고 있는 거야?", "en": "Are you going out with Jack?" },
+        { "kr": "걔(남자) Jack이랑 안 사귀고 있대?", "en": "Isn’t he going out with Jack?" },
+        { "kr": "걔(여자) Jack이랑 사귀는 중이래.", "en": "She’s going out with Jack." },
+        { "kr": "우리 Jack이랑 사귀는 거 아니야.", "en": "We aren’t going out with Jack." },
+        { "kr": "나 만나는 사람 아무도 없어.", "en": "I’m not going out with anyone." },
+        { "kr": "너 만나는 사람 아무도 없니?", "en": "Aren’t you going out with anyone?" },
+        { "kr": "걔(남자) 만나는 사람 아무도 없대.", "en": "He isn’t going out with anyone." },
+        { "kr": "우리 누구 만나는 중이야.", "en": "We’re going out with someone." },
+        { "kr": "걔들 누구 만나는 중이래?", "en": "Are they going out with someone?" },
+        { "kr": "너 누구 만나는 중이야?", "en": "Are you going out with someone?" },
+        { "kr": "걔(남자) 네가 모르는 사람이랑 만난대.", "en": "He’s going out with someone you don’t know." },
+        { "kr": "걔(여자) 내가 모르는 사람이랑 사귄대?", "en": "Is she going out with someone I don’t know?" },
+        { "kr": "우리 사내 연애 중이야.", "en": "We’re going out with someone from work." },
+        { "kr": "걔(남자) 직장 동료랑 사귀는 거 아니래.", "en": "He isn’t going out with someone from work." },
+        { "kr": "우리 사내 연애 하는 거 아니잖아.", "en": "We aren’t going out with someone from work." },
+
+        // 7. thinking about having dinner
+        { "kr": "나 저녁 먹을까 말까 고민 중이야.", "en": "I’m thinking about having dinner." },
+        { "kr": "너 저녁 먹을까 고민 중이야?", "en": "Are you thinking about having dinner?" },
+        { "kr": "걔(남자) 저녁 먹을까 고민 안 한대?", "en": "Isn’t he thinking about having dinner?" },
+        { "kr": "걔(여자) 저녁 먹을까 고민 중이래.", "en": "She’s thinking about having dinner." },
+        { "kr": "우리 저녁 먹을까 고민 중이야.", "en": "We’re thinking about having dinner." },
+        { "kr": "나 회사 그만둘까 고민 중이야.", "en": "I’m thinking about quitting my job." },
+        { "kr": "너 회사 그만둘까 고민 안 해봤어?", "en": "Aren’t you thinking about quitting your job?" },
+        { "kr": "걔(남자) 회사 그만둘까 고민 중이래?", "en": "Is he thinking about quitting his job?" },
+        { "kr": "우리 이직할까 고민 중이야.", "en": "We’re thinking about moving to another company." },
+        { "kr": "걔들 이직할까 고민 안 한대?", "en": "Aren’t they thinking about moving to another company?" },
+        { "kr": "너 이직할까 고민 중인 거야?", "en": "Are you thinking about moving to another company?" },
+        { "kr": "나 이거 살까 말까 고민 중이야.", "en": "I’m thinking about buying this." },
+        { "kr": "너 이거 살까 고민 안 해봤어?", "en": "Aren’t you thinking about buying this?" },
+        { "kr": "우리 이거 살까 고민 중인 거야?", "en": "Are we thinking about buying this?" },
+        { "kr": "걔들 이거 살까 고민 중이래.", "en": "They’re thinking about buying this." },
+
+        // 8. 신체 통증 (killing me) 시리즈
+        { "kr": "나 허리 아파 죽겠어.", "en": "My back is killing me." },
+        { "kr": "너 허리 아파 죽겠니?", "en": "Is your back killing you?" },
+        { "kr": "걔(남자) 허리 아파 죽겠대?", "en": "Is his back killing him?" },
+        { "kr": "걔(여자) 허리 아파 죽겠대.", "en": "Her back is killing her." },
+        { "kr": "우리 허리 아파 죽겠어.", "en": "Our backs are killing us." },
+        { "kr": "나 머리 아파 죽겠어.", "en": "My head is killing me." },
+        { "kr": "너 머리 안 아파?", "en": "Isn’t your head killing you?" },
+        { "kr": "걔(남자) 머리 아파 죽겠대?", "en": "Is his head killing him?" },
+        { "kr": "나 배 아파 죽겠어.", "en": "My stomach is killing me." },
+        { "kr": "너 배 아파 죽겠니?", "en": "Is your stomach killing you?" },
+        { "kr": "나 무릎 아파 죽겠어.", "en": "My knee is killing me." },
+        { "kr": "나 어깨 아파 죽겠어.", "en": "My shoulder is killing me." },
+        { "kr": "나 다리 아파 죽겠어.", "en": "My leg is killing me." },
+        { "kr": "나 팔 아파 죽겠어.", "en": "My arm is killing me." },
+        { "kr": "나 발 아파 죽겠어.", "en": "My foot is killing me." },
+        { "kr": "나 이빨 아파 죽겠어.", "en": "My tooth is killing me." },
+        { "kr": "걔(남자) 다리 아파 죽겠대.", "en": "His leg is killing him." },
+        { "kr": "우리 발 아파 죽겠어.", "en": "Our feet are killing us." },
+
+        // 9. ~하는 것을 선호하다/원하다 (like to/want to) 시리즈
+        { "kr": "난 사람들 만나는 거 좋아해.", "en": "I like meeting people." },
+        { "kr": "너 사람들 만나는 거 좋아해?", "en": "Do you like meeting people?" },
+        { "kr": "걔(남자) 사람들 만나는 거 안 좋아해?", "en": "Doesn’t he like meeting people?" },
+        { "kr": "걔(여자) 사람들 만나는 거 좋아한대.", "en": "She likes meeting people." },
+        { "kr": "우리 사람들 만나는 거 좋아해.", "en": "We like meeting people." },
+        { "kr": "걔들 사람들 만나는 거 안 좋아해.", "en": "They don’t like meeting people." },
+        { "kr": "난 사람들 만나는 거 정말 좋아해.", "en": "I love meeting people." },
+        { "kr": "너 사람들 만나는 거 정말 안 좋아하니?", "en": "Don’t you love meeting people?" },
+        { "kr": "걔(남자) 사람들 만나는 거 정말 좋아한대?", "en": "Does he love meeting people?" },
+        { "kr": "우리 사람들 만나는 거 딱 질색이야.", "en": "We hate meeting people." },
+        { "kr": "걔들 사람들 만나는 거 안 싫어한대?", "en": "Don’t they hate meeting people?" },
+        { "kr": "너 사람들 만나는 거 싫어하니?", "en": "Do you hate meeting people?" },
+        { "kr": "걔(남자) 사람들 만나고 싶어해.", "en": "He wants to meet people." },
+        { "kr": "걔(여자) 사람들 만나고 싶어한대?", "en": "Does she want to meet people?" },
+        { "kr": "우리 사람들 만나고 싶지 않아?", "en": "Don’t we want to meet people?" },
+        { "kr": "걔들 사람들 만나고 싶어해.", "en": "They want to meet people." },
+        { "kr": "난 사람들 만나고 싶지 않아.", "en": "I don’t want to meet people." },
+        { "kr": "전 사람들 만나고 싶네요.", "en": "I’d like to meet people." },
+        { "kr": "사람들 만나고 싶으신가요?", "en": "Would you like to meet people?" },
+        { "kr": "저희는 사람들 만나고 싶네요.", "en": "We’d like to meet people." },
+        { "kr": "그들은 사람들 만나고 싶어하지 않아요.", "en": "They wouldn’t like to meet people." },
+
+        // 10. 낮잠, 요리, 노력 시리즈
+        { "kr": "나 낮잠 자고 있어.", "en": "I’m taking a nap." },
+        { "kr": "우리 낮잠 자는 중이야?", "en": "Are we taking a nap?" },
+        { "kr": "걔(남자) 낮잠 안 자고 있대?", "en": "Isn’t he taking a nap?" },
+        { "kr": "걔(여자) 낮잠 자는 중이래.", "en": "She’s taking a nap." },
+        { "kr": "우리 낮잠 자는 중이야.", "en": "We’re taking a nap." },
+        { "kr": "나 집에서 낮잠 자는 중이야.", "en": "I’m taking a nap at home." },
+        { "kr": "걔(여자) 소파에서 낮잠 자는 중이래.", "en": "She’s taking a nap on the sofa." },
+        { "kr": "전 낮잠 자고 싶네요.", "en": "I’d like to take a nap." },
+        { "kr": "낮잠 자고 싶으신가요?", "en": "Would you like to take a nap?" },
+        { "kr": "나 저녁 요리하는 중이야.", "en": "I’m cooking dinner." },
+        { "kr": "우리 저녁 요리하고 있어?", "en": "Are we cooking dinner?" },
+        { "kr": "걔(남자) 저녁 요리 안 하고 있대?", "en": "Isn’t he cooking dinner?" },
+        { "kr": "걔(여자) 저녁 요리하는 중이래.", "en": "She’s cooking dinner." },
+        { "kr": "우리 집에서 저녁 준비하는 중이야.", "en": "We’re cooking dinner at home." },
+        { "kr": "걔들 엄마랑 저녁 요리하는 중이래.", "en": "They’re cooking dinner with Mom." },
+        { "kr": "나 취미로 요리하는 중이야.", "en": "I’m cooking for fun." },
+        { "kr": "전 저녁 요리하고 싶네요.", "en": "I’d like to cook dinner." },
+        { "kr": "저녁 요리하고 싶으신가요?", "en": "Would you like to cook dinner?" },
+        { "kr": "나 나름 노력하고 있어.", "en": "I’m trying." },
+        { "kr": "우리 노력하고 있긴 한 거야?", "en": "Are we trying?" },
+        { "kr": "걔(남자) 노력 안 하고 있대?", "en": "Isn’t he trying?" },
+        { "kr": "걔(여자) 나름 노력 중이래.", "en": "She’s trying." },
+        { "kr": "우리 여기서 고군분투 중이야.", "en": "We’re trying here." },
+        { "kr": "걔들 거기서 애쓰고 있대.", "en": "They’re trying there." },
+        { "kr": "나 돈 벌려고 애쓰는 중이야.", "en": "I’m trying to make money." },
+        { "kr": "걔(남자) 일찍 일어나려고 노력 중이래?", "en": "Is he trying to wake up early?" },
+        { "kr": "전 노력해보고 싶네요.", "en": "I’d like to try." }
+    ];
+
+    let orderArray = [];       
+    let orderPointer = -1;     
+    let currentTask = { kr: '', en: '' };
+    let history = [];          
+    let playMode = 'manual';
+    let autoTimer = null;
+
+    function shuffleOrder() {
+        orderArray = Array.from({length: allClaims.length}, (_, i) => i);
+        for (let i = orderArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [orderArray[i], orderArray[j]] = [orderArray[j], orderArray[i]];
+        }
+        orderPointer = 0; 
+    }
+
+    function startTrainer() {
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        document.getElementById('progress-counter').classList.add('active');
+        
+        const miniContainer = document.getElementById('lvl-container-mini');
+        miniContainer.innerHTML = `<button class="lvl-btn" onclick="resetShuffleAndGenerate()">다시 섞기 🎲</button>`;
+        
+        shuffleOrder();
+        generate();
+    }
+
+    function resetShuffleAndGenerate() {
+        history = []; 
+        shuffleOrder();
+        generate();
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+
+        if (isAuto) {
+            generate();
+        } else {
+            clearTimeout(autoTimer);
+            updateProgressBar(0, 0);
+        }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        
+        if (currentTask.kr) {
+            history.push({...currentTask});
+        }
+        if (history.length > 50) history.shift();
+
+        if (orderPointer >= orderArray.length || orderPointer < 0) {
+            shuffleOrder();
+        }
+
+        const targetIndex = orderArray[orderPointer];
+        currentTask = allClaims[targetIndex];
+        
+        updateDisplay();
+        document.getElementById('progress-counter').innerText = `[ ${orderPointer + 1} / ${allClaims.length} ]`;
+        
+        orderPointer++;
+
+        if (playMode === 'auto') {
+            runAutoCycle();
+        }
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000);
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000);
+            autoTimer = setTimeout(() => {
+                generate();
+            }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        
+        orderPointer--;
+        if(orderPointer < 1) orderPointer = 1;
+
+        currentTask = history.pop();
+        updateDisplay();
+        document.getElementById('progress-counter').innerText = `[ ${orderPointer - 1 || 1} / ${allClaims.length} ]`;
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.kr;
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() {
+        document.getElementById('english-answer').classList.add('show');
+    }
+
+    const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
+    let currentBannerIdx = 0;
+    setInterval(() => {
+        currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+        const msg = bannerMsgs[currentBannerIdx];
+        document.getElementById('banner-icon').innerText = msg.icon;
+        document.getElementById('banner-title').innerText = msg.text;
+    }, 4000);
+</script>
+
+</body>
+</html>
