@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daily Life Pattern Trainer</title>
+    <!-- Pretendard 폰트 불러오기 (CDN) -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        :root {
+            --primary-blue: #1a365d;
+            --btn-blue: #2b6cb0;
+            --accent-green: #27ae60;
+            --bg-gray: #f8f9fa;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #333; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            text-align: center; width: 95%; max-width: 500px; border: 1px solid #eee; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        /* 상단 제어 바 (구석 버튼들) */
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 15px;
+            order: 1;
+        }
+        .top-controls.active { display: flex; }
+
+        /* 제목 스타일 */
+        h1 { 
+            color: var(--primary-blue); font-size: 20px !important; margin: 10px 0 5px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2; order: 2;
+        }
+
+        /* 진행률 표시기 */
+        .progress-counter {
+            font-size: 13px; font-weight: 700; color: #718096; margin-bottom: 15px; order: 2.5;
+            background: #edf2f7; padding: 2px 10px; border-radius: 20px; display: none;
+        }
+        .progress-counter.active { display: inline-block; }
+
+        /* 큰 문구 스타일 */
+        #korean-task { 
+            font-size: 19px; font-weight: 700; margin: 10px 0 15px 0; min-height: 100px; 
+            color: #2d3748; line-height: 1.6; word-break: keep-all; display: flex; align-items: center; justify-content: center; 
+            padding: 0 10px; letter-spacing: -0.02em; order: 3;
+        }
+
+        /* 시작 버튼 컨테이너 */
+        .start-container { order: 4; margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--btn-blue); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(43, 108, 176, 0.2);
+        }
+        
+        /* 구석으로 이동했을 때의 다시 섞기 버튼 스타일 */
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(43, 108, 176, 0.15); }
+        .lvl-btn:active { transform: scale(0.95); }
+
+        /* 자동/수동 토글 버튼 */
+        .auto-toggle {
+            display: flex; align-items: center; gap: 5px; background: #eee; padding: 4px; border-radius: 12px;
+        }
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: #868e96;
+        }
+        .toggle-btn.active { background: var(--primary-blue); color: white; }
+        
+        /* 정답창 영역 고정 */
+        .answer-container {
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%; order: 5;
+        }
+
+        #english-answer { 
+            font-size: 16px; color: var(--accent-green); width: 100%; padding: 15px; 
+            background: #f0fff4; border-radius: 12px; border: 1px solid #c6f6d5; font-weight: 600; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { order: 6; width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 8px; }
+        .ans-btn { background: var(--btn-blue); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #4a5568; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #adb5bd; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #dee2e6; font-size: 13px; margin-top: 15px; width: 100%; }
+        
+        .hidden { display: none !important; }
+        #banner-container { order: 7; }
+
+        /* 자동 모드 진행 바 */
+        #auto-progress {
+            width: 0%; height: 4px; background: #f59e0b; position: absolute; top: 0; left: 0; border-radius: 24px 24px 0 0; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+
+    <!-- 연습 시작 후 나타날 구석 제어 바 -->
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini"></div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
+    </div>
+
+    <h1>⚡ 데일리 라이프 패턴 트레이너</h1>
+
+    <!-- 실시간 진행 갯수 카운터 -->
+    <div id="progress-counter" class="progress-counter">[ 0 / 232 ]</div>
+    
+    <div id="korean-task">입으로 소리 내어 훈련하세요! 🗣️</div>
+    
+    <!-- 첫 화면 중앙 시작 버튼 -->
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <!-- PSE 광고 배너 -->
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
+            <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+            <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center">
+                <h3 id="banner-title" class="font-black text-slate-800 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const allClaims = [
+        // 1. 일어나다 (wake up) 관련 세트 (논리적 오류 4개 제거)
+        { "kr": "난 7시에 일어나.", "en": "I wake up at 7." },
+        { "kr": "너 7시에 일어나?", "en": "Do you wake up at 7?" },
+        { "kr": "난 7시에 일어나지 않아.", "en": "I don't wake up at 7." },
+        { "kr": "너 7시에 안 일어나?", "en": "Don't you wake up at 7?" },
+        { "kr": "난 일찍 일어나.", "en": "I wake up early." },
+        { "kr": "너 일찍 일어나?", "en": "Do you wake up early?" },
+        { "kr": "난 일찍 일어나지 않아.", "en": "I don't wake up early." },
+        { "kr": "너 일찍 안 일어나?", "en": "Don't you wake up early?" },
+        { "kr": "난 늦게 일어나.", "en": "I wake up late." },
+        { "kr": "너 늦게 일어나?", "en": "Do you wake up late?" },
+        { "kr": "난 늦게 일어나지 않아.", "en": "I don't wake up late." },
+        { "kr": "너 늦게 안 일어나?", "en": "Don't you wake up late?" },
+        { "kr": "난 7시 전에 일어나.", "en": "I wake up before 7." },
+        { "kr": "너 7시 전에 일어나?", "en": "Do you wake up before 7?" },
+        { "kr": "난 7시 전에 일어나지 않아.", "en": "I don't wake up before 7." },
+        { "kr": "너 7시 전에 안 일어나?", "en": "Don't you wake up before 7?" },
+        { "kr": "난 7시 넘어서 일어나.", "en": "I wake up past 7." },
+        { "kr": "너 7시 넘어서 일어나?", "en": "Do you wake up past 7?" },
+        { "kr": "난 7시 넘어서 일어나지 않아.", "en": "I don't wake up past 7." },
+        { "kr": "너 7시 넘어서 안 일어나?", "en": "Don't you wake up past 7?" },
+        { "kr": "난 평일에는 아침에 일어나.", "en": "I wake up on weekdays." },
+        { "kr": "너 평일에는 아침에 일어나?", "en": "Do you wake up on weekdays?" },
+        { "kr": "난 주말에도 아침에 일어나.", "en": "I wake up on the weekend." },
+        { "kr": "너 주말에도 아침에 일어나?", "en": "Do you wake up on the weekend?" },
+
+        // 2. 출근하다 (take the bus to work) 관련 세트
+        { "kr": "난 버스 타고 출근해.", "en": "I take the bus to work." },
+        { "kr": "너 버스 타고 출근해?", "en": "Do you take the bus to work?" },
+        { "kr": "난 버스 타고 출근하지 않아.", "en": "I don't take the bus to work." },
+        { "kr": "너 버스 타고 출근 안 해?", "en": "Don't you take the bus to work?" },
+        { "kr": "난 지하철 타고 출근해.", "en": "I take the subway to work." },
+        { "kr": "너 지하철 타고 출근해?", "en": "Do you take the subway to work?" },
+        { "kr": "난 지하철 타고 출근하지 않아.", "en": "I don't take the subway to work." },
+        { "kr": "너 지하철 타고 출근 안 해?", "en": "Don't you take the subway to work?" },
+        { "kr": "난 택시 타고 출근해.", "en": "I take a taxi to work." },
+        { "kr": "너 택시 타고 출근해?", "en": "Do you take a taxi to work?" },
+        { "kr": "난 택시 타고 출근하지 않아.", "en": "I don't take a taxi to work." },
+        { "kr": "너 택시 타고 출근 안 해?", "en": "Don't you take a taxi to work?" },
+        { "kr": "난 대중교통 타고 출근해.", "en": "I take public transportation to work." },
+        { "kr": "너 대중교통 타고 출근해?", "en": "Do you take public transportation to work?" },
+        { "kr": "난 대중교통 타고 출근하지 않아.", "en": "I don't take public transportation to work." },
+        { "kr": "너 대중교통 타고 출근 안 해?", "en": "Don't you take public transportation to work?" },
+
+        // 3. 도착하다 (get to work) 관련 세트
+        { "kr": "난 9시에 회사에 도착해.", "en": "I get to work at 9." },
+        { "kr": "너 9시에 회사에 도착해?", "en": "Do you get to work at 9?" },
+        { "kr": "난 9시에 회사에 도착하지 않아.", "en": "I don't get to work at 9." },
+        { "kr": "너 9시에 회사에 도착 안 해?", "en": "Don't you get to work at 9?" },
+        { "kr": "난 회사에 일찍 도착해.", "en": "I get to work early." },
+        { "kr": "너 회사에 일찍 도착해?", "en": "Do you get to work early?" },
+        { "kr": "난 회사에 일찍 도착하지 않아.", "en": "I don't get to work early." },
+        { "kr": "너 회사에 일찍 도착 안 해?", "en": "Don't you get to work early?" },
+        { "kr": "난 회사에 늦게 도착해.", "en": "I get to work late." },
+        { "kr": "너 회사에 늦게 도착해?", "en": "Do you get to work late?" },
+        { "kr": "난 회사에 늦게 도착하지 않아.", "en": "I don't get to work late." },
+        { "kr": "너 회사에 늦게 도착 안 해?", "en": "Don't you get to work late?" },
+        { "kr": "난 회사에 제시간에 도착해.", "en": "I get to work on time." },
+        { "kr": "너 회사에 제시간에 도착해?", "en": "Do you get to work on time." },
+        { "kr": "난 회사에 제시간에 도착하지 않아.", "en": "I don't get to work on time." },
+        { "kr": "너 회사에 제시간에 도착 안 해?", "en": "Don't you get to work on time?" },
+
+        // 4. 일하다 (work) 관련 세트
+        { "kr": "난 강남에서 일해.", "en": "I work in Gangnam." },
+        { "kr": "너 강남에서 일해?", "en": "Do you work in Gangnam?" },
+        { "kr": "난 강남에서 일하지 않아.", "en": "I don't work in Gangnam." },
+        { "kr": "너 강남에서 일 안 해?", "en": "Don't you work in Gangnam?" },
+        { "kr": "난 구글에서 일해.", "en": "I work for Google." },
+        { "kr": "너 구글에서 일해?", "en": "Do you work for Google?" },
+        { "kr": "난 구글에서 일하지 않아.", "en": "I don't work for Google." },
+        { "kr": "너 구글에서 일 안 해?", "en": "Don't you work for Google?" },
+        { "kr": "난 이 근처에서 일해.", "en": "I work near here." },
+        { "kr": "너 이 근처에서 일해?", "en": "Do you work near here?" },
+        { "kr": "난 이 근처에서 일하지 않아.", "en": "I don't work near here." },
+        { "kr": "너 이 근처에서 일 안 해?", "en": "Don't you work near here?" },
+        { "kr": "난 늦게까지 일해.", "en": "I work late." },
+        { "kr": "너 늦게까지 일해?", "en": "Do you work late?" },
+        { "kr": "난 늦게까지 일하지 않아.", "en": "I don't work late." },
+        { "kr": "너 늦게까지 일 안 해?", "en": "Don't you work late?" },
+        { "kr": "난 그랑 일해.", "en": "I work with him." },
+        { "kr": "너 그랑 일해?", "en": "Do you work with him?" },
+        { "kr": "난 그랑 일하지 않아.", "en": "I don't work with him." },
+        { "kr": "너 그랑 일 안 해?", "en": "Don't you work with him?" },
+        { "kr": "난 파트타임으로 일해.", "en": "I work part-time." },
+        { "kr": "너 파트타임으로 일해?", "en": "Do you work part-time?" },
+        { "kr": "난 파트타임으로 일하지 않아.", "en": "I don't work part-time." },
+        { "kr": "너 파트타임으로 일 안 해?", "en": "Don't you work part-time?" },
+
+        // 5. 퇴근하다 (get off work) 관련 세트
+        { "kr": "난 6시에 퇴근해.", "en": "I get off work at 6." },
+        { "kr": "너 6시에 퇴근해?", "en": "Do you get off work at 6?" },
+        { "kr": "난 6시에 퇴근하지 않아.", "en": "I don't get off work at 6." },
+        { "kr": "너 6시에 퇴근 안 해?", "en": "Don't you get off work at 6?" },
+        { "kr": "난 일찍 퇴근해.", "en": "I get off work early." },
+        { "kr": "너 일찍 퇴근해?", "en": "Do you get off work early?" },
+        { "kr": "난 일찍 퇴근하지 않아.", "en": "I don't get off work early." },
+        { "kr": "너 일찍 퇴근 안 해?", "en": "Don't you get off work early?" },
+        { "kr": "난 늦게 퇴근해.", "en": "I get off work late." },
+        { "kr": "너 늦게 퇴근해?", "en": "Do you get off work late?" },
+        { "kr": "난 늦게 퇴근하지 않아.", "en": "I don't get off work late." },
+        { "kr": "너 늦게 퇴근 안 해?", "en": "Don't you get off work late?" },
+        { "kr": "난 제시간에 퇴근해.", "en": "I get off work on time." },
+        { "kr": "너 제시간에 퇴근해?", "en": "Do you get off work on time?" },
+        { "kr": "난 제시간에 퇴근하지 않아.", "en": "I don't get off work on time." },
+        { "kr": "너 제시간에 퇴근 안 해?", "en": "Don't you get off work on time?" },
+        { "kr": "난 6시 전에 퇴근해.", "en": "I get off work before 6." },
+        { "kr": "너 6시 전에 퇴근해?", "en": "Do you get off work before 6?" },
+        { "kr": "난 6시 전에 퇴근하지 않아.", "en": "I don't get off work before 6." },
+        { "kr": "너 6시 전에 퇴근 안 해?", "en": "Don't you get off work before 6?" },
+        { "kr": "난 6시 넘어서 퇴근해.", "en": "I get off work past 6." },
+        { "kr": "너 6시 넘어서 퇴근해?", "en": "Do you get off work past 6?" },
+        { "kr": "난 6시 넘어서 퇴근하지 않아.", "en": "I don't get off work past 6." },
+        { "kr": "너 6시 넘어서 퇴근 안 해?", "en": "Don't you get off work past 6?" },
+
+        // 6. 자다 (go to bed) 관련 세트
+        { "kr": "난 11시에 자.", "en": "I go to bed at 11." },
+        { "kr": "너 11시에 자?", "en": "Do you go to bed at 11?" },
+        { "kr": "난 11시에 자지 않아.", "en": "I don't go to bed at 11." },
+        { "kr": "너 11시에 안 자?", "en": "Don't you go to bed at 11?" },
+        { "kr": "난 일찍 자.", "en": "I go to bed early." },
+        { "kr": "너 일찍 자?", "en": "Do you go to bed early?" },
+        { "kr": "난 일찍 자지 않아.", "en": "I don't go to bed early." },
+        { "kr": "너 일찍 안 자?", "en": "Don't you go to bed early?" },
+        { "kr": "난 늦게 자.", "en": "I go to bed late." },
+        { "kr": "너 늦게 자?", "en": "Do you go to bed late?" },
+        { "kr": "난 늦게 자지 않아.", "en": "I don't go to bed late." },
+        { "kr": "너 늦게 안 자?", "en": "Don't you go to bed late?" },
+        { "kr": "난 11시 전에 자.", "en": "I go to bed before 11." },
+        { "kr": "너 11시 전에 자?", "en": "Do you go to bed before 11?" },
+        { "kr": "난 11시 전에 자지 않아.", "en": "I don't go to bed before 11." },
+        { "kr": "너 11시 전에 안 자?", "en": "Don't you go to bed before 11?" },
+        { "kr": "난 11시 넘어서 자.", "en": "I go to bed past 11." },
+        { "kr": "너 11시 넘어서 자?", "en": "Do you go to bed past 11?" },
+        { "kr": "난 11시 넘어서 자지 않아.", "en": "I don't go to bed past 11." },
+        { "kr": "너 11시 넘어서 안 자?", "en": "Don't you go to bed past 11?" },
+
+        // 7. 영화 보다 (watch a movie) 관련 세트
+        { "kr": "난 영화 봐.", "en": "I watch a movie." },
+        { "kr": "너 영화 봐?", "en": "Do you watch a movie?" },
+        { "kr": "난 영화 보지 않아.", "en": "I don't watch a movie." },
+        { "kr": "너 영화 안 봐?", "en": "Don't you watch a movie?" },
+        { "kr": "난 내 휴대폰을 봐.", "en": "I watch my cellphone." },
+        { "kr": "너 네 휴대폰을 봐?", "en": "Do you watch your cellphone?" },
+        { "kr": "난 내 휴대폰을 보지 않아.", "en": "I don't watch my cellphone." },
+        { "kr": "너 네 휴대폰을 안 봐?", "en": "Don't you watch your cellphone?" },
+        { "kr": "난 동영상을 봐.", "en": "I watch video clips." },
+        { "kr": "너 동영상을 봐?", "en": "Do you watch video clips?" },
+        { "kr": "난 동영상을 보지 않아.", "en": "I don't watch video clips." },
+        { "kr": "너 동영상을 안 봐?", "en": "Don't you watch video clips?" },
+        { "kr": "난 집에서 영화 봐.", "en": "I watch a movie at home." },
+        { "kr": "너 집에서 영화 봐?", "en": "Do you watch a movie at home?" },
+        { "kr": "난 집에서 영화 보지 않아.", "en": "I don't watch a movie at home." },
+        { "kr": "너 집에서 영화 안 봐?", "en": "Don't you watch a movie at home?" },
+        { "kr": "난 넷플릭스로 영화 봐.", "en": "I watch a movie on Netflix." },
+        { "kr": "너 넷플릭스로 영화 봐?", "en": "Do you watch a movie on Netflix?" },
+        { "kr": "난 넷플릭스로 영화 보지 않아.", "en": "I don't watch a movie on Netflix." },
+        { "kr": "너 넷플릭스로 영화 안 봐?", "en": "Don't you watch a movie on Netflix?" },
+        { "kr": "난 유튜브로 영화 봐.", "en": "I watch a movie on Youtube." },
+        { "kr": "너 유튜브로 영화 봐?", "en": "Do you watch a movie on Youtube?" },
+        { "kr": "난 유튜브로 영화 보지 않아.", "en": "I don't watch a movie on Youtube." },
+        { "kr": "너 유튜브로 영화 안 봐?", "en": "Don't you watch a movie on Youtube?" },
+        { "kr": "난 여가 시간에 영화 봐.", "en": "I watch a movie in my free time." },
+        { "kr": "너 네 여가 시간에 영화 봐?", "en": "Do you watch a movie in your free time?" },
+        { "kr": "난 여가 시간에 영화 보지 않아.", "en": "I don't watch a movie in my free time." },
+        { "kr": "너 네 여가 시간에 영화 안 봐?", "en": "Don't you watch a movie in your free time?" },
+        { "kr": "난 재미로 영화 봐.", "en": "I watch a movie for fun." },
+        { "kr": "너 재미로 영화 봐?", "en": "Do you watch a movie for fun?" },
+        { "kr": "난 재미로 영화 보지 않아.", "en": "I don't watch a movie for fun." },
+        { "kr": "너 재미로 영화 안 봐?", "en": "Don't you watch a movie for fun?" },
+
+        // 8. 체육관 다니다 (go to the gym) 관련 세트
+        { "kr": "난 헬스장 다녀.", "en": "I go to the gym." },
+        { "kr": "너 헬스장 다녀?", "en": "Do you go to the gym?" },
+        { "kr": "난 헬스장 다니지 않아.", "en": "I don't go to the gym." },
+        { "kr": "너 헬스장 안 다녀?", "en": "Don't you go to the gym?" },
+        { "kr": "난 회사 다녀.", "en": "I go to work." },
+        { "kr": "너 회사 다녀?", "en": "Do you go to work?" },
+        { "kr": "난 회사 다니지 않아.", "en": "I don't go to work." },
+        { "kr": "너 회사 안 다녀?", "en": "Don't you go to work?" },
+        { "kr": "난 학교 다녀.", "en": "I go to school." },
+        { "kr": "너 학교 다녀?", "en": "Do you go to school?" },
+        { "kr": "난 학교 다니지 않아.", "en": "I don't go to school." },
+        { "kr": "너 학교 안 다녀?", "en": "Don't you go to school?" },
+        { "kr": "난 교회 다녀.", "en": "I go to church." },
+        { "kr": "너 교회 다녀?", "en": "Do you go to church?" },
+        { "kr": "난 교회 다니지 않아.", "en": "I don't go to church." },
+        { "kr": "너 교회 안 다녀?", "en": "Don't you go to church?" },
+        { "kr": "난 학원 다녀.", "en": "I go to an academy." },
+        { "kr": "너 학원 다녀?", "en": "Do you go to an academy?" },
+        { "kr": "난 학원 다니지 않아.", "en": "I don't go to an academy." },
+        { "kr": "너 학원 안 다녀?", "en": "Don't you go to an academy?" },
+        { "kr": "난 평일에 헬스장 다녀.", "en": "I go to the gym on weekdays." },
+        { "kr": "너 평일에 헬스장 다녀?", "en": "Do you go to the gym on weekdays?" },
+        { "kr": "난 평일에 헬스장 다니지 않아.", "en": "I don't go to the gym on weekdays." },
+        { "kr": "너 평일에 헬스장 안 다녀?", "en": "Don't you go to the gym on weekdays?" },
+        { "kr": "난 주말에 헬스장 다녀.", "en": "I go to the gym on the weekend." },
+        { "kr": "너 주말에 헬스장 다녀?", "en": "Do you go to the gym on the weekend." },
+        { "kr": "난 주말에 헬스장 다니지 않아.", "en": "I don't go to the gym on the weekend." },
+        { "kr": "너 주말에 헬스장 안 다녀?", "en": "Don't you go to the gym on the weekend?" },
+        { "kr": "난 퇴근 후에 헬스장 다녀.", "en": "I go to the gym after work." },
+        { "kr": "너 퇴근 후에 헬스장 다녀?", "en": "Do you go to the gym after work?" },
+        { "kr": "난 퇴근 후에 헬스장 다니지 않아.", "en": "I don't go to the gym after work." },
+        { "kr": "너 퇴근 후에 헬스장 안 다녀?", "en": "Don't you go to the gym after work?" },
+        { "kr": "난 방과 후에 헬스장 다녀.", "en": "I go to the gym after school." },
+        { "kr": "너 방과 후에 헬스장 다녀?", "en": "Do you go to the gym after school?" },
+        { "kr": "난 방과 후에 헬스장 다니지 않아.", "en": "I don't go to the gym after school." },
+        { "kr": "너 방과 후에 헬스장 안 다녀?", "en": "Don't you go to the gym after school?" },
+        { "kr": "난 저녁 식사 후에 헬스장 다녀.", "en": "I go to the gym after dinner." },
+        { "kr": "너 저녁 식사 후에 헬스장 다녀?", "en": "Do you go to the gym after dinner?" },
+        { "kr": "난 저녁 식사 후에 헬스장 다니지 않아.", "en": "I don't go to the gym after dinner." },
+        { "kr": "너 저녁 식사 후에 헬스장 안 다녀?", "en": "Don't you go to the gym after dinner?" },
+
+        // 9. 친구들과 놀다 (hang out with friends) 관련 세트
+        { "kr": "난 친구들이랑 놀아.", "en": "I hang out with my friends." },
+        { "kr": "너 친구들이랑 놀아?", "en": "Do you hang out with your friends?" },
+        { "kr": "난 친구들이랑 놀지 않아.", "en": "I don't hang out with my friends." },
+        { "kr": "너 친구들이랑 안 놀아?", "en": "Don't you hang out with your friends?" },
+        { "kr": "난 주말에 친구들이랑 놀아.", "en": "I hang out with my friends on the weekend." },
+        { "kr": "너 주말에 친구들이랑 놀아?", "en": "Do you hang out with your friends on the weekend?" },
+        { "kr": "난 주말에 친구들이랑 놀지 않아.", "en": "I don't hang out with my friends on the weekend." },
+        { "kr": "너 주말에 친구들이랑 안 놀아?", "en": "Don't you hang out with your friends on the weekend?" },
+        { "kr": "난 금요일에 친구들이랑 놀아.", "en": "I hang out with my friends on Friday." },
+        { "kr": "너 금요일에 친구들이랑 놀아?", "en": "Do you hang out with your friends on Friday?" },
+        { "kr": "난 금요일에 친구들이랑 놀지 않아.", "en": "I don't hang out with my friends on Friday." },
+        { "kr": "너 금요일에 친구들이랑 안 놀아?", "en": "Don't you hang out with your friends on Friday?" },
+        { "kr": "난 여가 시간에 친구들이랑 놀아.", "en": "I hang out with my friends in my free time." },
+        { "kr": "너 네 여가 시간에 친구들이랑 놀아?", "en": "Do you hang out with your friends in your free time?" },
+        { "kr": "난 여가 시간에 친구들이랑 놀지 않아.", "en": "I don't hang out with my friends in my free time." },
+        { "kr": "너 네 여가 시간에 친구들이랑 안 놀아?", "en": "Don't you hang out with your friends in your free time?" },
+        { "kr": "난 재미로 친구들이랑 놀아.", "en": "I hang out with my friends for fun." },
+        { "kr": "너 재미로 친구들이랑 놀아?", "en": "Do you hang out with your friends for fun." },
+        { "kr": "난 재미로 친구들이랑 놀지 않아.", "en": "I don't hang out with my friends for fun." },
+        { "kr": "너 재미로 친구들이랑 안 놀아?", "en": "Don't you hang out with your friends for fun?" },
+
+        // 10. 집에서 쉬다 (get some rest at home) 관련 세트
+        { "kr": "난 집에서 쉬어.", "en": "I get some rest at home." },
+        { "kr": "너 집에서 쉬어?", "en": "Do you get some rest at home?" },
+        { "kr": "난 집에서 쉬지 않아.", "en": "I don't get some rest at home." },
+        { "kr": "너 집에서 안 쉬어?", "en": "Don't you get some rest at home?" },
+        { "kr": "난 주말에 집에서 쉬어.", "en": "I get some rest at home on the weekend." },
+        { "kr": "너 주말에 집에서 쉬어?", "en": "Do you get some rest at home on the weekend?" },
+        { "kr": "난 주말에 집에서 쉬지 않아.", "en": "I don't get some rest at home on the weekend." },
+        { "kr": "너 주말에 집에서 안 쉬어?", "en": "Don't you get some rest at home on the weekend?" },
+        { "kr": "난 혼자 집에서 쉬어.", "en": "I get some rest at home alone." },
+        { "kr": "너 혼자 집에서 쉬어?", "en": "Do you get some rest at home alone?" },
+        { "kr": "난 혼자 집에서 쉬지 않아.", "en": "I don't get some rest at home alone." },
+        { "kr": "너 혼자 집에서 안 쉬어?", "en": "Don't you get some rest at home alone?" },
+        { "kr": "난 그랑 집에서 쉬어.", "en": "I get some rest at home with him." },
+        { "kr": "너 그랑 집에서 쉬어?", "en": "Do you get some rest at home with him?" },
+        { "kr": "난 그랑 집에서 쉬지 않아.", "en": "I don't get some rest at home with him." },
+        { "kr": "너 그랑 집에서 안 쉬어?", "en": "Don't you get some rest at home with him." }
+    ];
+
+    let orderArray = [];       // 셔플된 인덱스를 담을 순서 배열
+    let orderPointer = -1;     // 현재 순서 배열 안의 위치 지시자
+    let currentTask = { kr: '', en: '' };
+    let history = [];          // 이전에 보았던 태스크 기록 백업용 (이전 버튼 기능)
+    let playMode = 'manual';
+    let autoTimer = null;
+
+    // 피셔-예이츠 알고리즘 기반 인덱스 일괄 풀 셔플 함수
+    function shuffleOrder() {
+        orderArray = Array.from({length: allClaims.length}, (_, i) => i);
+        for (let i = orderArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [orderArray[i], orderArray[j]] = [orderArray[j], orderArray[i]];
+        }
+        orderPointer = 0; // 초기 첫 번째 카드로 포인터 고정
+    }
+
+    function startTrainer() {
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        document.getElementById('progress-counter').classList.add('active');
+        
+        const miniContainer = document.getElementById('lvl-container-mini');
+        miniContainer.innerHTML = `<button class="lvl-btn" onclick="resetShuffleAndGenerate()">다시 섞기 🎲</button>`;
+        
+        shuffleOrder();
+        generate();
+    }
+
+    function resetShuffleAndGenerate() {
+        history = []; // 기록 리셋
+        shuffleOrder();
+        generate();
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+
+        if (isAuto) {
+            generate();
+        } else {
+            clearTimeout(autoTimer);
+            updateProgressBar(0, 0);
+        }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        
+        // 현재 보던 문제를 히스토리에 백업
+        if (currentTask.kr) {
+            history.push({...currentTask});
+        }
+        if (history.length > 50) history.shift();
+
+        // 232문제를 한 바퀴 다 돌았다면 자동으로 다시 셔플
+        if (orderPointer >= orderArray.length || orderPointer < 0) {
+            shuffleOrder();
+        }
+
+        // 중복 없이 셔플 리스트에서 정해진 인덱스 고유 할당
+        const targetIndex = orderArray[orderPointer];
+        currentTask = allClaims[targetIndex];
+        
+        // 화면 업데이트 및 진행 순서 트래커 갱신
+        updateDisplay();
+        document.getElementById('progress-counter').innerText = `[ ${orderPointer + 1} / ${allClaims.length} ]`;
+        
+        // 포인터를 다음 방으로 1 칸 전진
+        orderPointer++;
+
+        if (playMode === 'auto') {
+            runAutoCycle();
+        }
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000);
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000);
+            autoTimer = setTimeout(() => {
+                generate();
+            }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        
+        // 뒤로 갈 때 포인터 백 트래킹 연산 처리
+        orderPointer--;
+        if(orderPointer < 1) orderPointer = 1;
+
+        currentTask = history.pop();
+        updateDisplay();
+        document.getElementById('progress-counter').innerText = `[ ${orderPointer - 1 || 1} / ${allClaims.length} ]`;
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.kr;
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() {
+        document.getElementById('english-answer').classList.add('show');
+    }
+
+    const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
+    let currentBannerIdx = 0;
+    setInterval(() => {
+        currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+        const msg = bannerMsgs[currentBannerIdx];
+        document.getElementById('banner-icon').innerText = msg.icon;
+        document.getElementById('banner-title').innerText = msg.text;
+    }, 4000);
+</script>
+
+</body>
+</html>
