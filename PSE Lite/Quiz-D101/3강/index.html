@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ultimate Core Pattern Trainer v2.0</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-blue: #1a365d;
+            --btn-blue: #2b6cb0;
+            --accent-green: #27ae60;
+            --bg-gray: #f8f9fa;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #333; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            text-align: center; width: 95%; max-width: 500px; border: 1px solid #eee; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 15px;
+            order: 1;
+        }
+        .top-controls.active { display: flex; }
+
+        h1 { 
+            color: var(--primary-blue); font-size: 20px !important; margin: 10px 0 5px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2; order: 2;
+        }
+
+        .progress-counter {
+            font-size: 13px; font-weight: 700; color: #718096; margin-bottom: 15px; order: 2.5;
+            background: #edf2f7; padding: 3px 12px; border-radius: 20px; display: none;
+        }
+        .progress-counter.active { display: inline-block; }
+
+        /* 한국어 문제 영역 박스 */
+        .task-container {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            margin: 10px 0 15px 0; min-height: 130px; width: 100%; order: 3; padding: 0 10px;
+        }
+
+        /* 4대 지정 분류에 최적화된 독립 카테고리 뱃지 */
+        .hint-badge {
+            font-size: 12px; font-weight: 800; color: #4c51bf;
+            background: #e0e7ff; padding: 4px 14px; border-radius: 20px;
+            border: 1px solid #c7d2fe; margin-bottom: 8px; visibility: hidden; opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .hint-badge.active { visibility: visible; opacity: 1; }
+
+        #korean-task { 
+            font-size: 19px; font-weight: 700; color: #2d3748; line-height: 1.6; 
+            word-break: keep-all; text-align: center; letter-spacing: -0.02em;
+        }
+
+        .start-container { order: 4; margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--btn-blue); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(43, 108, 176, 0.2);
+        }
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(43, 108, 176, 0.15); }
+        .lvl-btn:active { transform: scale(0.95); }
+
+        .auto-toggle {
+            display: flex; align-items: center; gap: 5px; background: #eee; padding: 4px; border-radius: 12px;
+        }
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: #868e96;
+        }
+        .toggle-btn.active { background: var(--primary-blue); color: white; }
+        
+        .answer-container {
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%; order: 5;
+        }
+
+        #english-answer { 
+            font-size: 16px; color: var(--accent-green); width: 100%; padding: 15px; 
+            background: #f0fff4; border-radius: 12px; border: 1px solid #c6f6d5; font-weight: 600; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { order: 6; width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 8px; }
+        .ans-btn { background: var(--btn-blue); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #4a5568; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #adb5bd; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #dee2e6; font-size: 13px; margin-top: 15px; width: 100%; }
+        
+        .hidden { display: none !important; }
+        #banner-container { order: 7; }
+
+        #auto-progress {
+            width: 0%; height: 4px; background: #f59e0b; position: absolute; top: 0; left: 0; border-radius: 24px 24px 0 0; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini"></div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
+    </div>
+
+    <h1>⚡ 실전 필수 문형 변형 트레이너</h1>
+
+    <div id="progress-counter" class="progress-counter">[ 0 / 240 ]</div>
+    
+    <!-- 한국어 문제 블록 내에 한눈에 보이는 카테고리 배치 -->
+    <div class="task-container">
+        <div id="hint-badge" class="hint-badge">대기중</div>
+        <div id="korean-task">입으로 소리 내어 훈련하세요! 🗣️</div>
+    </div>
+    
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
+            <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+            <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center">
+                <h3 id="banner-title" class="font-black text-slate-800 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 날씨, 성격과 감정, 맛과 식감, 상태와 특성 4가지 카테고리로 완벽 리매핑 완료
+    const allClaims = [
+        // 1. 날씨 (1~20)
+        { "kr": "쌀쌀해.", "en": "It's chilly.", "cat": "날씨" },
+        { "kr": "엄청나게 덥니?", "en": "Is it scorching hot?", "cat": "날씨" },
+        { "kr": "엄청나게 춥지 않아.", "en": "It isn't freezing cold.", "cat": "날씨" },
+        { "kr": "따뜻하지 않니?", "en": "Isn't it warm?", "cat": "날씨" },
+        { "kr": "시원해.", "en": "It's cool.", "cat": "날씨" },
+        { "kr": "화창하니?", "en": "Is it sunny?", "cat": "날씨" },
+        { "kr": "흐리지 않아.", "en": "It isn't cloudy.", "cat": "날씨" },
+        { "kr": "비가 오지 않니?", "en": "Isn't it rainy?", "cat": "날씨" },
+        { "kr": "눈이 와.", "en": "It's snowy.", "cat": "날씨" },
+        { "kr": "바람이 많이 부니?", "en": "Is it windy?", "cat": "날씨" },
+        { "kr": "안개가 자욱하지 않아.", "en": "It isn't foggy.", "cat": "날씨" },
+        { "kr": "습하지 않니?", "en": "Isn't it humid?", "cat": "날씨" },
+        { "kr": "건조해.", "en": "It's dry.", "cat": "날씨" },
+        { "kr": "폭풍우가 치니?", "en": "Is it stormy?", "cat": "날씨" },
+        { "kr": "맑지 않아.", "en": "It isn't clear.", "cat": "날씨" },
+        { "kr": "화창하지 않니?", "en": "Isn't it sunny?", "cat": "날씨" },
+        { "kr": "쌀쌀하니?", "en": "Is it chilly?", "cat": "날씨" },
+        { "kr": "습하지 않아.", "en": "It isn't humid.", "cat": "날씨" },
+        { "kr": "따뜻해.", "en": "It's warm.", "cat": "날씨" },
+        { "kr": "시원하지 않니?", "en": "Isn't it cool?", "cat": "날씨" },
+
+        // 2. 성격과 감정 (21~40)
+        { "kr": "나 돈이 다 떨어졌어.", "en": "I'm broke.", "cat": "상태와 특성" },
+        { "kr": "너 취했니?", "en": "Are you drunk?", "cat": "상태와 특성" },
+        { "kr": "걔(남자) 숙취가 있지 않아.", "en": "He isn't hungover.", "cat": "상태와 특성" },
+        { "kr": "걔(여자) 스트레스 받지 않았니?", "en": "Isn't she stressed?", "cat": "성격과 감정" },
+        { "kr": "우리 피곤해.", "en": "We're tired.", "cat": "성격과 감정" },
+        { "kr": "걔들 기진맥진했니?", "en": "Are they exhausted?", "cat": "성격과 감정" },
+        { "kr": "나 지루하지 않아.", "en": "I'm not bored.", "cat": "성격과 감정" },
+        { "kr": "너 신나지 않니?", "en": "Aren’t you excited?", "cat": "성격과 감정" },
+        { "kr": "걔(남자) 무서워해.", "en": "He's scared.", "cat": "성격과 감정" },
+        { "kr": "걔(여자) 놀랐니?", "en": "Is she surprised?", "cat": "성격과 감정" },
+        { "kr": "우리 부러워하지 않아.", "en": "We aren't jealous.", "cat": "성격과 감정" },
+        { "kr": "걔들 외롭지 않니?", "en": "Aren't they lonely?", "cat": "성격과 감정" },
+        { "kr": "나 자랑스러워.", "en": "I'm proud.", "cat": "성격과 감정" },
+        { "kr": "너 속상하니?", "en": "Are you upset?", "cat": "성격과 감정" },
+        { "kr": "걔(남자) 화나지 않았어.", "en": "He isn't upset.", "cat": "성격과 감정" },
+        { "kr": "걔(여자) 외롭지 않니?", "en": "Isn't she lonely?", "cat": "성격과 감정" },
+        { "kr": "우리 신나.", "en": "We're excited.", "cat": "성격과 감정" },
+        { "kr": "걔들 피곤하니?", "en": "Are they tired?", "cat": "성격과 감정" },
+        { "kr": "나 기진맥진하지 않아.", "en": "I'm not exhausted.", "cat": "성격과 감정" },
+        { "kr": "너 스트레스 받지 않니?", "en": "Aren't you stressed?", "cat": "성격과 감정" },
+
+        // 3. 성격과 감정 (41~60)
+        { "kr": "걔(남자) 외향적이야.", "en": "He's extroverted.", "cat": "성격과 감정" },
+        { "kr": "걔(여자) 내성적이니?", "en": "Is she introverted?", "cat": "성격과 감정" },
+        { "kr": "우리 털털하지 않아.", "en": "We aren't easygoing.", "cat": "성격과 감정" },
+        { "kr": "걔들 고집 세지 않니?", "en": "Aren't they stubborn?", "cat": "성격과 감정" },
+        { "kr": "나 우유부단해.", "en": "I'm indecisive.", "cat": "성격과 감정" },
+        { "kr": "너 순진하니?", "en": "Are you naive?", "cat": "성격과 감정" },
+        { "kr": "걔(남자) 똑똑하지 않아.", "en": "He isn't smart.", "cat": "상태와 특성" },
+        { "kr": "걔(여자) 친절하지 않니?", "en": "Isn't she friendly?", "cat": "성격과 감정" },
+        { "kr": "우리 마음이 따뜻해.", "en": "We're warm-hearted.", "cat": "성격과 감정" },
+        { "kr": "걔들 냉정하니?", "en": "Are they cold-hearted?", "cat": "성격과 감정" },
+        { "kr": "나 매력적이지 않아.", "en": "I'm not charming.", "cat": "상태와 특성" },
+        { "kr": "너 착하지 않니?", "en": "Aren't you nice?", "cat": "성격과 감정" },
+        { "kr": "걔(남자) 게을러.", "en": "He's lazy.", "cat": "성격과 감정" },
+        { "kr": "걔(여자) 부지런하니?", "en": "Is she diligent?", "cat": "성격과 감정" },
+        { "kr": "우리 부끄러움 타지 않아.", "en": "We aren't shy.", "cat": "성격과 감정" },
+        { "kr": "걔들 이기적이지 않니?", "en": "Aren't they selfish?", "cat": "성격과 감정" },
+        { "kr": "나 엄격해.", "en": "I'm strict.", "cat": "성격과 감정" },
+        { "kr": "너 솔직하니?", "en": "Are you honest?", "cat": "성격과 감정" },
+        { "kr": "걔(남자) 똑똑하지 않아.", "en": "He isn't kind.", "cat": "성격과 감정" },
+        { "kr": "걔(여자) 똑똑하지 않니?", "en": "Isn't she clever?", "cat": "상태와 특성" },
+
+        // 4. 상태와 특성 - 외모/매력 포함 (61~80)
+        { "kr": "걔(남자) 잘생겼어.", "en": "He's good-looking.", "cat": "상태와 특성" },
+        { "kr": "걔(여자) 매력적이니?", "en": "Is she attractive?", "cat": "상태와 특성" },
+        { "kr": "우리 아름답지 않아.", "en": "We aren't beautiful.", "cat": "상태와 특성" },
+        { "kr": "걔들 잘생기지 않았니?", "en": "Aren’t they handsome?", "cat": "상태와 특성" },
+        { "kr": "나 예뻐.", "en": "I'm pretty.", "cat": "상태와 특성" },
+        { "kr": "너 귀엽니?", "en": "Are you cute?", "cat": "상태와 특성" },
+        { "kr": "걔(남자) 못생기지 않았어.", "en": "He isn't ugly.", "cat": "상태와 특성" },
+        { "kr": "걔(여자) 키 크지 않니?", "en": "Isn't she tall?", "cat": "상태와 특성" },
+        { "kr": "우리 키 작아.", "en": "We're short.", "cat": "상태와 특성" },
+        { "kr": "걔들 날씬하니?", "en": "Are they slim?", "cat": "상태와 특성" },
+        { "kr": "나 마르지 않았어.", "en": "I'm not skinny.", "cat": "상태와 특성" },
+        { "kr": "너 통통하지 않니?", "en": "Aren't you chubby?", "cat": "상태와 특성" },
+        { "kr": "걔(남자) 매력적이야.", "en": "He's attractive.", "cat": "상태와 특성" },
+        { "kr": "걔(여자) 예쁘니?", "en": "Is she pretty?", "cat": "상태와 특성" },
+        { "kr": "우리 귀엽지 않아.", "en": "We aren't cute.", "cat": "상태와 특성" },
+        { "kr": "걔들 키 크니?", "en": "Are they tall?", "cat": "상태와 특성" },
+        { "kr": "나 잘생기지 않았어.", "en": "I'm not good-looking.", "cat": "상태와 특성" },
+        { "kr": "너 날씬하니?", "en": "Are you slim?", "cat": "상태와 특성" },
+        { "kr": "걔(남자) 통통하지 않아.", "en": "He isn't chubby.", "cat": "상태와 특성" },
+        { "kr": "걔(여자) 아름답지 않니?", "en": "Isn't she beautiful?", "cat": "상태와 특성" },
+
+        // 5. 맛과 식감 (81~100)
+        { "kr": "달아.", "en": "It's sweet.", "cat": "맛과 식감" },
+        { "kr": "짜니?", "en": "Is it salty?", "cat": "맛과 식감" },
+        { "kr": "맵지 않아.", "en": "It isn't spicy.", "cat": "맛과 식감" },
+        { "kr": "쓰지 않니?", "en": "Isn't it bitter?", "cat": "맛과 식감" },
+        { "kr": "셔.", "en": "It's sour.", "cat": "맛과 식감" },
+        { "kr": "싱겁니?", "en": "Is it bland?", "cat": "맛과 식감" },
+        { "kr": "텁텁하지 않아.", "en": "It isn't dry.", "cat": "맛과 식감" },
+        { "kr": "기름지지 않니?", "en": "Isn't it oily?", "cat": "맛과 식감" },
+        { "kr": "부드러워.", "en": "It's tender.", "cat": "맛과 식감" },
+        { "kr": "바삭하니?", "en": "Is it crispy?", "cat": "맛과 식감" },
+        { "kr": "맛있지 않아.", "en": "It isn't delicious.", "cat": "맛과 식감" },
+        { "kr": "맛있지 않니?", "en": "Isn't it tasty?", "cat": "맛과 식감" },
+        { "kr": "느끼해.", "en": "It's greasy.", "cat": "맛과 식감" },
+        { "kr": "쫄깃하니?", "en": "Is it chewy?", "cat": "맛과 식감" },
+        { "kr": "짜지 않아.", "en": "It isn't salty.", "cat": "맛과 식감" },
+        { "kr": "맵지 않니?", "en": "Isn't it spicy?", "cat": "맛과 식감" },
+        { "kr": "바삭해.", "en": "It's crispy.", "cat": "맛과 식감" },
+        { "kr": "느끼하니?", "en": "Is it greasy?", "cat": "맛과 식감" },
+        { "kr": "달지 않아.", "en": "It isn't sweet.", "cat": "맛과 식감" },
+        { "kr": "맛있지 않니?", "en": "Isn't it delicious?", "cat": "맛과 식감" },
+
+        // 6. 상태와 특성 - 관계/조건 통합 (101~120)
+        { "kr": "서울에서 멀어.", "en": "It's far from Seoul.", "cat": "상태와 특성" },
+        { "kr": "강남역이랑 가깝니?", "en": "Is it close to Gangnam Station?", "cat": "상태와 특성" },
+        { "kr": "우리 안 친해.", "en": "We aren't close.", "cat": "상태와 특성" },
+        { "kr": "걔들 결혼하지 않았니?", "en": "Aren't they married?", "cat": "상태와 특성" },
+        { "kr": "나 솔로야.", "en": "I'm single.", "cat": "상태와 특성" },
+        { "kr": "너 인기 많니?", "en": "Are you popular?", "cat": "상태와 특성" },
+        { "kr": "걔(남자) 바쁘지 않아.", "en": "He isn't busy.", "cat": "상태와 특성" },
+        { "kr": "걔(여자) 한가하지 않니?", "en": "Isn't she free?", "cat": "상태와 특성" },
+        { "kr": "우리 바빠.", "en": "We're busy.", "cat": "상태와 특성" },
+        { "kr": "걔들 한가하니?", "en": "Are they free?", "cat": "상태와 특성" },
+        { "kr": "나 결혼 안 했어.", "en": "I'm not married.", "cat": "상태와 특성" },
+        { "kr": "너 솔로 아니니?", "en": "Aren't you single?", "cat": "상태와 특성" },
+        { "kr": "걔(남자) 인기 많아.", "en": "He's popular.", "cat": "상태와 특성" },
+        { "kr": "걔(여자) 안 친하니?", "en": "Isn't she close?", "cat": "상태와 특성" },
+        { "kr": "우리 솔로야.", "en": "We're single.", "cat": "상태와 특성" },
+        { "kr": "걔들 바쁘지 않니?", "en": "Aren't they busy?", "cat": "상태와 특성" },
+        { "kr": "나 한가해.", "en": "I'm free.", "cat": "상태와 특성" },
+        { "kr": "너 안 바쁘니?", "en": "Aren't you busy?", "cat": "상태와 특성" },
+        { "kr": "걔(남자) 결혼했어.", "en": "He's married.", "cat": "상태와 특성" },
+        { "kr": "걔(여자) 인기 없지 않아?", "en": "Isn't she popular?", "cat": "상태와 특성" },
+
+        // 7. 상태와 특성 - 사물 성질/평가 통합 (121~140)
+        { "kr": "좋아.", "en": "It's good.", "cat": "상태와 특성" },
+        { "kr": "나쁘니?", "en": "Is it bad?", "cat": "상태와 특성" },
+        { "kr": "깨끗하지 않아.", "en": "It isn't clean.", "cat": "상태와 특성" },
+        { "kr": "더럽지 않니?", "en": "Isn't it dirty?", "cat": "상태와 특성" },
+        { "kr": "비싸.", "en": "It's expensive.", "cat": "상태와 특성" },
+        { "kr": "싸니?", "en": "Is it cheap?", "cat": "상태와 특성" },
+        { "kr": "무겁지 않아.", "en": "It isn't heavy.", "cat": "상태와 특성" },
+        { "kr": "가볍지 않니?", "en": "Isn't it light?", "cat": "상태와 특성" },
+        { "kr": "딱딱해.", "en": "It's hard.", "cat": "상태와 특성" },
+        { "kr": "부드럽니?", "en": "Is it soft?", "cat": "상태와 특성" },
+        { "kr": "쉽지 않아.", "en": "It isn't easy.", "cat": "상태와 특성" },
+        { "kr": "어렵지 않니?", "en": "Isn't it difficult?", "cat": "상태와 특성" },
+        { "kr": "중요해.", "en": "It's important.", "cat": "상태와 특성" },
+        { "kr": "안전하니?", "en": "Is it safe?", "cat": "상태와 특성" },
+        { "kr": "위험하지 않아.", "en": "It isn't dangerous.", "cat": "상태와 특성" },
+        { "kr": "편안하지 않니?", "en": "Isn't it comfortable?", "cat": "상태와 특성" },
+        { "kr": "불편해.", "en": "It's uncomfortable.", "cat": "상태와 특성" },
+        { "kr": "비싸지 않아.", "en": "It isn't expensive.", "cat": "상태와 특성" },
+        { "kr": "안전하지 않니?", "en": "Isn't it safe?", "cat": "상태와 특성" },
+        { "kr": "어려워.", "en": "It's difficult.", "cat": "상태와 특성" },
+
+        // 8. 상태와 특성 - 시공간/공간 통합 (141~150)
+        { "kr": "크니?", "en": "Is it big?", "cat": "상태와 특성" },
+        { "kr": "작지 않아.", "en": "It isn't small.", "cat": "상태와 특성" },
+        { "kr": "새롭지 않니?", "en": "Isn't it new?", "cat": "상태와 특성" },
+        { "kr": "오래되었어.", "en": "It's old.", "cat": "상태와 특성" },
+        { "kr": "비어 있니?", "en": "Is it empty?", "cat": "상태와 특성" },
+        { "kr": "비어 있지 않아.", "en": "It isn't empty.", "cat": "상태와 특성" },
+        { "kr": "크지 않니?", "en": "Isn't it large?", "cat": "상태와 특성" },
+        { "kr": "새로워.", "en": "It's new.", "cat": "상태와 특성" },
+        { "kr": "작니?", "en": "Is it small?", "cat": "상태와 특성" },
+        { "kr": "오래되지 않았니?", "en": "Isn't it old?", "cat": "상태와 특성" },
+
+        // 9. 사람 보강 영역 매핑 (151~240)
+        { "kr": "너 돈 다 떨어졌니?", "en": "Are you broke?", "cat": "상태와 특성" },
+        { "kr": "걔(남자) 취했어.", "en": "He's drunk.", "cat": "상태와 특성" },
+        { "kr": "걔(여자) 숙취가 있어?", "en": "Is she hungover?", "cat": "상태와 특성" },
+        { "kr": "우리 스트레스 안 받아.", "en": "We aren't stressed.", "cat": "성격과 감정" },
+        { "kr": "걔들 피곤하지 않니?", "en": "Aren’t they tired?", "cat": "성격과 감정" },
+        { "kr": "나 기진맥진해.", "en": "I'm exhausted.", "cat": "성격과 감정" },
+        { "kr": "너 지루하니?", "en": "Are you bored?", "cat": "성격과 감정" },
+        { "kr": "걔(남자) 신나지 않았어.", "en": "He isn't excited.", "cat": "성격과 감정" },
+        { "kr": "걔(여자) 무서워하지 않니?", "en": "Isn't she scared?", "cat": "성격과 감정" },
+        { "kr": "우리 놀랐어.", "en": "We're surprised.", "cat": "성격과 감정" },
+        { "kr": "걔들 부럽니?", "en": "Are they jealous?", "cat": "성격과 감정" },
+        { "kr": "나 외롭지 않아.", "en": "I'm not lonely.", "cat": "성격과 감정" },
+        { "kr": "너 자랑스럽지 않니?", "en": "Aren't you proud?", "cat": "성격과 감정" },
+        { "kr": "걔(남자) 속상해.", "en": "He's upset.", "cat": "성격과 감정" },
+        { "kr": "걔(여자) 화났니?", "en": "Is she upset?", "cat": "성격과 감정" },
+        { "kr": "우리 돈 다 떨어지지 않았어.", "en": "We aren't broke.", "cat": "상태와 특성" },
+        { "kr": "걔들 취하지 않았니?", "en": "Aren't they drunk?", "cat": "상태와 특성" },
+        { "kr": "나 숙취 있어.", "en": "I'm hungover.", "cat": "상태와 특성" },
+        { "kr": "너 스트레스 받니?", "en": "Are you stressed?", "cat": "성격과 감정" },
+        { "kr": "걔(남자) 피곤하지 않아.", "en": "He isn't tired.", "cat": "성격과 감정" },
+
+        { "kr": "나 외향적이야.", "en": "I'm extroverted.", "cat": "성격과 감정" },
+        { "kr": "너 내성적이니?", "en": "Are you introverted?", "cat": "성격과 감정" },
+        { "kr": "걔(남자) 느긋해.", "en": "He's easygoing.", "cat": "성격과 감정" },
+        { "kr": "걔(여자) 고집 세지 않아.", "en": "She isn't stubborn.", "cat": "성격과 감정" },
+        { "kr": "우리 우유부단하지 않니?", "en": "Aren't we indecisive?", "cat": "성격과 감정" },
+        { "kr": "걔들 순진해.", "en": "They're naive.", "cat": "성격과 감정" },
+        { "kr": "나 친절하니?", "en": "Are you kind?", "cat": "성격과 감정" },
+        { "kr": "너 친절하지 않아.", "en": "You aren't friendly.", "cat": "성격과 감정" },
+        { "kr": "걔(남자) 마음이 따뜻하지 않니?", "en": "Isn't he warm-hearted?", "cat": "성격과 감정" },
+        { "kr": "걔(여자) 냉정해.", "en": "She's cold-hearted.", "cat": "성격과 감정" },
+        { "kr": "우리 매력적이니?", "en": "Are we charming?", "cat": "상태와 특성" },
+        { "kr": "걔들 착하지 않아.", "en": "They aren't nice.", "cat": "성격과 감정" },
+        { "kr": "나 게으르지 않니?", "en": "Aren't I lazy?", "cat": "성격과 감정" },
+        { "kr": "너 부지런해.", "en": "You're diligent.", "cat": "성격과 감정" },
+        { "kr": "걔(남자) 부끄러움 타니?", "en": "Is he shy?", "cat": "성격과 감정" },
+        { "kr": "걔(여자) 이기적이지 않아.", "en": "She isn't selfish.", "cat": "성격과 감정" },
+        { "kr": "우리 엄격하지 않니?", "en": "Aren't we strict?", "cat": "성격과 감정" },
+        { "kr": "걔들 솔직해.", "en": "They're honest.", "cat": "성격과 감정" },
+        { "kr": "나 똑똑하니?", "en": "Are you smart?", "cat": "성격과 감정" },
+        { "kr": "너 똑똑하지 않아.", "en": "You aren't clever?", "cat": "성격과 감정" },
+
+        { "kr": "너 잘생겼어.", "en": "You're good-looking.", "cat": "상태와 특성" },
+        { "kr": "걔(남자) 매력적이니?", "en": "Is he attractive?", "cat": "상태와 특성" },
+        { "kr": "걔(여자) 아름답지 않아.", "en": "She isn't beautiful.", "cat": "상태와 특성" },
+        { "kr": "우리 잘생기지 않았니?", "en": "Aren't we handsome?", "cat": "상태와 특성" },
+        { "kr": "걔들 예뻐.", "en": "They're pretty.", "cat": "상태와 특성" },
+        { "kr": "나 귀엽니?", "en": "Am I cute?", "cat": "상태와 특성" },
+        { "kr": "너 못생기지 않았어.", "en": "You aren't ugly.", "cat": "상태와 특성" },
+        { "kr": "걔(남자) 키 크지 않니?", "en": "Isn't he tall?", "cat": "상태와 특성" },
+        { "kr": "걔(여자) 키 작아.", "en": "She's short.", "cat": "상태와 특성" },
+        { "kr": "우리 날씬하니?", "en": "Are we slim?", "cat": "상태와 특성" },
+        { "kr": "걔들 마르지 않았어.", "en": "They aren’t skinny.", "cat": "상태와 특성" },
+        { "kr": "나 통통하지 않니?", "en": "Aren't I chubby?", "cat": "상태와 특성" },
+        { "kr": "너 매력적이야.", "en": "You're attractive.", "cat": "상태와 특성" },
+        { "kr": "걔(남자) 잘생겼니?", "en": "Is he handsome?", "cat": "상태와 특성" },
+        { "kr": "걔(여자) 예쁘지 않아.", "en": "She isn't pretty.", "cat": "상태와 특성" },
+        { "kr": "우리 귀엽지 않니?", "en": "Aren't we cute?", "cat": "상태와 특성" },
+        { "kr": "걔들 키 크니?", "en": "Are they tall?", "cat": "상태와 특성" },
+        { "kr": "나 날씬하지 않아.", "en": "I'm not slim.", "cat": "상태와 특성" },
+        { "kr": "너 통통하지 않아.", "en": "You aren't chubby.", "cat": "상태와 특성" },
+        { "kr": "걔(남자) 잘생기지 않았니?", "en": "Isn't he good-looking?", "cat": "상태와 특성" },
+
+        { "kr": "우리 결혼했어.", "en": "We're married.", "cat": "상태와 특성" },
+        { "kr": "걔들 솔로니?", "en": "Are they single?", "cat": "상태와 특성" },
+        { "kr": "나 인기 많지 않아.", "en": "I'm not popular.", "cat": "상태와 특성" },
+        { "kr": "너 바쁘지 않니?", "en": "Aren't you busy?", "cat": "상태와 특성" },
+        { "kr": "걔(남자) 한가해.", "en": "He's free.", "cat": "상태와 특성" },
+        { "kr": "걔(여자) 바쁘니?", "en": "Is she busy?", "cat": "상태와 특성" },
+        { "kr": "우리 한가하지 않아.", "en": "We aren't free.", "cat": "상태와 특성" },
+        { "kr": "걔들 결혼하지 않았니?", "en": "Aren't they married?", "cat": "상태와 특성" },
+        { "kr": "나 솔로야.", "en": "I'm single.", "cat": "상태와 특성" },
+        { "kr": "너 인기 많니?", "en": "Are you popular?", "cat": "상태와 특성" },
+        { "kr": "걔(남자) 안 바빠.", "en": "He isn't busy.", "cat": "상태와 특성" },
+        { "kr": "걔(여자) 안 한가하니?", "en": "Isn't she free?", "cat": "상태와 특성" },
+        { "kr": "우리 인기 많아.", "en": "We're popular.", "cat": "상태와 특성" },
+        { "kr": "걔들 안 바쁘니?", "en": "Aren't they busy?", "cat": "상태와 특성" },
+        { "kr": "나 안 한가해.", "en": "I'm not free.", "cat": "상태와 특성" },
+        { "kr": "너 결혼했니?", "en": "Are you married?", "cat": "상태와 특성" },
+        { "kr": "걔(남자) 솔로 아니니?", "en": "Aren't he single?", "cat": "상태와 특성" },
+        { "kr": "걔(여자) 바쁘지 않아.", "en": "She isn't busy.", "cat": "상태와 특성" },
+        { "kr": "우리 한가하니?", "en": "Are we free?", "cat": "상태와 특성" },
+        { "kr": "걔들 솔로 아니니?", "en": "Aren't they single?", "cat": "상태와 특성" },
+
+        { "kr": "전 한가해요.", "en": "I'd like to be free.", "cat": "상태와 특성" }, 
+        { "kr": "한가하고 싶으신가요?", "en": "Would you like to be free?", "cat": "상태와 특성" },
+        { "kr": "나 배불러.", "en": "I'm full.", "cat": "상태와 특성" },
+        { "kr": "너 배부르니?", "en": "Are you full?", "cat": "상태와 특성" },
+        { "kr": "나 배 안 불러.", "en": "I'm not full.", "cat": "상태와 특성" },
+        { "kr": "너 안 배부르니?", "en": "Aren't you full?", "cat": "상태와 특성" },
+        { "kr": "우리 배불러.", "en": "We're full.", "cat": "상태와 특성" },
+        { "kr": "걔들 배부르대?", "en": "Are they full?", "cat": "상태와 특성" },
+        { "kr": "나 지루해.", "en": "I'm bored.", "cat": "성격과 감정" },
+        { "kr": "너 지루하니?", "en": "Are you bored?", "cat": "성격과 감정" }
+    ];
+
+    let orderArray = [];       
+    let orderPointer = -1;     
+    let currentTask = { kr: '', en: '', cat: '' }; 
+    let history = [];          
+    let playMode = 'manual';
+    let autoTimer = null;
+
+    function shuffleOrder() {
+        orderArray = Array.from({length: allClaims.length}, (_, i) => i);
+        for (let i = orderArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [orderArray[i], orderArray[j]] = [orderArray[j], orderArray[i]];
+        }
+        orderPointer = 0; 
+    }
+
+    function startTrainer() {
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        document.getElementById('progress-counter').classList.add('active');
+        
+        const miniContainer = document.getElementById('lvl-container-mini');
+        miniContainer.innerHTML = `<button class="lvl-btn" onclick="resetShuffleAndGenerate()">다시 섞기 🎲</button>`;
+        
+        shuffleOrder();
+        generate();
+    }
+
+    function resetShuffleAndGenerate() {
+        history = []; 
+        shuffleOrder();
+        generate();
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+
+        if (isAuto) {
+            generate();
+        } else {
+            clearTimeout(autoTimer);
+            updateProgressBar(0, 0);
+        }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        
+        if (currentTask.kr) {
+            history.push({...currentTask});
+        }
+        if (history.length > 50) history.shift();
+
+        if (orderPointer >= orderArray.length || orderPointer < 0) {
+            shuffleOrder();
+        }
+
+        const targetIndex = orderArray[orderPointer];
+        currentTask = allClaims[targetIndex];
+        
+        updateDisplay();
+        document.getElementById('progress-counter').innerText = `[ ${orderPointer + 1} / ${allClaims.length} ]`;
+        
+        const badge = document.getElementById('hint-badge');
+        badge.innerText = currentTask.cat;
+        badge.classList.add('active');
+        
+        orderPointer++;
+
+        if (playMode === 'auto') {
+            runAutoCycle();
+        }
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000);
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000);
+            autoTimer = setTimeout(() => {
+                generate();
+            }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        
+        orderPointer--;
+        if(orderPointer < 1) orderPointer = 1;
+
+        currentTask = history.pop();
+        updateDisplay();
+        document.getElementById('progress-counter').innerText = `[ ${orderPointer - 1 || 1} / ${allClaims.length} ]`;
+        
+        const badge = document.getElementById('hint-badge');
+        badge.innerText = currentTask.cat;
+        badge.classList.add('active');
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.kr;
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() {
+        document.getElementById('english-answer').classList.add('show');
+    }
+
+    const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
+    let currentBannerIdx = 0;
+    setInterval(() => {
+        currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+        const msg = bannerMsgs[currentBannerIdx];
+        document.getElementById('banner-icon').innerText = msg.icon;
+        document.getElementById('banner-title').innerText = msg.text;
+    }, 4000);
+</script>
+
+</body>
+</html>
