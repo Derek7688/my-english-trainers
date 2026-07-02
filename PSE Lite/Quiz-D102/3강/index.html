@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ultimate Core Pattern Trainer v11.0</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-blue: #1e3a8a;
+            --btn-blue: #3b82f6;
+            --accent-green: #10b981;
+            --bg-gray: #f8fafc;
+            --highlight-coral: #ef4444;
+            --highlight-blue: #2563eb;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #334155; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 35px 25px; border-radius: 32px; box-shadow: 0 20px 40px rgba(15, 23, 42, 0.04); 
+            text-align: center; width: 95%; max-width: 530px; border: 1px solid #f1f5f9; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 20px;
+            order: 1;
+        }
+        .top-controls.active { display: flex; }
+
+        h1 { 
+            color: #0f172a; font-size: 20px !important; margin: 10px 0 8px 0; 
+            font-weight: 800; letter-spacing: -0.04em; line-height: 1.2; order: 2;
+        }
+
+        .progress-counter {
+            font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 20px; order: 2.5;
+            background: #f1f5f9; padding: 4px 12px; border-radius: 100px; display: none;
+        }
+        .progress-counter.active { display: inline-block; }
+
+        #korean-task { 
+            font-size: 19px; font-weight: 600; margin: 15px 0 20px 0; min-height: 80px; 
+            color: #1e293b; line-height: 1.4; display: flex; align-items: center; justify-content: center; 
+            padding: 0 10px; letter-spacing: -0.03em; order: 3; width: 100%; white-space: nowrap; flex-wrap: nowrap;
+        }
+
+        .base-text { color: #475569; font-weight: 600; }
+        .focus-suffix { font-size: 25px; font-weight: 900; letter-spacing: -0.02em; margin-left: 4px; display: inline; }
+        .suffix-neg { color: var(--highlight-coral); }
+        .suffix-pos { color: var(--highlight-blue); }
+
+        .start-container { order: 4; margin-bottom: 10px; width: 100%; display: flex; flex-direction: column; gap: 16px; }
+        
+        .lvl-btn { 
+            background: #0f172a; color: white; border: none; padding: 14px 40px; 
+            border-radius: 100px; font-size: 15px; cursor: pointer; font-weight: 700; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); width: 100%;
+        }
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; width: auto; background: #f1f5f9; color: #334155; box-shadow: none; border: 1px solid #e2e8f0; }
+        .lvl-btn:active { transform: scale(0.98); }
+
+        .auto-toggle {
+            display: flex; align-items: center; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 100px;
+        }
+        .toggle-btn {
+            padding: 5px 14px; font-size: 12px; border-radius: 100px; cursor: pointer; font-weight: 700; border: none; color: #64748b; background: transparent;
+        }
+        .toggle-btn.active { background: white; color: #0f172a; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+        
+        .answer-container {
+            min-height: 90px; margin-bottom: 25px; display: flex; align-items: center; justify-content: center; width: 100%; order: 5;
+        }
+
+        #english-answer { 
+            font-size: 17px; color: #047857; width: 100%; padding: 18px; 
+            background: #ecfdf5; border-radius: 16px; border: 1px solid #a7f3d0; font-weight: 700; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.25s ease; tracking: -0.01em;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { order: 6; width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 10px; }
+        .ans-btn { background: #2563eb; color: white; flex: 1; padding: 14px; border-radius: 16px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; box-shadow: 0 4px 12px rgba(37,99,235,0.15); }
+        .next-btn { background: #475569; color: white; flex: 1; padding: 14px; border-radius: 16px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #94a3b8; padding: 10px; border-radius: 14px; font-weight: 600; cursor: pointer; border: 1px dashed #e2e8f0; font-size: 13px; margin-top: 16px; width: 100%; }
+        
+        .hidden { display: none !important; }
+        #banner-container { order: 7; }
+
+        #auto-progress {
+            width: 0%; height: 4px; background: #f59e0b; position: absolute; top: 0; left: 0; border-radius: 32px 32px 0 0; transition: width 0.1s linear;
+        }
+
+        .setting-panel {
+            width: 100%; display: flex; flex-direction: column; gap: 16px; background: #fafafa; border: 1px solid #f1f5f9; padding: 20px; border-radius: 20px;
+        }
+        .setting-group-title {
+            font-size: 12px; font-weight: 800; color: #94a3b8; text-align: center; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .modern-chips {
+            display: flex; flex-wrap: wrap; gap: 6px; width: 100%; justify-content: center;
+        }
+        .modern-chip {
+            background: white; border: 1px solid #e2e8f0; padding: 7px 16px; border-radius: 100px; font-size: 12px; font-weight: 700;
+            color: #475569; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .modern-chip.active {
+            background: #0f172a; border-color: #0f172a; color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini"></div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
+    </div>
+
+    <h1>⚡ 실전 필수 문형 변형 트레이너</h1>
+
+    <div id="progress-counter" class="progress-counter">[ 0 / 0 ]</div>
+    
+    <div id="korean-task">
+        <span class="base-text">옵션을 설정한 후</span>
+        <span class="focus-suffix suffix-pos">시작하세요!</span>
+    </div>
+    
+    <div id="start-container" class="start-container">
+        <div class="setting-panel">
+            <div>
+                <div class="setting-group-title">⏱️ 시제 선택</div>
+                <div class="modern-chips mt-2" id="filter-tense">
+                    <div class="modern-chip active" onclick="toggleFilter(this, 'tense', 'present_simple')">현재 시제</div>
+                    <div class="modern-chip active" onclick="toggleFilter(this, 'tense', 'present_continuous')">현재 진행</div>
+                    <div class="modern-chip active" onclick="toggleFilter(this, 'tense', 'past_simple')">과거 시제</div>
+                    <div class="modern-chip active" onclick="toggleFilter(this, 'tense', 'past_continuous')">과거 진행</div>
+                </div>
+            </div>
+
+            <div>
+                <div class="setting-group-title">📐 문장 형태</div>
+                <div class="modern-chips mt-2" id="filter-type">
+                    <div class="modern-chip active" onclick="toggleFilter(this, 'type', 'affirmative')">평서문</div>
+                    <div class="modern-chip active" onclick="toggleFilter(this, 'type', 'negative')">부정문</div>
+                    <div class="modern-chip active" onclick="toggleFilter(this, 'type', 'interrogative')">의문문</div>
+                    <div class="modern-chip active" onclick="toggleFilter(this, 'type', 'negative_interrogative')">부정 의문문</div>
+                </div>
+            </div>
+        </div>
+
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">훈련 세션 시작</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
+            <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+            <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center">
+                <h3 id="banner-title" class="font-black text-slate-800 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 강사님 수정 요구사항 반영 완료된 최종 157문항 고유 순수 데이터셋 바인딩
+    const claimsPool = [
+        // === ⏱️ 1. 현재 시제 (Present Simple) — 총 36문제 ===
+        // 평서문 (Affirmative)
+        { "base": "나 학원", "suffix": "다녀.", "isNeg": false, "en": "I go to an academy.", "tense": "present_simple", "type": "affirmative" },
+        { "base": "나 아침", "suffix": "먹어.", "isNeg": false, "en": "I have breakfast.", "tense": "present_simple", "type": "affirmative" },
+        { "base": "나", "suffix": "운전해.", "isNeg": false, "en": "I drive.", "tense": "present_simple", "type": "affirmative" },
+        { "base": "나 안경", "suffix": "써.", "isNeg": false, "en": "I wear glasses.", "tense": "present_simple", "type": "affirmative" },
+        { "base": "나 혼자", "suffix": "공부해.", "isNeg": false, "en": "I study alone.", "tense": "present_simple", "type": "affirmative" },
+        { "base": "나", "suffix": "운동해.", "isNeg": false, "en": "I exercise.", "tense": "present_simple", "type": "affirmative" },
+        { "base": "걔(남자) 일찍", "suffix": "일어나.", "isNeg": false, "en": "He wakes up early.", "tense": "present_simple", "type": "affirmative" },
+        { "base": "걔(여자) 회사에", "suffix": "걸어서 출근해.", "isNeg": false, "en": "She walks to work.", "tense": "present_simple", "type": "affirmative" },
+        // 부정문 (Negative)
+        { "base": "걔네들 일", "suffix": "안 해.", "isNeg": true, "en": "They don't work.", "tense": "present_simple", "type": "negative" },
+        { "base": "우리 책", "suffix": "안 읽어.", "isNeg": true, "en": "We don't read books.", "tense": "present_simple", "type": "negative" },
+        { "base": "나 담배", "suffix": "안 피워.", "isNeg": true, "en": "I don't smoke.", "tense": "present_simple", "type": "negative" },
+        { "base": "나 샤워", "suffix": "안 해.", "isNeg": true, "en": "I don't take a shower.", "tense": "present_simple", "type": "negative" },
+        { "base": "나 탄산음료", "suffix": "안 마셔.", "isNeg": true, "en": "I don't drink soda.", "tense": "present_simple", "type": "negative" },
+        { "base": "걔(남자) 운동", "suffix": "안 해.", "isNeg": true, "en": "He doesn't work out.", "tense": "present_simple", "type": "negative" },
+        { "base": "걔(여자) 커피", "suffix": "안 마셔.", "isNeg": true, "en": "She doesn't drink coffee.", "tense": "present_simple", "type": "negative" },
+        { "base": "우리 게임 자주", "suffix": "안 해.", "isNeg": true, "en": "We don't play games often.", "tense": "present_simple", "type": "negative" },
+        { "base": "걔네들 주말에", "suffix": "안 쉬어.", "isNeg": true, "en": "They don't rest on weekends.", "tense": "present_simple", "type": "negative" },
+        { "base": "나 매운 음식", "suffix": "안 좋아해.", "isNeg": true, "en": "I don't like spicy food.", "tense": "present_simple", "type": "negative" },
+        // 의문문 (Interrogative)
+        { "base": "너 버스 타고", "suffix": "다녀?", "isNeg": false, "en": "Do you take the bus?", "tense": "present_simple", "type": "interrogative" },
+        { "base": "걔(남자)", "suffix": "세차해?", "isNeg": false, "en": "Does he wash the car?", "tense": "present_simple", "type": "interrogative" },
+        { "base": "걔(여자) 회사에", "suffix": "걸어가?", "isNeg": false, "en": "Does she walk to work?", "tense": "present_simple", "type": "interrogative" },
+        { "base": "걔(여자) 재택근무", "suffix": "해?", "isNeg": false, "en": "Does she work from home?", "tense": "present_simple", "type": "interrogative" },
+        { "base": "너", "suffix": "운동해?", "isNeg": false, "en": "Do you exercise?", "tense": "present_simple", "type": "interrogative" },
+        { "base": "걔네들 저녁", "suffix": "요리해?", "isNeg": false, "en": "Do they cook dinner?", "tense": "present_simple", "type": "interrogative" },
+        { "base": "너 자전거 자주", "suffix": "타?", "isNeg": false, "en": "Do you ride a bicycle often?", "tense": "present_simple", "type": "interrogative" },
+        { "base": "걔네들 서류", "suffix": "정리해?", "isNeg": false, "en": "Do they organize documents?", "tense": "present_simple", "type": "interrogative" },
+        { "base": "너 사람들 만나는 거", "suffix": "좋아해?", "isNeg": false, "en": "Do you like meeting people?", "tense": "present_simple", "type": "interrogative" },
+        { "base": "걔(남자) 일찍 자러", "suffix": "가?", "isNeg": false, "en": "Does he go to bed early?", "tense": "present_simple", "type": "interrogative" },
+        { "base": "너 매일 샤워", "suffix": "해?", "isNeg": false, "en": "Do you take a shower every day?", "tense": "present_simple", "type": "interrogative" },
+        // 부정 의문문 (Negative Interrogative)
+        { "base": "너 학원", "suffix": "안 다녀?", "isNeg": true, "en": "Don't you go to an academy?", "tense": "present_simple", "type": "negative_interrogative" },
+        { "base": "너", "suffix": "세차 안 해?", "isNeg": true, "en": "Don't you wash the car?", "tense": "present_simple", "type": "negative_interrogative" },
+        { "base": "너", "suffix": "안 쉬어?", "isNeg": true, "en": "Don't you get some rest?", "tense": "present_simple", "type": "negative_interrogative" },
+        { "base": "너 여기", "suffix": "안 와?", "isNeg": true, "en": "Don't you come here?", "tense": "present_simple", "type": "negative_interrogative" },
+        { "base": "걔네들 낮잠", "suffix": "안 자?", "isNeg": true, "en": "Don't they take a nap?", "tense": "present_simple", "type": "negative_interrogative" },
+        { "base": "너 전화", "suffix": "안 받아?", "isNeg": true, "en": "Don't you answer the phone?", "tense": "present_simple", "type": "negative_interrogative" },
+        { "base": "너 면접", "suffix": "안 봐?", "isNeg": true, "en": "Don't you have an interview?", "tense": "present_simple", "type": "negative_interrogative" },
+        { "base": "걔네들 제때 월급", "suffix": "안 받아?", "isNeg": true, "en": "Don't they get paid on time?", "tense": "present_simple", "type": "negative_interrogative" },
+        { "base": "우리 하루", "suffix": "안 쉬어?", "isNeg": true, "en": "Don't we take a day off?", "tense": "present_simple", "type": "negative_interrogative" },
+
+        // === ⏳ 2. 현재 진행 시제 (Present Continuous) — 총 41문제 ===
+        // 평서문 (Affirmative)
+        { "base": "걔(남자)", "suffix": "일어나는 중이야.", "isNeg": false, "en": "He is waking up.", "tense": "present_continuous", "type": "affirmative" },
+        { "base": "나", "suffix": "일하는 중이야.", "isNeg": false, "en": "I am working.", "tense": "present_continuous", "type": "affirmative" },
+        { "base": "걔(남자) 요가", "suffix": "하는 중이야.", "isNeg": false, "en": "He is doing yoga.", "tense": "present_continuous", "type": "affirmative" },
+        { "base": "나 커피", "suffix": "마시는 중이야.", "isNeg": false, "en": "I am drinking coffee.", "tense": "present_continuous", "type": "affirmative" },
+        { "base": "걔(여자) 친구", "suffix": "만나는 중이야.", "isNeg": false, "en": "She is meeting a friend.", "tense": "present_continuous", "type": "affirmative" },
+        { "base": "걔(여자) 낮잠", "suffix": "자는 중이야.", "isNeg": false, "en": "She is taking a nap.", "tense": "present_continuous", "type": "affirmative" },
+        { "base": "나 라면", "suffix": "끓이는 중이야.", "isNeg": false, "en": "I am cooking ramen.", "tense": "present_continuous", "type": "affirmative" },
+        { "base": "걔네들 맥주", "suffix": "마시는 중이야.", "isNeg": false, "en": "They are drinking beer.", "tense": "present_continuous", "type": "affirmative" },
+        { "base": "걔(남자) 컴퓨터 게임", "suffix": "하는 중이야.", "isNeg": false, "en": "He is playing a computer game.", "tense": "present_continuous", "type": "affirmative" },
+        { "base": "걔(여자)는 무대에", "suffix": "서있어.", "isNeg": false, "en": "She is standing on the stage.", "tense": "present_continuous", "type": "affirmative" },
+        { "base": "우리 카페에서", "suffix": "공부하는 중이야.", "isNeg": false, "en": "We are studying at a cafe.", "tense": "present_continuous", "type": "affirmative" },
+        { "base": "걔(여자) 전화", "suffix": "받는 중이야.", "isNeg": false, "en": "She is answering the phone.", "tense": "present_continuous", "type": "affirmative" },
+        // 부정문 (Negative)
+        { "base": "걔(여자) 반지", "suffix": "안 끼고 있어.", "isNeg": true, "en": "She isn't wearing a ring.", "tense": "present_continuous", "type": "negative" },
+        { "base": "나 게임", "suffix": "안 하고 있어.", "isNeg": true, "en": "I am not playing games.", "tense": "present_continuous", "type": "negative" },
+        { "base": "걔(여자) 프랑스어", "suffix": "안 배우는 중이야.", "isNeg": true, "en": "She isn't learning French.", "tense": "present_continuous", "type": "negative" },
+        { "base": "나 핸드폰 충전", "suffix": "안 하고 있어.", "isNeg": true, "en": "I am not charging the phone.", "tense": "present_continuous", "type": "negative" },
+        { "base": "우리 지금 운전", "suffix": "안 하고 있어.", "isNeg": true, "en": "We aren't driving.", "tense": "present_continuous", "type": "negative" },
+        { "base": "걔(남자) 옷", "suffix": "안 입고 있어.", "isNeg": true, "en": "He isn't wearing clothes.", "tense": "present_continuous", "type": "negative" },
+        { "base": "걔네들 공부", "suffix": "안 하고 있어.", "isNeg": true, "en": "They aren't studying.", "tense": "present_continuous", "type": "negative" },
+        { "base": "나 티비", "suffix": "안 보는 중이야.", "isNeg": true, "en": "I am not watching TV.", "tense": "present_continuous", "type": "negative" },
+        { "base": "걔(남자) 얘기", "suffix": "안 하는 중이야.", "isNeg": true, "en": "He isn't talking.", "tense": "present_continuous", "type": "negative" },
+        { "base": "우리 쇼핑", "suffix": "안 하고 있어.", "isNeg": true, "en": "We aren't going shopping.", "tense": "present_continuous", "type": "negative" },
+        { "base": "걔(여자)", "suffix": "안 쉬고 있어.", "isNeg": true, "en": "She isn't resting.", "tense": "present_continuous", "type": "negative" },
+        // 의문문 (Interrogative)
+        { "base": "우리 버스", "suffix": "타는 중이야?", "isNeg": false, "en": "Are we taking the bus?", "tense": "present_continuous", "type": "interrogative" },
+        { "base": "너", "suffix": "나가는 중이야?", "isNeg": false, "en": "Are you leaving?", "tense": "present_continuous", "type": "interrogative" },
+        { "base": "걔(여자)", "suffix": "뛰는 중이야?", "isNeg": false, "en": "Is she running?", "tense": "present_continuous", "type": "interrogative" },
+        { "base": "너 자전거", "suffix": "타는 중이야?", "isNeg": false, "en": "Are you riding a bicycle?", "tense": "present_continuous", "type": "interrogative" },
+        { "base": "너 쇼핑", "suffix": "하는 중이야?", "isNeg": false, "en": "Are you going shopping?", "tense": "present_continuous", "type": "interrogative" },
+        { "base": "너 샤워", "suffix": "하는 중이야?", "isNeg": false, "en": "Are you taking a shower?", "tense": "present_continuous", "type": "interrogative" },
+        { "base": "너 화장실에서 볼일", "suffix": "보는 중이야?", "isNeg": false, "en": "Are you doing your business?", "tense": "present_continuous", "type": "interrogative" },
+        { "base": "걔네들 회사에", "suffix": "도착하고 있어?", "isNeg": false, "en": "Are they getting to work?", "tense": "present_continuous", "type": "interrogative" },
+        { "base": "너 핸드폰", "suffix": "찾는 중이야?", "isNeg": false, "en": "Are you looking for your phone?", "tense": "present_continuous", "type": "interrogative" },
+        { "base": "걔(남자) 집안일", "suffix": "하는 중이야?", "isNeg": false, "en": "Is he doing the housework?", "tense": "present_continuous", "type": "interrogative" },
+        { "base": "걔네들 커피", "suffix": "만드는 중이야?", "isNeg": false, "en": "Are they making coffee?", "tense": "present_continuous", "type": "interrogative" },
+        { "base": "너 이직", "suffix": "생각하는 중이야?", "isNeg": false, "en": "Are you thinking about changing jobs?", "tense": "present_continuous", "type": "interrogative" },
+        // 부정 의문문 (Negative Interrogative)
+        { "base": "너 퇴근", "suffix": "안 하고 있어?", "isNeg": true, "en": "Aren't you getting off work?", "tense": "present_continuous", "type": "negative_interrogative" },
+        { "base": "우리 시계", "suffix": "안 차고 있어?", "isNeg": true, "en": "Aren't we wearing watches?", "tense": "present_continuous", "type": "negative_interrogative" },
+        { "base": "걔(여자)", "suffix": "안 조는 중이야?", "isNeg": true, "en": "Isn't she dozing off?", "tense": "present_continuous", "type": "negative_interrogative" },
+        { "base": "걔(여자) 방 정리", "suffix": "안 하고 있어?", "isNeg": true, "en": "Isn't she organizing her room?", "tense": "present_continuous", "type": "negative_interrogative" },
+        { "base": "너 버스", "suffix": "안 기다리고 있어?", "isNeg": true, "en": "Aren't you waiting for the bus?", "tense": "present_continuous", "type": "negative_interrogative" },
+        { "base": "우리 노력", "suffix": "안 하고 있어?", "isNeg": true, "en": "Aren't we trying?", "tense": "present_continuous", "type": "negative_interrogative" },
+        { "base": "걔네들 얘기", "suffix": "안 나누고 있어?", "isNeg": true, "en": "Aren't they talking?", "tense": "present_continuous", "type": "negative_interrogative" },
+        { "base": "너 아침", "suffix": "안 먹고 있어?", "isNeg": true, "en": "Aren't you having breakfast?", "tense": "present_continuous", "type": "negative_interrogative" },
+        { "base": "걔(남자)", "suffix": "안 자고 있어?", "isNeg": true, "en": "Isn't he sleeping?", "tense": "present_continuous", "type": "negative_interrogative" },
+
+        // === ⏳ 3. 과거 시제 (Past Simple) — 총 44문제 ===
+        // 평서문 (Affirmative)
+        { "base": "걔(남자)", "suffix": "일어났어.", "isNeg": false, "en": "He woke up.", "tense": "past_simple", "type": "affirmative" },
+        { "base": "걔(남자) 회사에", "suffix": "걸어갔어.", "isNeg": false, "en": "He walked to work.", "tense": "past_simple", "type": "affirmative" },
+        { "base": "나", "suffix": "퇴근했어.", "isNeg": false, "en": "I got off work.", "tense": "past_simple", "type": "affirmative" },
+        { "base": "걔(남자) 양복", "suffix": "입었어.", "isNeg": false, "en": "He wore a suit.", "tense": "past_simple", "type": "affirmative" },
+        { "base": "걔(남자) 오토바이", "suffix": "탔어.", "isNeg": false, "en": "He rode a motorcycle.", "tense": "past_simple", "type": "affirmative" },
+        { "base": "걔네들 수영", "suffix": "배웠어.", "isNeg": false, "en": "They learned swimming.", "tense": "past_simple", "type": "affirmative" },
+        { "base": "나 비싼 노트북", "suffix": "샀어.", "isNeg": false, "en": "I bought an expensive laptop.", "tense": "past_simple", "type": "affirmative" },
+        { "base": "걔(남자)", "suffix": "월급 받았어.", "isNeg": false, "en": "He got paid.", "tense": "past_simple", "type": "affirmative" },
+        { "base": "우리 대화하려고", "suffix": "노력했어.", "isNeg": false, "en": "We tried to talk.", "tense": "past_simple", "type": "affirmative" },
+        { "base": "걔(남자) 쓰레기", "suffix": "버렸어.", "isNeg": false, "en": "He threw away the trash.", "tense": "past_simple", "type": "affirmative" },
+        { "base": "우리 마룻바닥에", "suffix": "누웠어.", "isNeg": false, "en": "We lay on the floor.", "tense": "past_simple", "type": "affirmative" },
+        { "base": "걔네들 회사에서", "suffix": "졸았어.", "isNeg": false, "en": "They dozed off at work.", "tense": "past_simple", "type": "affirmative" },
+        // 부정문 (Negative)
+        { "base": "우리 버스", "suffix": "안 탔어.", "isNeg": true, "en": "We didn't take the bus.", "tense": "past_simple", "type": "negative" },
+        { "base": "우리 아침", "suffix": "안 먹었어.", "isNeg": true, "en": "We didn't have breakfast.", "tense": "past_simple", "type": "negative" },
+        { "base": "우리 집안일", "suffix": "안 했어.", "isNeg": true, "en": "We didn't do the housework.", "tense": "past_simple", "type": "negative" },
+        { "base": "나 쇼핑", "suffix": "안 갔어.", "isNeg": true, "en": "I didn't go shopping.", "tense": "past_simple", "type": "negative" },
+        { "base": "너 저녁 요리", "suffix": "안 했어.", "isNeg": true, "en": "You didn't cook dinner.", "tense": "past_simple", "type": "negative" },
+        { "base": "우리 식당 예약", "suffix": "안 했어.", "isNeg": true, "en": "We didn't book a restaurant.", "tense": "past_simple", "type": "negative" },
+        { "base": "나 와인", "suffix": "안 마셨어.", "isNeg": true, "en": "I didn't drink wine.", "tense": "past_simple", "type": "negative" },
+        { "base": "걔(여자) 일찍 집", "suffix": "안 갔어.", "isNeg": true, "en": "She didn't get home early.", "tense": "past_simple", "type": "negative" },
+        { "base": "나 어제 하루", "suffix": "안 쉬었어.", "isNeg": true, "en": "I didn't take a day off yesterday.", "tense": "past_simple", "type": "negative" },
+        { "base": "우리 얘기", "suffix": "안 했어.", "isNeg": true, "en": "We didn't talk.", "tense": "past_simple", "type": "negative" },
+        { "base": "걔(남자) 운동", "suffix": "안 했어.", "isNeg": true, "en": "He didn't work out.", "tense": "past_simple", "type": "negative" },
+        // 의문문 (Interrogative)
+        { "base": "걔(여자)", "suffix": "나갔어?", "isNeg": false, "en": "Did she leave?", "tense": "past_simple", "type": "interrogative" },
+        { "base": "걔(남자) 자러", "suffix": "갔어?", "isNeg": false, "en": "Did he go to bed?", "tense": "past_simple", "type": "interrogative" },
+        { "base": "걔네들 코트", "suffix": "입었어?", "isNeg": false, "en": "Did they wear coats?", "tense": "past_simple", "type": "interrogative" },
+        { "base": "너 어제 낮잠", "suffix": "잤어?", "isNeg": false, "en": "Did you take a nap yesterday?", "tense": "past_simple", "type": "interrogative" },
+        { "base": "너 면접", "suffix": "봤어?", "isNeg": false, "en": "Did you have an interview?", "tense": "past_simple", "type": "interrogative" },
+        { "base": "너 막차", "suffix": "탔어?", "isNeg": false, "en": "Did you catch the last bus?", "tense": "past_simple", "type": "interrogative" },
+        { "base": "너 머리", "suffix": "잘랐어?", "isNeg": false, "en": "Did you get a haircut?", "tense": "past_simple", "type": "interrogative" },
+        { "base": "걔(남자)", "suffix": "운전했어?", "isNeg": false, "en": "Did he drive?", "tense": "past_simple", "type": "interrogative" },
+        { "base": "너 돈", "suffix": "빌렸어?", "isNeg": false, "en": "Did you borrow money?", "tense": "past_simple", "type": "interrogative" },
+        { "base": "걔네들 영화", "suffix": "봤어?", "isNeg": false, "en": "Did they watch the movie?", "tense": "past_simple", "type": "interrogative" },
+        { "base": "너 책", "suffix": "읽었어?", "isNeg": false, "en": "Did you read the book?", "tense": "past_simple", "type": "interrogative" },
+        { "base": "너 편지", "suffix": "보냈어?", "isNeg": false, "en": "Did you send the letter?", "tense": "past_simple", "type": "interrogative" },
+        // 부정 의문문 (Negative Interrogative)
+        { "base": "걔(여자)", "suffix": "안 일어났어?", "isNeg": true, "en": "Didn't she wake up?", "tense": "past_simple", "type": "negative_interrogative" },
+        { "base": "걔네들 신문", "suffix": "안 읽었어?", "isNeg": true, "en": "Didn't they read the newspaper?", "tense": "past_simple", "type": "negative_interrogative" },
+        { "base": "걔네들 집안일", "suffix": "안 했어?", "isNeg": true, "en": "Didn't they do the housework?", "tense": "past_simple", "type": "negative_interrogative" },
+        { "base": "너 핸드폰 충전", "suffix": "안 했어?", "isNeg": true, "en": "Didn't you charge the phone?", "tense": "past_simple", "type": "negative_interrogative" },
+        { "base": "걔네들 케이크", "suffix": "안 만들었어?", "isNeg": true, "en": "Didn't they make a cake?", "tense": "past_simple", "type": "negative_interrogative" },
+        { "base": "우리 머리", "suffix": "안 잘랐어?", "isNeg": true, "en": "Didn't we get a haircut?", "tense": "past_simple", "type": "negative_interrogative" },
+        { "base": "너 내 이메일", "suffix": "안 읽었어?", "isNeg": true, "en": "Didn't you read my email?", "tense": "past_simple", "type": "negative_interrogative" },
+        { "base": "걔(여자) 숙제", "suffix": "안 했어?", "isNeg": true, "en": "Didn't she do her homework?", "tense": "past_simple", "type": "negative_interrogative" },
+        { "base": "너 약", "suffix": "안 먹었어?", "isNeg": true, "en": "Didn't you take the medicine?", "tense": "past_simple", "type": "negative_interrogative" },
+        { "base": "우리 작년에", "suffix": "안 만났어?", "isNeg": true, "en": "Didn't we meet last year?", "tense": "past_simple", "type": "negative_interrogative" },
+        { "base": "너 불", "suffix": "안 껐어?", "isNeg": true, "en": "Didn't you turn off the light?", "tense": "past_simple", "type": "negative_interrogative" },
+        { "base": "너 지갑", "suffix": "안 가져왔어?", "isNeg": true, "en": "Didn't you bring your wallet?", "tense": "past_simple", "type": "negative_interrogative" },
+
+        // === ⏳ 4. 과거 진행 시제 (Past Continuous) — 총 36문제 ===
+        // 평서문 (Affirmative)
+        { "base": "나 버스", "suffix": "타고 있었어.", "isNeg": false, "en": "I was taking the bus.", "tense": "past_continuous", "type": "affirmative" },
+        { "base": "나", "suffix": "세차하고 있었어.", "isNeg": false, "en": "I was washing the car.", "tense": "past_continuous", "type": "affirmative" },
+        { "base": "우리", "suffix": "자고 있었어.", "isNeg": false, "en": "We were sleeping.", "tense": "past_continuous", "type": "affirmative" },
+        { "base": "걔(여자) 방에서", "suffix": "쉬고 있었어.", "isNeg": false, "en": "She was resting in her room.", "tense": "past_continuous", "type": "affirmative" },
+        { "base": "나 웹툰", "suffix": "읽고 있었어.", "isNeg": false, "en": "I was reading a webtoon.", "tense": "past_continuous", "type": "affirmative" },
+        { "base": "걔네들", "suffix": "공부하고 있었어.", "isNeg": false, "en": "They were studying.", "tense": "past_continuous", "type": "affirmative" },
+        { "base": "우리 거실", "suffix": "치우고 있었어.", "isNeg": false, "en": "We were cleaning up the living room.", "tense": "past_continuous", "type": "affirmative" },
+        { "base": "걔네들 시험공부", "suffix": "하고 있었어.", "isNeg": false, "en": "They were studying for the exam.", "tense": "past_continuous", "type": "affirmative" },
+        { "base": "나 볼일", "suffix": "보는 중이었어.", "isNeg": false, "en": "I was doing my business.", "tense": "past_continuous", "type": "affirmative" },
+        { "base": "걔(여자)는 유럽 여행", "suffix": "갔다 왔어.", "isNeg": false, "en": "She went on a trip to Europe.", "tense": "past_continuous", "type": "affirmative" },
+        { "base": "나 독서실에서", "suffix": "졸고 있었어.", "isNeg": false, "en": "I was dozing off in the reading room.", "tense": "past_continuous", "type": "affirmative" },
+        // 부정문 (Negative)
+        { "base": "걔네들 재택근무", "suffix": "안 하고 있었어.", "isNeg": true, "en": "They weren't working from home.", "tense": "past_continuous", "type": "negative" },
+        { "base": "나 운동", "suffix": "안 하고 있었어.", "isNeg": true, "en": "I wasn't working out.", "tense": "past_continuous", "type": "negative" },
+        { "base": "우리", "suffix": "안 놀고 있었어.", "isNeg": true, "en": "We weren't hanging out.", "tense": "past_continuous", "type": "negative" },
+        { "base": "나 핸드폰 충전", "suffix": "안 하고 있었어.", "isNeg": true, "en": "I wasn't charging the phone.", "tense": "past_continuous", "type": "negative" },
+        { "base": "너 의자에", "suffix": "안 앉아 있었어.", "isNeg": true, "en": "You weren't sitting on the chair.", "tense": "past_continuous", "type": "negative" },
+        { "base": "나 전화", "suffix": "안 받고 있었어.", "isNeg": true, "en": "I wasn't answering the phone.", "tense": "past_continuous", "type": "negative" },
+        { "base": "걔(남자) 내 말", "suffix": "안 듣고 있었어.", "isNeg": true, "en": "He wasn't listening to me.", "tense": "past_continuous", "type": "negative" },
+        { "base": "우리 운전", "suffix": "안 하고 있었어.", "isNeg": true, "en": "We weren't driving.", "tense": "past_continuous", "type": "negative" },
+        { "base": "걔(여자) 밥", "suffix": "안 먹고 있었어.", "isNeg": true, "en": "She wasn't eating.", "tense": "past_continuous", "type": "negative" },
+        { "base": "걔네들 요리", "suffix": "안 하고 있었어.", "isNeg": true, "en": "They weren't cooking.", "tense": "past_continuous", "type": "negative" },
+        // 의문문 (Interrogative)
+        { "base": "걔(남자) 담배", "suffix": "피우고 있었어?", "isNeg": false, "en": "Was he smoking?", "tense": "past_continuous", "type": "interrogative" },
+        { "base": "너", "suffix": "일하고 있었어?", "isNeg": false, "en": "Were you working?", "tense": "past_continuous", "type": "interrogative" },
+        { "base": "너", "suffix": "퇴근하고 있었어?", "isNeg": false, "en": "Were you getting off work?", "tense": "past_continuous", "type": "interrogative" },
+        { "base": "너 요가", "suffix": "하고 있었어?", "isNeg": false, "en": "Were you doing yoga?", "tense": "past_continuous", "type": "interrogative" },
+        { "base": "너 잡지", "suffix": "읽고 있었어?", "isNeg": false, "en": "Were you reading a magazine?", "tense": "past_continuous", "type": "interrogative" },
+        { "base": "걔(남자) 면접", "suffix": "보고 있었어?", "isNeg": false, "en": "Was he having an interview?", "tense": "past_continuous", "type": "interrogative" },
+        { "base": "너 자전거", "suffix": "타고 있었어?", "isNeg": false, "en": "Were you riding a bicycle?", "tense": "past_continuous", "type": "interrogative" },
+        { "base": "걔네들 음악", "suffix": "듣고 있었어?", "isNeg": false, "en": "Were they listening to music?", "tense": "past_continuous", "type": "interrogative" },
+        { "base": "너 사진", "suffix": "찍고 있었어?", "isNeg": false, "en": "Were you taking pictures?", "tense": "past_continuous", "type": "interrogative" },
+        { "base": "걔(여자)", "suffix": "울고 있었어?", "isNeg": false, "en": "Was she crying?", "tense": "past_continuous", "type": "interrogative" },
+        // 부정 의문문 (Negative Interrogative)
+        { "base": "너 운전", "suffix": "안 하고 있었어?", "isNeg": true, "en": "Weren't you driving?", "tense": "past_continuous", "type": "negative_interrogative" },
+        { "base": "걔네들", "suffix": "안 나가고 있었어?", "isNeg": true, "en": "Weren't they leaving?", "tense": "past_continuous", "type": "negative_interrogative" },
+        { "base": "우리", "suffix": "안 놀고 있었어?", "isNeg": true, "en": "Weren't we hanging out?", "tense": "past_continuous", "type": "negative_interrogative" },
+        { "base": "걔네들", "suffix": "안 쉬고 있었어?", "isNeg": true, "en": "Weren't they getting some rest?", "tense": "past_continuous", "type": "negative_interrogative" },
+        { "base": "걔(여자)", "suffix": "안 노력하고 있었어?", "isNeg": true, "en": "Wasn't she trying?", "tense": "past_continuous", "type": "negative_interrogative" },
+        { "base": "너 버스", "suffix": "안 기다리고 있었어?", "isNeg": true, "en": "Weren't you waiting for the bus?", "tense": "past_continuous", "type": "negative_interrogative" }
+    ];
+
+    let activeFilters = {
+        tense: ['present_simple', 'present_continuous', 'past_simple', 'past_continuous'],
+        type: ['affirmative', 'negative', 'interrogative', 'negative_interrogative']
+    };
+
+    let filteredClaims = [];
+    let orderArray = [];        
+    let orderPointer = -1;      
+    let currentTask = {};
+    let history = [];           
+    let playMode = 'manual';
+    let autoTimer = null;
+
+    function toggleFilter(element, category, val) {
+        const arr = activeFilters[category];
+        const idx = arr.indexOf(val);
+        if (idx > -1) {
+            if(arr.length === 1) return; 
+            arr.splice(idx, 1);
+            element.classList.remove('active');
+        } else {
+            arr.push(val);
+            element.classList.add('active');
+        }
+    }
+
+    function applyFilters() {
+        filteredClaims = claimsPool.filter(item => {
+            return activeFilters.tense.includes(item.tense) && activeFilters.type.includes(item.type);
+        });
+    }
+
+    function shuffleOrder() {
+        orderArray = Array.from({length: filteredClaims.length}, (_, i) => i);
+        for (let i = orderArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [orderArray[i], orderArray[j]] = [orderArray[j], orderArray[i]];
+        }
+        orderPointer = 0;
+    }
+
+    function startTrainer() {
+        applyFilters();
+        if(filteredClaims.length === 0) {
+            alert("선택된 조건에 맞는 트레이닝 카드가 없습니다. 다시 선택해 주세요.");
+            return;
+        }
+
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        document.getElementById('progress-counter').classList.add('active');
+        
+        document.getElementById('lvl-container-mini').innerHTML = 
+            `<button class="lvl-btn" onclick="goHome()">↩ Home</button>`;
+        
+        shuffleOrder();
+        generate();
+    }
+
+    function goHome() {
+        clearTimeout(autoTimer);
+        updateProgressBar(0, 0);
+        
+        document.getElementById('start-container').classList.remove('hidden');
+        document.getElementById('top-controls').classList.remove('active');
+        document.getElementById('action-area').classList.add('hidden');
+        document.getElementById('progress-counter').classList.remove('active');
+        
+        document.getElementById('korean-task').innerHTML = `
+            <span class="base-text">옵션을 설정한 후</span>
+            <span class="focus-suffix suffix-pos">시작하세요!</span>
+        `;
+        document.getElementById('english-answer').classList.remove('show');
+        
+        currentTask = {};
+        history = [];
+        orderPointer = -1;
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.4" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.4" : "1";
+
+        if (isAuto) {
+            generate();
+        } else {
+            clearTimeout(autoTimer);
+            updateProgressBar(0, 0);
+        }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        
+        if (currentTask.base) {
+            history.push({...currentTask});
+        }
+        if (history.length > 50) history.shift();
+
+        if (orderPointer >= orderArray.length) {
+            shuffleOrder();
+        }
+
+        const targetIndex = orderArray[orderPointer];
+        currentTask = filteredClaims[targetIndex];
+        
+        updateDisplay();
+        document.getElementById('progress-counter').innerText = `[ ${orderPointer + 1} / ${filteredClaims.length} ]`;
+        
+        orderPointer++;
+
+        if (playMode === 'auto') {
+            runAutoCycle();
+        }
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000);
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000);
+            autoTimer = setTimeout(() => {
+                generate();
+            }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        
+        orderPointer--;
+        if(orderPointer < 1) orderPointer = 1;
+
+        currentTask = history.pop();
+        updateDisplay();
+        document.getElementById('progress-counter').innerText = `[ ${orderPointer} / ${filteredClaims.length} ]`;
+    }
+
+    function updateDisplay() {
+        const taskBox = document.getElementById('korean-task');
+        const colorClass = currentTask.isNeg ? 'suffix-neg' : 'suffix-pos';
+        
+        taskBox.innerHTML = `
+            <span class="base-text">${currentTask.base}</span>
+            <span class="focus-suffix ${colorClass}">${currentTask.suffix}</span>
+        `;
+        
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() {
+        document.getElementById('english-answer').classList.add('show');
+    }
+
+    const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
+    let currentBannerIdx = 0;
+    setInterval(() => {
+        currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+        const msg = bannerMsgs[currentBannerIdx];
+        document.getElementById('banner-icon').innerText = msg.icon;
+        document.getElementById('banner-title').innerText = msg.text;
+    }, 4000);
+</script>
+
+</body>
+</html>
