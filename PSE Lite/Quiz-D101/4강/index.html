@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>전치사구 트레이너 v2.0</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-blue: #1e3a8a;
+            --btn-blue: #3b82f6;
+            --accent-green: #10b981;
+            --bg-gray: #f8fafc;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #334155; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 35px 25px; border-radius: 32px; box-shadow: 0 20px 40px rgba(15, 23, 42, 0.04); 
+            text-align: center; width: 95%; max-width: 530px; border: 1px solid #f1f5f9; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 20px;
+            order: 1;
+        }
+        .top-controls.active { display: flex; }
+
+        h1 { 
+            color: #0f172a; font-size: 20px !important; margin: 10px 0 8px 0; 
+            font-weight: 800; letter-spacing: -0.04em; line-height: 1.2; order: 2;
+        }
+
+        .progress-counter {
+            font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 20px; order: 2.5;
+            background: #f1f5f9; padding: 4px 12px; border-radius: 100px; display: none;
+        }
+        .progress-counter.active { display: inline-block; }
+
+        #korean-task { 
+            font-size: 22px; font-weight: 700; margin: 15px 0 20px 0; min-height: 80px; 
+            color: #1e293b; line-height: 1.4; display: flex; align-items: center; justify-content: center; 
+            padding: 0 10px; letter-spacing: -0.03em; order: 3; width: 100%; white-space: nowrap; flex-wrap: nowrap;
+        }
+
+        .start-container { order: 4; margin-bottom: 10px; width: 100%; display: flex; flex-direction: column; gap: 16px; }
+        
+        .lvl-btn { 
+            background: #0f172a; color: white; border: none; padding: 14px 40px; 
+            border-radius: 100px; font-size: 15px; cursor: pointer; font-weight: 700; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); width: 100%;
+        }
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; width: auto; background: #f1f5f9; color: #334155; box-shadow: none; border: 1px solid #e2e8f0; }
+        .lvl-btn:active { transform: scale(0.98); }
+
+        .auto-toggle {
+            display: flex; align-items: center; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 100px;
+        }
+        .toggle-btn {
+            padding: 5px 14px; font-size: 12px; border-radius: 100px; cursor: pointer; font-weight: 700; border: none; color: #64748b; background: transparent;
+        }
+        .toggle-btn.active { background: white; color: #0f172a; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+        
+        .answer-container {
+            min-height: 90px; margin-bottom: 25px; display: flex; align-items: center; justify-content: center; width: 100%; order: 5;
+        }
+
+        #english-answer { 
+            font-size: 17px; color: #047857; width: 100%; padding: 18px; 
+            background: #ecfdf5; border-radius: 16px; border: 1px solid #a7f3d0; font-weight: 700; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.25s ease; tracking: -0.01em;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { order: 6; width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 10px; }
+        .ans-btn { background: #2563eb; color: white; flex: 1; padding: 14px; border-radius: 16px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; box-shadow: 0 4px 12px rgba(37,99,235,0.15); }
+        .next-btn { background: #475569; color: white; flex: 1; padding: 14px; border-radius: 16px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #94a3b8; padding: 10px; border-radius: 14px; font-weight: 600; cursor: pointer; border: 1px dashed #e2e8f0; font-size: 13px; margin-top: 16px; width: 100%; }
+        
+        .hidden { display: none !important; }
+        #banner-container { order: 7; }
+
+        #auto-progress {
+            width: 0%; height: 4px; background: #f59e0b; position: absolute; top: 0; left: 0; border-radius: 32px 32px 0 0; transition: width 0.1s linear;
+        }
+
+        .setting-panel {
+            width: 100%; display: flex; flex-direction: column; gap: 16px; background: #fafafa; border: 1px solid #f1f5f9; padding: 20px; border-radius: 20px;
+        }
+        .setting-group-title {
+            font-size: 12px; font-weight: 800; color: #94a3b8; text-align: center; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .modern-chips {
+            display: flex; flex-wrap: wrap; gap: 6px; width: 100%; justify-content: center;
+        }
+        .modern-chip {
+            background: white; border: 1px solid #e2e8f0; padding: 7px 14px; border-radius: 100px; font-size: 12px; font-weight: 700;
+            color: #475569; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .modern-chip.active {
+            background: #0f172a; border-color: #0f172a; color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini"></div>
+        <div class="auto-toggle">
+            <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+            <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+        </div>
+    </div>
+
+    <h1>⚡ 2형식 전치사구 코어 패턴 트레이너</h1>
+
+    <div id="progress-counter" class="progress-counter">[ 0 / 0 ]</div>
+    
+    <div id="korean-task">옵션을 설정한 후 시작하세요!</div>
+    
+    <div id="start-container" class="start-container">
+        <div class="setting-panel">
+            <div>
+                <div class="setting-group-title">⏱️ 시제 선택 필터</div>
+                <div class="modern-chips mt-2" id="filter-tense">
+                    <div class="modern-chip active" onclick="toggleFilter(this, 'tense', 'present')">현재 시제</div>
+                    <div class="modern-chip active" onclick="toggleFilter(this, 'tense', 'past')">과거 시제</div>
+                </div>
+            </div>
+            <div>
+                <div class="setting-group-title">📐 문장 형태 필터</div>
+                <div class="modern-chips mt-2" id="filter-type">
+                    <div class="modern-chip active" onclick="toggleFilter(this, 'type', 'affirmative')">평서문</div>
+                    <div class="modern-chip active" onclick="toggleFilter(this, 'type', 'negative')">부정문</div>
+                    <div class="modern-chip active" onclick="toggleFilter(this, 'type', 'interrogative')">의문문</div>
+                    <div class="modern-chip active" onclick="toggleFilter(this, 'type', 'negative_interrogative')">부정 의문문</div>
+                </div>
+            </div>
+        </div>
+
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">훈련 세션 시작</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
+            <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+            <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center">
+                <h3 id="banner-title" class="font-black text-slate-800 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 강사님의 원본 데이터 145문항(현재)에 과거 시제 145문항을 정밀 대칭 매핑한 총 290문항 데이터 셋
+    const claimsPool = [
+        // ========================================================
+        // 🟢 1. 평서문 (Affirmative) — 현재 44문항 + 과거 44문항 = 총 88문항
+        // ========================================================
+        { "fullText": "나 차 안이야.", "en": "I am in the car.", "tense": "present", "type": "affirmative" },
+        { "fullText": "나 차 안이었어.", "en": "I was in the car.", "tense": "past", "type": "affirmative" },
+        { "fullText": "걔(남자) 방에 있어.", "en": "He is in the room.", "tense": "present", "type": "affirmative" },
+        { "fullText": "걔(남자) 방에 있었어.", "en": "He was in the room.", "tense": "past", "type": "affirmative" },
+        { "fullText": "우린 비행기야.", "en": "We are on the plane.", "tense": "present", "type": "affirmative" },
+        { "fullText": "우린 비행기였어.", "en": "We were on the plane.", "tense": "past", "type": "affirmative" },
+        { "fullText": "걔(여자) 무대에 있어.", "en": "She is on the stage.", "tense": "present", "type": "affirmative" },
+        { "fullText": "걔(여자) 무대에 있었어.", "en": "She was on the stage.", "tense": "past", "type": "affirmative" },
+        { "fullText": "나 잠실역이야.", "en": "I am at Jamsil station.", "tense": "present", "type": "affirmative" },
+        { "fullText": "나 잠실역이었어.", "en": "I was at Jamsil station.", "tense": "past", "type": "affirmative" },
+        { "fullText": "걔네들 버스 안이야.", "en": "They are on the bus.", "tense": "present", "type": "affirmative" },
+        { "fullText": "걔네들 버스 안이었어.", "en": "They were on the bus.", "tense": "past", "type": "affirmative" },
+        { "fullText": "우리 엘리베이터야.", "en": "We are in the elevator.", "tense": "present", "type": "affirmative" },
+        { "fullText": "우리 엘리베이터였어.", "en": "We were in the elevator.", "tense": "past", "type": "affirmative" },
+        { "fullText": "걔(남자) 옥상에 있어.", "en": "He is on the rooftop.", "tense": "present", "type": "affirmative" },
+        { "fullText": "걔(남자) 옥상에 있었어.", "en": "He was on the rooftop.", "tense": "past", "type": "affirmative" },
+        { "fullText": "나 정문 앞이야.", "en": "I am at the main gate.", "tense": "present", "type": "affirmative" },
+        { "fullText": "나 정문 앞이었어.", "en": "I was at the main gate.", "tense": "past", "type": "affirmative" },
+        { "fullText": "걔네들 교실에 있어.", "en": "They are in the classroom.", "tense": "present", "type": "affirmative" },
+        { "fullText": "걔네들 교실에 있었어.", "en": "They were in the classroom.", "tense": "past", "type": "affirmative" },
+        { "fullText": "우린 회사야.", "en": "We are at work.", "tense": "present", "type": "affirmative" },
+        { "fullText": "우린 회사였어.", "en": "We were at work.", "tense": "past", "type": "affirmative" },
+        { "fullText": "걔(여자) 3층에 있어.", "en": "She is on the third floor.", "tense": "present", "type": "affirmative" },
+        { "fullText": "걔(여자) 3층에 있었어.", "en": "She was on the third floor.", "tense": "past", "type": "affirmative" },
+        { "fullText": "네 핸드폰 침대 위에 있어.", "en": "Your cellphone is on the bed.", "tense": "present", "type": "affirmative" },
+        { "fullText": "네 핸드폰 침대 위에 있었어.", "en": "Your cellphone was on the bed.", "tense": "past", "type": "affirmative" },
+        { "fullText": "나 부엌에 있어.", "en": "I am in the kitchen.", "tense": "present", "type": "affirmative" },
+        { "fullText": "나 부엌에 있었어.", "en": "I was in the kitchen.", "tense": "past", "type": "affirmative" },
+        { "fullText": "걔(남자) 화장실에 있어.", "en": "He is in the restroom.", "tense": "present", "type": "affirmative" },
+        { "fullText": "걔(남자) 화장실에 있었어.", "en": "He was in the restroom.", "tense": "past", "type": "affirmative" },
+        { "fullText": "우리 기차 안이야.", "en": "We are on the train.", "tense": "present", "type": "affirmative" },
+        { "fullText": "우리 기차 안이었어.", "en": "We were on the train.", "tense": "past", "type": "affirmative" },
+        { "fullText": "걔네들 카페에 있어.", "en": "They are at the cafe.", "tense": "present", "type": "affirmative" },
+        { "fullText": "걔네들 카페에 있었어.", "en": "They were at the cafe.", "tense": "past", "type": "affirmative" },
+        { "fullText": "우리 주차장이야.", "en": "We are in the parking lot.", "tense": "present", "type": "affirmative" },
+        { "fullText": "우리 주차장이었어.", "en": "We were in the parking lot.", "tense": "past", "type": "affirmative" },
+        { "fullText": "나 은행이야.", "en": "I am at the bank.", "tense": "present", "type": "affirmative" },
+        { "fullText": "나 은행이었어.", "en": "I was at the bank.", "tense": "past", "type": "affirmative" },
+        { "fullText": "걔네들 사무실 안이야.", "en": "They are in the office.", "tense": "present", "type": "affirmative" },
+        { "fullText": "걔네들 사무실 안이었어.", "en": "They were in the office.", "tense": "past", "type": "affirmative" },
+        { "fullText": "걔(여자) 호텔에 있어.", "en": "She is at the hotel.", "tense": "present", "type": "affirmative" },
+        { "fullText": "걔(여자) 호텔에 있었어.", "en": "She was at the hotel.", "tense": "past", "type": "affirmative" },
+        { "fullText": "회의 11시야.", "en": "The meeting is at 11.", "tense": "present", "type": "affirmative" },
+        { "fullText": "회의 11시였어.", "en": "The meeting was at 11.", "tense": "past", "type": "affirmative" },
+        { "fullText": "축제는 5월이야.", "en": "The festival is in May.", "tense": "present", "type": "affirmative" },
+        { "fullText": "축제는 5월이었어.", "en": "The festival was in May.", "tense": "past", "type": "affirmative" },
+        { "fullText": "면접은 월요일이야.", "en": "The interview is on Monday.", "tense": "present", "type": "affirmative" },
+        { "fullText": "면접은 월요일이었어.", "en": "The interview was on Monday.", "tense": "past", "type": "affirmative" },
+        { "fullText": "시험은 아침에 있어.", "en": "The exam is in the morning.", "tense": "present", "type": "affirmative" },
+        { "fullText": "시험은 아침에 있었어.", "en": "The exam was in the morning.", "tense": "past", "type": "affirmative" },
+        { "fullText": "콘서트는 다음주 토요일이야.", "en": "The concert is next Saturday.", "tense": "present", "type": "affirmative" },
+        { "fullText": "콘서트는 다음주 토요일이었어.", "en": "The concert was next Saturday.", "tense": "past", "type": "affirmative" },
+        { "fullText": "경기는 일요일에 있어.", "en": "The game is on Sunday.", "tense": "present", "type": "affirmative" },
+        { "fullText": "경기는 일요일에 있었어.", "en": "The game was on Sunday.", "tense": "past", "type": "affirmative" },
+        { "fullText": "생일파티는 점심시간이야.", "en": "The birthday party is at lunchtime.", "tense": "present", "type": "affirmative" },
+        { "fullText": "생일파티는 점심시간이었어.", "en": "The birthday party was at lunchtime.", "tense": "past", "type": "affirmative" },
+        { "fullText": "수업은 저녁 시간이야.", "en": "The class is in the evening.", "tense": "present", "type": "affirmative" },
+        { "fullText": "수업은 저녁 시간이었어.", "en": "The class was in the evening.", "tense": "past", "type": "affirmative" },
+        { "fullText": "행사는 정오에 있어요.", "en": "The event is at noon.", "tense": "present", "type": "affirmative" },
+        { "fullText": "행사는 정오에 있었어요.", "en": "The event was at noon.", "tense": "past", "type": "affirmative" },
+        { "fullText": "개막식은 3시예요.", "en": "The opening ceremony is at 3.", "tense": "present", "type": "affirmative" },
+        { "fullText": "개막식은 3시였어요.", "en": "The opening ceremony was at 3.", "tense": "past", "type": "affirmative" },
+        { "fullText": "영화는 12시 15분이야.", "en": "The movie is at 12:15.", "tense": "present", "type": "affirmative" },
+        { "fullText": "영화는 12시 15분이었어.", "en": "The movie was at 12:15.", "tense": "past", "type": "affirmative" },
+        { "fullText": "출장은 목요일이야.", "en": "The business trip is on Thursday.", "tense": "present", "type": "affirmative" },
+        { "fullText": "출장은 목요일이었어.", "en": "The business trip was on Thursday.", "tense": "past", "type": "affirmative" },
+        { "fullText": "축구 시합 금요일이야.", "en": "The soccer game is on Friday.", "tense": "present", "type": "affirmative" },
+        { "fullText": "축구 시합 금요일이었어.", "en": "The soccer game was on Friday.", "tense": "past", "type": "affirmative" },
+        { "fullText": "그 사진이 인터넷에 있어.", "en": "That picture is on the internet.", "tense": "present", "type": "affirmative" },
+        { "fullText": "그 사진이 인터넷에 있었어.", "en": "That picture was on the internet.", "tense": "past", "type": "affirmative" },
+        { "fullText": "인터뷰 유튜브에 있어.", "en": "The interview is on YouTube.", "tense": "present", "type": "affirmative" },
+        { "fullText": "인터뷰 유튜브에 있었어.", "en": "The interview was on YouTube.", "tense": "past", "type": "affirmative" },
+        { "fullText": "이 다큐멘터리 넷플릭스에 있어.", "en": "This documentary is on Netflix.", "tense": "present", "type": "affirmative" },
+        { "fullText": "이 다큐멘터리 넷플릭스에 있었어.", "en": "This documentary was on Netflix.", "tense": "past", "type": "affirmative" },
+        { "fullText": "레시피 인터넷에 있어.", "en": "The recipe is on the internet.", "tense": "present", "type": "affirmative" },
+        { "fullText": "레시피 인터넷에 있었어.", "en": "The recipe was on the internet.", "tense": "past", "type": "affirmative" },
+        { "fullText": "드라마 넷플릭스에 있어.", "en": "The drama is on Netflix.", "tense": "present", "type": "affirmative" },
+        { "fullText": "드라마 넷플릭스에 있었어.", "en": "The drama was on Netflix.", "tense": "past", "type": "affirmative" },
+        { "fullText": "뮤직비디오 유튜브에 있어.", "en": "The music video is on YouTube.", "tense": "present", "type": "affirmative" },
+        { "fullText": "뮤직비디오 유튜브에 있었어.", "en": "The music video was on YouTube.", "tense": "past", "type": "affirmative" },
+        { "fullText": "소문 인터넷에 다 퍼졌어(있어).", "en": "The rumor is all over the internet.", "tense": "present", "type": "affirmative" },
+        { "fullText": "소문 인터넷에 다 퍼졌었어(있었어).", "en": "The rumor was all over the internet.", "tense": "past", "type": "affirmative" },
+        { "fullText": "풀버전 영상 유튜브에 있어.", "en": "The full video is on YouTube.", "tense": "present", "type": "affirmative" },
+        { "fullText": "풀버전 영상 유튜브에 있었어.", "en": "The full video was on YouTube.", "tense": "past", "type": "affirmative" },
+        { "fullText": "영화 넷플릭스에 있어.", "en": "The movie is on Netflix.", "tense": "present", "type": "affirmative" },
+        { "fullText": "영화 넷플릭스에 있었어.", "en": "The movie was on Netflix.", "tense": "past", "type": "affirmative" },
+        { "fullText": "뉴스 기사 인터넷에 있어.", "en": "The news article is on the internet.", "tense": "present", "type": "affirmative" },
+        { "fullText": "뉴스 기사 인터넷에 있었어.", "en": "The news article was on the internet.", "tense": "past", "type": "affirmative" },
+
+        // ========================================================
+        // 🔴 2. 부정문 (Negative) — 현재 35문항 + 과거 35문항 = 총 70문항
+        // ========================================================
+        { "fullText": "나 집에 없어.", "en": "I'm not at home.", "tense": "present", "type": "negative" },
+        { "fullText": "나 집에 없었어.", "en": "I wasn't at home.", "tense": "past", "type": "negative" },
+        { "fullText": "걔(남자) 회사에 없어.", "en": "He isn't at work.", "tense": "present", "type": "negative" },
+        { "fullText": "걔(남자) 회사에 없었어.", "en": "He wasn't at work.", "tense": "past", "type": "negative" },
+        { "fullText": "걔(남자) 방에 없어.", "en": "He isn't in the room.", "tense": "present", "type": "negative" },
+        { "fullText": "걔(남자) 방에 없었어.", "en": "He wasn't in the room.", "tense": "past", "type": "negative" },
+        { "fullText": "걔네들 문 앞에 없어.", "en": "They aren't at the door.", "tense": "present", "type": "negative" },
+        { "fullText": "걔네들 문 앞에 없었어.", "en": "They weren't at the door.", "tense": "past", "type": "negative" },
+        { "fullText": "걔(여자) 기차 안이 아니야.", "en": "She isn't on the train.", "tense": "present", "type": "negative" },
+        { "fullText": "걔(여자) 기차 안이 아니었어.", "en": "She wasn't on the train.", "tense": "past", "type": "negative" },
+        { "fullText": "걔네들 부엌에 없어.", "en": "They aren't in the kitchen.", "tense": "present", "type": "negative" },
+        { "fullText": "걔네들 부엌에 없었어.", "en": "They weren't in the kitchen.", "tense": "past", "type": "negative" },
+        { "fullText": "걔네들 옥상에 없어.", "en": "They aren't on the rooftop.", "tense": "present", "type": "negative" },
+        { "fullText": "걔네들 옥상에 없었어.", "en": "They weren't on the rooftop.", "tense": "past", "type": "negative" },
+        { "fullText": "걔(여자) 학교에 없어.", "en": "She isn't at school.", "tense": "present", "type": "negative" },
+        { "fullText": "걔(여자) 학교에 없었어.", "en": "She wasn't at school.", "tense": "past", "type": "negative" },
+        { "fullText": "나 택시 아니야.", "en": "I'm not in the taxi.", "tense": "present", "type": "negative" },
+        { "fullText": "나 택시 아니었어.", "en": "I wasn't in the taxi.", "tense": "past", "type": "negative" },
+        { "fullText": "걔(남자) 도서관에 없어.", "en": "He isn't at the library.", "tense": "present", "type": "negative" },
+        { "fullText": "걔(남자) 도서관에 없었어.", "en": "He wasn't at the library.", "tense": "past", "type": "negative" },
+        { "fullText": "우리 엘리베이터 아니야.", "en": "We aren't in the elevator.", "tense": "present", "type": "negative" },
+        { "fullText": "우리 엘리베이터 아니었어.", "en": "We weren't in the elevator.", "tense": "past", "type": "negative" },
+        { "fullText": "걔네들 무대 위에 없어.", "en": "They aren't on the stage.", "tense": "present", "type": "negative" },
+        { "fullText": "걔네들 무대 위에 없었어.", "en": "They weren't on the stage.", "tense": "past", "type": "negative" },
+        { "fullText": "걔네들 잠실역에 없어.", "en": "They aren't at Jamsil station.", "tense": "present", "type": "negative" },
+        { "fullText": "걔네들 잠실역에 없었어.", "en": "They weren't at Jamsil station.", "tense": "past", "type": "negative" },
+        { "fullText": "걔(여자) 교실에 없어.", "en": "She isn't in the classroom.", "tense": "present", "type": "negative" },
+        { "fullText": "걔(여자) 교실에 없었어.", "en": "She wasn't in the classroom.", "tense": "past", "type": "negative" },
+        { "fullText": "나 공항 아니야.", "en": "I'm not at the airport.", "tense": "present", "type": "negative" },
+        { "fullText": "나 공항 아니었어.", "en": "I wasn't at the airport.", "tense": "past", "type": "negative" },
+        { "fullText": "걔네들 은행에 없어.", "en": "They aren't at the bank.", "tense": "present", "type": "negative" },
+        { "fullText": "걔네들 은행에 없었어.", "en": "They weren't at the bank.", "tense": "past", "type": "negative" },
+        { "fullText": "걔(남자) 식당에 없어.", "en": "He isn't at the restaurant.", "tense": "present", "type": "negative" },
+        { "fullText": "걔(남자) 식당에 없었어.", "en": "He wasn't at the restaurant.", "tense": "past", "type": "negative" },
+        { "fullText": "우리 정문 앞 아니야.", "en": "We aren't at the gate.", "tense": "present", "type": "negative" },
+        { "fullText": "우리 정문 앞 아니었어.", "en": "We weren't at the gate.", "tense": "past", "type": "negative" },
+        { "fullText": "걔네들 서점에 없어.", "en": "They aren't at the bookstore.", "tense": "present", "type": "negative" },
+        { "fullText": "걔네들 서점에 없었어.", "en": "They weren't at the bookstore.", "tense": "past", "type": "negative" },
+        { "fullText": "회의 7시 아니야.", "en": "The meeting isn't at 7.", "tense": "present", "type": "negative" },
+        { "fullText": "회의 7시 아니었어.", "en": "The meeting wasn't at 7.", "tense": "past", "type": "negative" },
+        { "fullText": "면접 월요일 아니야.", "en": "The interview isn't on Monday.", "tense": "present", "type": "negative" },
+        { "fullText": "면접 월요일 아니었어.", "en": "The interview wasn't on Monday.", "tense": "past", "type": "negative" },
+        { "fullText": "축제 6월 아니야.", "en": "The festival isn't in June.", "tense": "present", "type": "negative" },
+        { "fullText": "축제 6월 아니었어.", "en": "The festival wasn't in June.", "tense": "past", "type": "negative" },
+        { "fullText": "콘서트 금요일 아니야.", "en": "The concert isn't on Friday.", "tense": "present", "type": "negative" },
+        { "fullText": "콘서트 금요일 아니었어.", "en": "The concert wasn't on Friday.", "tense": "past", "type": "negative" },
+        { "fullText": "개막식 5시 아니야.", "en": "The opening ceremony isn't at 5.", "tense": "present", "type": "negative" },
+        { "fullText": "개막식 5시 아니었어.", "en": "The opening ceremony wasn't at 5.", "tense": "past", "type": "negative" },
+        { "fullText": "회의 오후 시간 아니야.", "en": "The meeting isn't in the afternoon.", "tense": "present", "type": "negative" },
+        { "fullText": "회의 오후 시간 아니었어.", "en": "The meeting wasn't in the afternoon.", "tense": "past", "type": "negative" },
+        { "fullText": "출장 목요일 아니야.", "en": "The business trip isn't on Thursday.", "tense": "present", "type": "negative" },
+        { "fullText": "출장 목요일 아니었어.", "en": "The business trip wasn't on Thursday.", "tense": "past", "type": "negative" },
+        { "fullText": "축구 시합 주말 아니야.", "en": "The soccer game isn't on the weekend.", "tense": "present", "type": "negative" },
+        { "fullText": "축구 시합 주말 아니었어.", "en": "The soccer game wasn't on the weekend.", "tense": "past", "type": "negative" },
+        { "fullText": "그거 인터넷에 없어.", "en": "It isn't on the internet.", "tense": "present", "type": "negative" },
+        { "fullText": "그거 인터넷에 없었어.", "en": "It wasn't on the internet.", "tense": "past", "type": "negative" },
+        { "fullText": "그 쇼 넷플릭스에 없어.", "en": "That show isn't on Netflix.", "tense": "present", "type": "negative" },
+        { "fullText": "그 쇼 넷플릭스에 없었어.", "en": "That show wasn't on Netflix.", "tense": "past", "type": "negative" },
+        { "fullText": "내 브이로그 유튜브에 없어.", "en": "My vlog isn't on YouTube.", "tense": "present", "type": "negative" },
+        { "fullText": "내 브이로그 유튜브에 없었어.", "en": "My vlog wasn't on YouTube.", "tense": "past", "type": "negative" },
+        { "fullText": "그 사진 인터넷에 없어.", "en": "That picture isn't on the internet.", "tense": "present", "type": "negative" },
+        { "fullText": "그 사진 인터넷에 없었어.", "en": "That picture wasn't on the internet.", "tense": "past", "type": "negative" },
+        { "fullText": "이 노래 유튜브에 없어.", "en": "This song isn't on YouTube.", "tense": "present", "type": "negative" },
+        { "fullText": "이 노래 유튜브에 없었어.", "en": "This song wasn't on YouTube.", "tense": "past", "type": "negative" },
+        { "fullText": "답안지 인터넷에 없어.", "en": "The answer key isn't on the internet.", "tense": "present", "type": "negative" },
+        { "fullText": "답안지 인터넷에 없었어.", "en": "The answer key wasn't on the internet.", "tense": "past", "type": "negative" },
+        { "fullText": "시즌 2 넷플릭스에 없어.", "en": "Season 2 isn't on Netflix.", "tense": "present", "type": "negative" },
+        { "fullText": "시즌 2 넷플릭스에 없었어.", "en": "Season 2 wasn't on Netflix.", "tense": "past", "type": "negative" },
+        { "fullText": "공식 예고편 유튜브에 없어.", "en": "The official trailer isn't on YouTube.", "tense": "present", "type": "negative" },
+        { "fullText": "공식 예고편 유튜브에 없었어.", "en": "The official trailer wasn't on YouTube.", "tense": "past", "type": "negative" },
+
+        // ========================================================
+        // 🔵 3. 의문문 (Interrogative) — 현재 39문항 + 과거 39문항 = 총 78문항
+        // ========================================================
+        { "fullText": "너 택시야?", "en": "Are you in the taxi?", "tense": "present", "type": "interrogative" },
+        { "fullText": "너 택시였어?", "en": "Were you in the taxi?", "tense": "past", "type": "interrogative" },
+        { "fullText": "걔(남자) 회의실에 있어?", "en": "Is he in the meeting room?", "tense": "present", "type": "interrogative" },
+        { "fullText": "걔(남자) 회의실에 있었어?", "en": "Was he in the meeting room?", "tense": "past", "type": "interrogative" },
+        { "fullText": "걔네들 전철이야?", "en": "Are they on the train?", "tense": "present", "type": "interrogative" },
+        { "fullText": "걔네들 전철이었어?", "en": "Were they on the train?", "tense": "past", "type": "interrogative" },
+        { "fullText": "너 공원에 있어?", "en": "Are you at the park?", "tense": "present", "type": "interrogative" },
+        { "fullText": "너 공원에 있었어?", "en": "Were you at the park?", "tense": "past", "type": "interrogative" },
+        { "fullText": "걔네들 공항이야?", "en": "Are they at the airport?", "tense": "present", "type": "interrogative" },
+        { "fullText": "걔네들 공항이었어?", "en": "Were they at the airport?", "tense": "past", "type": "interrogative" },
+        { "fullText": "걔(여자) 도서관이야?", "en": "Is she at the library?", "tense": "present", "type": "interrogative" },
+        { "fullText": "걔(여자) 도서관이었어?", "en": "Was she at the library?", "tense": "past", "type": "interrogative" },
+        { "fullText": "차 3층에 있어?", "en": "Is the car on the third floor?", "tense": "present", "type": "interrogative" },
+        { "fullText": "차 3층에 있었어?", "en": "Was the car on the third floor?", "tense": "past", "type": "interrogative" },
+        { "fullText": "걔네들 카페야?", "en": "Are they at the cafe?", "tense": "present", "type": "interrogative" },
+        { "fullText": "걔네들 카페였어?", "en": "Were they at the cafe?", "tense": "past", "type": "interrogative" },
+        { "fullText": "너 은행이야?", "en": "Are you at the bank?", "tense": "present", "type": "interrogative" },
+        { "fullText": "너 은행이었어?", "en": "Were you at the bank?", "tense": "past", "type": "interrogative" },
+        { "fullText": "걔(남자) 식당이야?", "en": "Is he at the restaurant?", "tense": "present", "type": "interrogative" },
+        { "fullText": "걔(남자) 식당이었어?", "en": "Is he at the restaurant?", "tense": "past", "type": "interrogative" },
+        { "fullText": "너 서점에 있어?", "en": "Are you at the bookstore?", "tense": "present", "type": "interrogative" },
+        { "fullText": "너 서점에 있었어?", "en": "Were you at the bookstore?", "tense": "past", "type": "interrogative" },
+        { "fullText": "걔(여자) 백화점이야?", "en": "Is she at the department store?", "tense": "present", "type": "interrogative" },
+        { "fullText": "걔(여자) 백화점이었어?", "en": "Is she at the department store?", "tense": "past", "type": "interrogative" },
+        { "fullText": "걔(남자) 사무실이야?", "en": "Is he in the office?", "tense": "present", "type": "interrogative" },
+        { "fullText": "걔(남자) 사무실이었어?", "en": "Was he in the office?", "tense": "past", "type": "interrogative" },
+        { "fullText": "걔네들 잠실역에 있어?", "en": "Are they at Jamsil station?", "tense": "present", "type": "interrogative" },
+        { "fullText": "걔네들 잠실역에 있었어?", "en": "Were they at Jamsil station?", "tense": "past", "type": "interrogative" },
+        { "fullText": "걔(여자) 회사야?", "en": "Is she at work?", "tense": "present", "type": "interrogative" },
+        { "fullText": "걔(여자) 회사였어?", "en": "Was she at work?", "tense": "past", "type": "interrogative" },
+        { "fullText": "너 부엌에 있어?", "en": "Are you in the kitchen?", "tense": "present", "type": "interrogative" },
+        { "fullText": "너 부엌에 있었어?", "en": "Were you in the kitchen?", "tense": "past", "type": "interrogative" },
+        { "fullText": "너 옥상에 있어?", "en": "Are you on the rooftop?", "tense": "present", "type": "interrogative" },
+        { "fullText": "너 옥상에 있었어?", "en": "Were you on the rooftop?", "tense": "past", "type": "interrogative" },
+        { "fullText": "걔네들 정문 앞이야?", "en": "Are they at the gate?", "tense": "present", "type": "interrogative" },
+        { "fullText": "걔네들 정문 앞이었어?", "en": "Were they at the gate?", "tense": "past", "type": "interrogative" },
+        { "fullText": "회의 2시야?", "en": "Is the meeting at two o'clock?", "tense": "present", "type": "interrogative" },
+        { "fullText": "회의 2시였어?", "en": "Was the meeting at two o'clock?", "tense": "past", "type": "interrogative" },
+        { "fullText": "면접 화요일이야?", "en": "Is the interview on Tuesday?", "tense": "present", "type": "interrogative" },
+        { "fullText": "면접 화요일이었어?", "en": "The interview was on Tuesday?", "tense": "past", "type": "interrogative" },
+        { "fullText": "그 수업 아침 시간이야?", "en": "Is the class in the morning?", "tense": "present", "type": "interrogative" },
+        { "fullText": "그 수업 아침 시간이었어?", "en": "Was the class in the morning?", "tense": "past", "type": "interrogative" },
+        { "fullText": "회의 수요일이야?", "en": "Is the meeting on Wednesday?", "tense": "present", "type": "interrogative" },
+        { "fullText": "회의 수요일이었어?", "en": "Was the meeting on Wednesday?", "tense": "past", "type": "interrogative" },
+        { "fullText": "콘서트 오늘이야?", "en": "Is the concert today?", "tense": "present", "type": "interrogative" },
+        { "fullText": "콘서트 오늘이었어?", "en": "Was the concert today?", "tense": "past", "type": "interrogative" },
+        { "fullText": "네 결혼식 10월이야?", "en": "Is your wedding in October?", "tense": "present", "type": "interrogative" },
+        { "fullText": "네 결혼식 10월이었어?", "en": "Was your wedding in October?", "tense": "past", "type": "interrogative" },
+        { "fullText": "네 차 지하 2층에 있어?", "en": "Is your car on B2?", "tense": "present", "type": "interrogative" },
+        { "fullText": "네 차 지하 2층에 있었어?", "en": "Was your car on B2?", "tense": "past", "type": "interrogative" },
+        { "fullText": "행사 목요일이야?", "en": "Is the event on Thursday?", "tense": "present", "type": "interrogative" },
+        { "fullText": "행사 목요일이었어?", "en": "Was the event on Thursday?", "tense": "past", "type": "interrogative" },
+        { "fullText": "시험 오후 시간이야?", "en": "Is the exam in the afternoon?", "tense": "present", "type": "interrogative" },
+        { "fullText": "시험 오후 시간이었어?", "en": "Was the exam in the afternoon?", "tense": "past", "type": "interrogative" },
+        { "fullText": "영화 내일이야?", "en": "Is the movie tomorrow?", "tense": "present", "type": "interrogative" },
+        { "fullText": "영화 내일이었어?", "en": "Was the movie tomorrow?", "tense": "past", "type": "interrogative" },
+        { "fullText": "축구 시합 일요일이야?", "en": "Is the soccer game on Sunday?", "tense": "present", "type": "interrogative" },
+        { "fullText": "축구 시합 일요일이었어?", "en": "Was the soccer game on Sunday?", "tense": "past", "type": "interrogative" },
+        { "fullText": "콘서트 토요일이야?", "en": "Is the concert on Saturday?", "tense": "present", "type": "interrogative" },
+        { "fullText": "콘서트 토요일이었어?", "en": "Was the concert on Saturday?", "tense": "past", "type": "interrogative" },
+        { "fullText": "수업 7시 30분이야?", "en": "Is the class at 7:30?", "tense": "present", "type": "interrogative" },
+        { "fullText": "수업 7시 30분이었어?", "en": "Was the class at 7:30?", "tense": "past", "type": "interrogative" },
+        { "fullText": "회의 아침이야?", "en": "Is the meeting in the morning?", "tense": "present", "type": "interrogative" },
+        { "fullText": "회의 아침이었어?", "en": "Was the meeting in the morning?", "tense": "past", "type": "interrogative" },
+        { "fullText": "그거 인터넷에 있어?", "en": "Is that on the internet?", "tense": "present", "type": "interrogative" },
+        { "fullText": "그거 인터넷에 있었어?", "en": "Was that on the internet?", "tense": "past", "type": "interrogative" },
+        { "fullText": "영화 넷플릭스에 있어?", "en": "Is the movie on Netflix?", "tense": "present", "type": "interrogative" },
+        { "fullText": "영화 넷플릭스에 있었어?", "en": "Was the movie on Netflix?", "tense": "past", "type": "interrogative" },
+        { "fullText": "동영상 유튜브에 있어?", "en": "Is the video on YouTube?", "tense": "present", "type": "interrogative" },
+        { "fullText": "동영상 유튜브에 있었어?", "en": "Was the video on YouTube?", "tense": "past", "type": "interrogative" },
+        { "fullText": "링크 인터넷에 있어?", "en": "Is the link on the internet?", "tense": "present", "type": "interrogative" },
+        { "fullText": "링크 인터넷에 있었어?", "en": "Was the link on the internet?", "tense": "past", "type": "interrogative" },
+        { "fullText": "그 애니메이션 넷플릭스에 있어?", "en": "Is that animation on Netflix?", "tense": "present", "type": "interrogative" },
+        { "fullText": "그 애니메이션 넷플릭스에 있었어?", "en": "Was that animation on Netflix?", "tense": "past", "type": "interrogative" },
+        { "fullText": "해리 포터 시리즈 넷플릭스에 있어?", "en": "Is the Harry Potter series on Netflix?", "tense": "present", "type": "interrogative" },
+        { "fullText": "해리 포터 시리즈 넷플릭스에 있었어?", "en": "Is the Harry Potter series on Netflix?", "tense": "past", "type": "interrogative" },
+        { "fullText": "하이라이트 영상 유튜브에 있어?", "en": "Is the highlight video on YouTube?", "tense": "present", "type": "interrogative" },
+        { "fullText": "하이라이트 영상 유튜브에 있었어?", "en": "Was the highlight video on YouTube?", "tense": "past", "type": "interrogative" },
+
+        // ========================================================
+        // 🟡 4. 부정의문문 (Negative Interrogative) — 현재 27문항 + 과거 27문항 = 총 54문항
+        // ========================================================
+        { "fullText": "너 차 아니야?", "en": "Aren't you in the car?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "너 차 아니었어?", "en": "Weren't you in the car?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "걔(남자) 사무실에 없어?", "en": "Isn't he in the office?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "걔(남자) 사무실에 없었어?", "en": "Wasn't he in the office?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "네 핸드폰 가방에 없어?", "en": "Isn't your cellphone in the bag?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "네 핸드폰 가방에 없었어?", "en": "Isn't your cellphone in the bag?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "걔네들 잠실역 아니야?", "en": "Aren't they at Jamsil station?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "걔네들 잠실역 아니었어?", "en": "Weren't they at Jamsil station?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "너 회사 아니야?", "en": "Aren't you at work?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "너 회사 아니었어?", "en": "Weren't you at work?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "걔네들 방에 없어?", "en": "Aren't they in the room?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "걔네들 방에 없었어?", "en": "Weren't they in the room?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "걔(남자) 교실에 없어?", "en": "Isn't he in the classroom?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "걔(남자) 교실에 없었어?", "en": "Isn't he in the classroom?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "걔(여자) 공항에 있지 않아?", "en": "Isn't she at the airport?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "걔(여자) 공항에 있지 않았어?", "en": "Wasn't she at the airport?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "너네들 2층 아니야?", "en": "Aren't you on the second floor?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "너네들 2층 아니었어?", "en": "Weren't you on the second floor?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "걔네들 카페에 없어?", "en": "Aren't they at the cafe?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "걔네들 카페에 없었어?", "en": "Weren't they at the cafe?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "너 부엌에 있지 않아?", "en": "Aren't you in the kitchen?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "너 부엌에 있지 않았어?", "en": "Wasn't you in the kitchen?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "걔(여자) 학교에 있지 않아?", "en": "Isn't she at school?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "걔(여자) 학교에 있지 않았어?", "en": "Wasn't she at school?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "너 엘리베이터 안이야?", "en": "Aren't you in the elevator?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "너 엘리베이터 안이었어?", "en": "Weren't you in the elevator?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "회의 4시 아니야?", "en": "Isn't the meeting at 4?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "회의 4시 아니었어?", "en": "Isn't the meeting at 4?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "면접 수요일 아니야?", "en": "Isn't the interview on Wednesday?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "면접 수요일 아니었어?", "en": "Isn't the interview on Wednesday?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "축제 1월 아니야?", "en": "Isn't the festival in January?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "축제 1월 아니었어?", "en": "Isn't the festival in January?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "콘서트 다음주 아니야?", "en": "Isn't the concert next week?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "콘서트 다음주 아니었어?", "en": "Isn't the concert next week?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "우리 여행 7월 아니야?", "en": "Isn't our trip in July?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "우리 여행 7월 아니었어?", "en": "Isn't our trip in July?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "행사 토요일 아니야?", "en": "Isn't the event on Saturday?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "행사 토요일 아니었어?", "en": "Isn't the event on Saturday?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "개막식 2시 정각 아니야?", "en": "Isn't the opening ceremony at 2?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "개막식 2시 정각 아니었어?", "en": "Isn't the opening ceremony at 2?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "네 생일 월요일 아니야?", "en": "Isn't your birthday on Monday?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "네 생일 월요일 아니었어?", "en": "Isn't your birthday on Monday?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "출장 이번주 목요일 아니야?", "en": "Isn't the business trip this Thursday?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "출장 이번주 목요일 아니었어?", "en": "Isn't the business trip this Thursday?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "축구 시합 4시 아니야?", "en": "Isn't the soccer game at 4?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "축구 시합 4시 아니었어?", "en": "Isn't the soccer game at 4?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "인터넷에 없어?", "en": "Isn't it on the internet?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "인터넷에 없었어?", "en": "Wasn't it on the internet?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "그 드라마 넷플릭스에 없어?", "en": "Isn't that drama on Netflix?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "그 드라마 넷플릭스에 없었어?", "en": "Isn't that drama on Netflix?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "영화 넷플릭스에 안 올라와 있어?", "en": "Isn't the movie on Netflix?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "영화 넷플릭스에 안 올라와 있었어?", "en": "Isn't the movie on Netflix?", "tense": "past", "type": "negative_interrogative" },
+        { "fullText": "그 강의 유튜브에 없어?", "en": "Isn't that lecture on YouTube?", "tense": "present", "type": "negative_interrogative" },
+        { "fullText": "그 강의 유튜브에 없었어?", "en": "Isn't that lecture on YouTube?", "tense": "past", "type": "negative_interrogative" }
+    ];
+
+    let activeFilters = {
+        tense: ['present', 'past'],
+        type: ['affirmative', 'negative', 'interrogative', 'negative_interrogative']
+    };
+
+    let filteredClaims = [];
+    let orderArray = [];        
+    let orderPointer = -1;      
+    let currentTask = {};
+    let history = [];           
+    let playMode = 'manual';
+    let autoTimer = null;
+
+    function toggleFilter(element, category, val) {
+        const arr = activeFilters[category];
+        const idx = arr.indexOf(val);
+        if (idx > -1) {
+            if(arr.length === 1) return; 
+            arr.splice(idx, 1);
+            element.classList.remove('active');
+        } else {
+            arr.push(val);
+            element.classList.add('active');
+        }
+    }
+
+    function applyFilters() {
+        filteredClaims = claimsPool.filter(item => {
+            return activeFilters.tense.includes(item.tense) && activeFilters.type.includes(item.type);
+        });
+    }
+
+    function shuffleOrder() {
+        orderArray = Array.from({length: filteredClaims.length}, (_, i) => i);
+        for (let i = orderArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [orderArray[i], orderArray[j]] = [orderArray[j], orderArray[i]];
+        }
+        orderPointer = 0;
+    }
+
+    function startTrainer() {
+        applyFilters();
+        if(filteredClaims.length === 0) {
+            alert("선택된 조건에 맞는 트레이닝 카드가 없습니다. 다시 선택해 주세요.");
+            return;
+        }
+
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        document.getElementById('progress-counter').classList.add('active');
+        
+        document.getElementById('lvl-container-mini').innerHTML = 
+            `<button class="lvl-btn" onclick="goHome()">↩ Home</button>`;
+        
+        shuffleOrder();
+        generate();
+    }
+
+    function goHome() {
+        clearTimeout(autoTimer);
+        updateProgressBar(0, 0);
+        
+        document.getElementById('start-container').classList.remove('hidden');
+        document.getElementById('top-controls').classList.remove('active');
+        document.getElementById('action-area').classList.add('hidden');
+        document.getElementById('progress-counter').classList.remove('active');
+        
+        document.getElementById('korean-task').innerText = "옵션을 설정한 후 시작하세요!";
+        document.getElementById('english-answer').classList.remove('show');
+        
+        currentTask = {};
+        history = [];
+        orderPointer = -1;
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.4" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.4" : "1";
+
+        if (isAuto) {
+            generate();
+        } else {
+            clearTimeout(autoTimer);
+            updateProgressBar(0, 0);
+        }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        
+        if (currentTask.fullText) {
+            history.push({...currentTask});
+        }
+        if (history.length > 50) history.shift();
+
+        if (orderPointer >= orderArray.length) {
+            shuffleOrder();
+        }
+
+        const targetIndex = orderArray[orderPointer];
+        currentTask = filteredClaims[targetIndex];
+        
+        updateDisplay();
+        document.getElementById('progress-counter').innerText = `[ ${orderPointer + 1} / ${filteredClaims.length} ]`;
+        
+        orderPointer++;
+
+        if (playMode === 'auto') {
+            runAutoCycle();
+        }
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000);
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000);
+            autoTimer = setTimeout(() => {
+                generate();
+            }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        
+        orderPointer--;
+        if(orderPointer < 1) orderPointer = 1;
+
+        currentTask = history.pop();
+        updateDisplay();
+        document.getElementById('progress-counter').innerText = `[ ${orderPointer} / ${filteredClaims.length} ]`;
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.fullText;
+        
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() {
+        document.getElementById('english-answer').classList.add('show');
+    }
+
+    const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
+    let currentBannerIdx = 0;
+    setInterval(() => {
+        currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+        const msg = bannerMsgs[currentBannerIdx];
+        document.getElementById('banner-icon').innerText = msg.icon;
+        document.getElementById('banner-title').innerText = msg.text;
+    }, 4000);
+</script>
+
+</body>
+</html>
