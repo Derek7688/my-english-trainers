@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>의문사 패턴 훈련기</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --primary-bg: #eff6ff;
+            --negative-color: #ef4444;
+            --negative-bg: #fef2f2;
+            --secondary-color: #f5a623;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #0f172a;
+        }
+
+        body {
+            font-family: "Pretendard Variable", Pretendard, 'Malgun Gothic', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 3단 가로 그리드 레이아웃 개편 */
+        .workspace {
+            display: grid;
+            grid-template-columns: 140px 1fr 280px;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+            margin-bottom: 25px;
+            align-items: stretch;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* 1. 왼쪽: 의문사 스타일 */
+        .wh-column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            justify-content: space-between;
+        }
+
+        .wh-box {
+            background: linear-gradient(135deg, #e6fcf5 0%, #c3fae8 100%);
+            color: #0ca678;
+            padding: 15px 10px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #96f2d7;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+            box-shadow: 0 2px 4px rgba(12, 166, 120, 0.05);
+        }
+
+        .wh-eng {
+            font-size: 1.3rem;
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.03em;
+        }
+
+        .wh-kor {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-top: 5px;
+            color: #097957;
+            white-space: nowrap;
+        }
+
+        /* 2. 가운데: 시제 뼈대 스타일 */
+        .pattern-table {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .pattern-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .pattern-box {
+            padding: 10px 14px;
+            background-color: #f8fafc;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .pattern-box.pos {
+            border-left: 5px solid var(--primary-color);
+            background-color: var(--primary-bg);
+            border-color: #dbeafe;
+        }
+        .pattern-box.pos .eng { color: #1e40af; }
+
+        .pattern-box.neg {
+            border-left: 5px solid var(--negative-color);
+            background-color: var(--negative-bg);
+            border-color: #fee2e2;
+        }
+        .pattern-box.neg .eng { color: #991b1b; }
+
+        .pattern-box .eng { font-size: 1.1rem; font-weight: 700; }
+        .pattern-box .kor { font-size: 0.85rem; color: #475569; margin-top: 3px; font-weight: 500; }
+
+        /* 3. 오른쪽 배치: 동사 제어 존 */
+        .verb-control-zone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 25px 20px;
+            background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+            border: 2px solid #e2e8f0;
+        }
+
+        .verb-display-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            flex-grow: 1;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .verb-eng {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1e293b;
+            letter-spacing: -0.02em;
+            word-break: keep-all;
+        }
+
+        .verb-kor {
+            font-size: 1.15rem;
+            color: #64748b;
+            font-weight: 600;
+            word-break: keep-all;
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #f5a623 0%, #d97706 100%);
+            color: white;
+            border: none;
+            padding: 14px 0;
+            width: 100%;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            box-shadow: 0 4px 10px rgba(217, 119, 6, 0.25);
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(217, 119, 6, 0.35);
+        }
+        
+        .btn-generate:active { transform: translateY(0); }
+
+        #banner-container {
+            flex-shrink: 0;
+            width: 100%;
+            max-width: 460px;
+            margin-top: 20px;
+        }
+
+        /* 반응형 레이아웃 대응 */
+        @media (max-width: 1024px) {
+            .workspace {
+                grid-template-columns: 140px 1fr;
+            }
+            .verb-control-zone {
+                grid-column: span 2;
+                flex-direction: row;
+                justify-content: space-between;
+                padding: 20px;
+            }
+            .verb-display-box {
+                margin-bottom: 0;
+                align-items: flex-start;
+                text-align: left;
+            }
+            .btn-generate {
+                width: auto;
+                padding: 12px 30px;
+            }
+        }
+
+        @media (max-width: 650px) {
+            body { padding: 10px; }
+            .workspace { grid-template-columns: 1fr; gap: 12px; }
+            .wh-column { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+            .wh-box { flex: 1; min-width: 75px; padding: 10px 5px; }
+            .wh-eng { font-size: 1.1rem; }
+            .wh-kor { font-size: 0.8rem; }
+            .pattern-row { grid-template-columns: 1fr; gap: 6px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 6px; }
+            .pattern-row:last-child { border-bottom: none; padding-bottom: 0; }
+            .verb-control-zone { grid-column: span 1; flex-direction: column; padding: 20px 15px; gap: 15px; }
+            .verb-display-box { align-items: center; text-align: center; }
+            .verb-eng { font-size: 1.6rem; }
+            .verb-kor { font-size: 1.05rem; }
+            .btn-generate { width: 100%; padding: 12px 0; font-size: 1rem; }
+            #banner-container { max-width: 100%; padding: 0 5px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="text-center my-6 max-w-2xl mx-auto px-4">
+        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-900 bg-clip-text text-transparent drop-shadow-sm">
+            의문사 패턴 훈련기 🚀
+        </h1>
+        <p class="inline-block bg-indigo-50 text-indigo-700 text-sm md:text-base font-bold px-4 py-1.5 rounded-full border border-indigo-100 shadow-sm animate-pulse">
+            💬 랜덤 동사를 보고 의문문 문장을 완성해 보세요!
+        </p>
+    </header>
+
+    <div class="workspace">
+        <div class="card wh-column">
+            <div class="wh-box">
+                <span class="wh-eng">When</span>
+                <span class="wh-kor">언제</span>
+            </div>
+            <div class="wh-box">
+                <span class="wh-eng">Where</span>
+                <span class="wh-kor">어디</span>
+            </div>
+            <div class="wh-box">
+                <span class="wh-eng">Why</span>
+                <span class="wh-kor">왜</span>
+            </div>
+            <div class="wh-box">
+                <span class="wh-eng">How</span>
+                <span class="wh-kor">어떻게</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="pattern-table">
+                <div class="pattern-row">
+                    <div class="pattern-box pos">
+                        <span class="eng">do you V?</span>
+                        <span class="kor">(평소에) ~해?</span>
+                    </div>
+                    <div class="pattern-box neg">
+                        <span class="eng">don't you V?</span>
+                        <span class="kor">(평소에) 안 해?</span>
+                    </div>
+                </div>
+                <div class="pattern-row">
+                    <div class="pattern-box pos">
+                        <span class="eng">are you ~ing?</span>
+                        <span class="kor">~하고 있어?</span>
+                    </div>
+                    <div class="pattern-box neg">
+                        <span class="eng">aren't you ~ing?</span>
+                        <span class="kor">안 하고 있어?</span>
+                    </div>
+                </div>
+                <div class="pattern-row">
+                    <div class="pattern-box pos">
+                        <span class="eng">did you V?</span>
+                        <span class="kor">~했어?</span>
+                    </div>
+                    <div class="pattern-box neg">
+                        <span class="eng">didn't you V?</span>
+                        <span class="kor">안 했어?</span>
+                    </div>
+                </div>
+                <div class="pattern-row">
+                    <div class="pattern-box pos">
+                        <span class="eng">were you ~ing?</span>
+                        <span class="kor">~하고 있었어?</span>
+                    </div>
+                    <div class="pattern-box neg">
+                        <span class="eng">weren't you ~ing?</span>
+                        <span class="kor">안 하고 있었어?</span>
+                    </div>
+                </div>
+                <div class="pattern-row">
+                    <div class="pattern-box pos">
+                        <span class="eng">will you V?</span>
+                        <span class="kor">~해줄래?</span>
+                    </div>
+                    <div class="pattern-box neg">
+                        <span class="eng">won't you V?</span>
+                        <span class="kor">해주지 않을래?</span>
+                    </div>
+                </div>
+                <div class="pattern-row">
+                    <div class="pattern-box pos">
+                        <span class="eng">are you going to V?</span>
+                        <span class="kor">~할 거야?</span>
+                    </div>
+                    <div class="pattern-box neg">
+                        <span class="eng">aren't you going to V?</span>
+                        <span class="kor">안 할 거야?</span>
+                    </div>
+                </div>
+                <div class="pattern-row">
+                    <div class="pattern-box pos">
+                        <span class="eng">do you want to V?</span>
+                        <span class="kor">~할래? / ~하고 싶어?</span>
+                    </div>
+                    <div class="pattern-box neg">
+                        <span class="eng">don't you want to V?</span>
+                        <span class="kor">안 할래? / 안 하고 싶어?</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card verb-control-zone">
+            <div class="verb-display-box">
+                <div class="verb-eng" id="verbEng">로딩 중...</div>
+                <div class="verb-kor" id="verbKor">잠시만 기다려주세요.</div>
+            </div>
+            <button class="btn-generate" id="btnRandom">새 동사 뽑기 🎲</button>
+        </div>
+    </div>
+
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] cursor-pointer shadow-lg transition-all active:scale-95 mx-auto" 
+         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
+            <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+            <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center">
+                <h3 id="banner-title" class="font-black text-slate-800 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const verbList = [
+            { eng: "eat 명사", kor: "~를 먹다" }, { eng: "drink 명사", kor: "~를 마시다" }, { eng: "listen to 명사", kor: "~를 듣다" }, { eng: "meet 명사", kor: "~를 만나다" }, { eng: "buy 명사", kor: "~를 사다" }, { eng: "go to 장소", kor: "~에 가다" }, { eng: "watch 명사", kor: "~를 보다 (TV, 영상 등)" }, { eng: "see 명사", kor: "~를 보다 / 목격하다" }, { eng: "do 명사", kor: "~를 하다" }, { eng: "make 명사", kor: "~를 만들다" }, { eng: "read 명사", kor: "~를 읽다" }, { eng: "clean 명사", kor: "~를 청소하다" }, { eng: "visit 명사", kor: "~를 방문하다" }, { eng: "study 명사", kor: "~를 공부하다" }, { eng: "call 사람", kor: "~에게 전화하다" }, { eng: "leave 장소", kor: "~에서 출발하다 / 떠나다" }, { eng: "stay at 장소", kor: "~에 머무르다" }, { eng: "talk to 사람", kor: "~에게 말하다" }, { eng: "look for 명사", kor: "~를 찾다" }, { eng: "get 명사", kor: "~를 구하다 / 얻다" }, { eng: "work", kor: "일하다" }, { eng: "sleep", kor: "자다" }, { eng: "wake up", kor: "잠에서 깨다" }, { eng: "get up", kor: "일어나다 (침대 밖으로)" }, { eng: "go to work", kor: "출근하다" }, { eng: "go to school", kor: "등교하다" }, { eng: "leave work", kor: "퇴근하다" }, { eng: "finish work", kor: "일을 마치다" }, { eng: "start 명사", kor: "~를 시작하다" }, { eng: "finish 명사", kor: "~를 끝내다" }, { eng: "take a break", kor: "휴식을 취하다" }, { eng: "prepare 명사", kor: "~를 준비하다" }, { eng: "check 명사", kor: "~를 확인하다" }, { eng: "send 이메일/메시지", kor: "~를 보내다" }, { eng: "receive 명사", kor: "~를 받다" }, { eng: "use 명사", kor: "~를 사용하다" }, { eng: "bring 명사", kor: "~를 가져오다" }, { eng: "take 명사", kor: "~를 가져가다" }, { eng: "forget 명사", kor: "~를 잊어버리다" }, { eng: "remember 명사", kor: "~를 기억하다" }, { eng: "wash your hands", kor: "손을 씻다" }, { eng: "take a shower", kor: "샤워를 하다" }, { eng: "brush your teeth", kor: "이를 닦다" }, { eng: "cook 명사", kor: "~를 요리하다" }, { eng: "wash the dishes", kor: "설거지를 하다" }, { eng: "do the laundry", kor: "빨래를 하다" }, { eng: "throw away 명사", kor: "~를 버리다" }, { eng: "order 음식", kor: "~를 주문하다" }, { eng: "have breakfast", kor: "아침을 먹다" }, { eng: "have lunch", kor: "점심을 먹다" }, { eng: "have dinner", kor: "저녁을 먹다" }, { eng: "feed 반려동물", kor: "~에게 밥을 주다" }, { eng: "water 식물", kor: "~에 물을 주다" }, { eng: "fix 명사", kor: "~를 고치다 / 수리하다" }, { eng: "open 명사", kor: "~를 열다" }, { eng: "close 명사", kor: "~를 닫다" }, { eng: "turn on 명사", kor: "~를 켜다 (가전, 불)" }, { eng: "turn off 명사", kor: "~를 끄다" }, { eng: "change 옷", kor: "옷을 갈아입다" }, { eng: "put on 옷/신발", kor: "~를 입다 / 신다" }, { eng: "play tennis", kor: "테니스를 치다" }, { eng: "play soccer", kor: "축구를 하다" }, { eng: "go jogging", kor: "조깅하러 가다" }, { eng: "work out", kor: "운동하다" }, { eng: "go to the gym", kor: "헬스장에 가다" }, { eng: "take a walk", kor: "산책하다" }, { eng: "walk the dog", kor: "개 산책시키다" }, { eng: "play computer games", kor: "컴퓨터 게임을 하다" }, { eng: "watch YouTube", kor: "유튜브를 보다" }, { eng: "watch NetFlix", kor: "넷플릭스를 보다" }, { eng: "take photos", kor: "사진을 찍다" }, { eng: "listen to music", kor: "음악을 듣다" }, { eng: "sing a song", kor: "노래를 부르다" }, { eng: "dance", kor: "춤을 추다" }, { eng: "draw a picture", kor: "그림을 그리다" }, { eng: "play the guitar", kor: "기타를 치다" }, { eng: "play the piano", kor: "피아노를 치다" }, { eng: "read a book", kor: "책을 읽다" }, { eng: "write 블로그/일기", kor: "~를 쓰다" }, { eng: "surf the internet", kor: "인터넷을 서핑하다" }, { eng: "say 그 말", kor: "그 말을 하다" }, { eng: "tell 사람 비밀/이야기", kor: "~에게 비밀/이야기를 말하다" }, { eng: "speak English", kor: "영어를 말하다" }, { eng: "ask 질문", kor: "질문하다" }, { eng: "answer 질문", kor: "질문에 답하다" }, { eng: "invite 사람", kor: "~를 초대하다" }, { eng: "help 사람", kor: "~를 돕다" }, { eng: "thank 사람", kor: "~에게 감사하다" }, { eng: "apologize to 사람", kor: "~에게 사과하다" }, { eng: "argue with 사람", kor: "~와 말다툼하다" }, { eng: "agree with 사람", kor: "~에게 동의하다" }, { eng: "disagree with 사람", kor: "~에게 반대하다" }, { eng: "smile", kor: "미소 짓다" }, { eng: "laugh", kor: "웃다" }, { eng: "cry", kor: "울다" }, { eng: "worry about 명사", kor: "~에 대해 걱정하다" }, { eng: "think about 명사", kor: "~에 대해 생각하다" }, { eng: "believe 사람", kor: "~를 믿다" }, { eng: "trust 사람", kor: "~를 신뢰하다" }, { eng: "promise 명사", kor: "~를 약속하다" }, { eng: "drive 차", kor: "~를 운전하다" }, { eng: "ride a bike", kor: "자전거를 타다" }, { eng: "take a taxi", kor: "택시를 타다" }, { eng: "take the subway", kor: "지하철을 타다" }, { eng: "take the bus", kor: "버스를 타다" }, { eng: "catch a train", kor: "기차를 타다" }, { eng: "fly to 장소", kor: "~로 비행기 타고 가다" }, { eng: "travel on a trip", kor: "여행을 가다" }, { eng: "pack your bags", kor: "짐을 싸다" }, { eng: "book a hotel", kor: "호텔을 예약하다" }, { eng: "buy a ticket", kor: "티켓을 사다" }, { eng: "arrive at 장소", kor: "~에 도착하다" }, { eng: "lose 길/물건", kor: "~를 잃어버리다" }, { eng: "find 길/물건", kor: "~를 찾다 / 발견하다" }, { eng: "cross the street", kor: "길을 건너다" }, { eng: "wait for 사람/버스", kor: "~를 기다리다" }, { eng: "meet up with 사람", kor: "~와 만나다 (약속)" }, { eng: "hang out with 친구", kor: "친구들과 놀다" }, { eng: "stay home", kor: "집에 있다 / 머무르다" }, { eng: "visit your family", kor: "가족을 보러 가다" }, { eng: "go shopping", kor: "쇼핑하러 가다" }, { eng: "buy groceries", kor: "장 보러 가다 (식재료 사다)" }, { eng: "spend money", kor: "돈을 쓰다" }, { eng: "save money", kor: "돈을 아끼다 / 저축하다" }, { eng: "pay the bill", kor: "계산하다 / 청구서를 내다" }, { eng: "pay by credit card", kor: "신용카드로 계산하다" }, { eng: "pay in cash", kor: "현금으로 계산하다" }, { eng: "return 옷/물건", kor: "~를 반품하다" }, { eng: "exchange 옷/물건", kor: "~를 교환하다" }, { eng: "try on 옷", kor: "옷을 입어보다" }, { eng: "sell 명사", kor: "~를 팔다" }, { eng: "cost 금액", kor: "(비용이) ~만큼 들다" }, { eng: "borrow 명사", kor: "~를 빌리다" }, { eng: "lend 사람 명사", kor: "~에게 ~를 빌려주다" }, { eng: "lose your wallet", kor: "지갑을 잃어버리다" }, { eng: "find a bargain", kor: "싸고 좋은 물건을 찾다" }, { eng: "waste time", kor: "시간을 낭비하다" }, { eng: "save time", kor: "시간을 아끼다" }, { eng: "rent a car", kor: "렌터카를 빌리다" }, { eng: "withdraw money", kor: "(은행에서) 돈을 뽑다" }, { eng: "go to the doctor", kor: "병원에 가다" }, { eng: "go to the dentist", kor: "치과에 가다" }, { eng: "take medicine", kor: "약을 먹다" }, { eng: "catch a cold", kor: "감기에 걸리다" }, { eng: "feel sick", kor: "몸이 아프다" }, { eng: "feel tired", kor: "피곤함을 느끼다" }, { eng: "get a haircut", kor: "머리를 자르다" }, { eng: "dye your hair", kor: "머리를 염색하다" }, { eng: "gain weight", kor: "살이 찌다" }, { eng: "lose weight", kor: "살이 빠지다 / 빼다" }, { eng: "hurt your leg", kor: "다리를 다치다" }, { eng: "wash your face", kor: "세수를 하다" }, { eng: "wear glasses", kor: "안경을 쓰다" }, { eng: "shave", kor: "면도하다" }, { eng: "rest", kor: "쉬다" }, { eng: "sleep tight", kor: "푹 자다" }, { eng: "sweat", kor: "땀을 흘이다" }, { eng: "cough", kor: "기침을 하다" }, { eng: "stretch your body", kor: "스트레칭을 하다" }, { eng: "take a deep breath", kor: "심호흡을 하다" }, { eng: "learn English", kor: "영어를 배우다" }, { eng: "understand 명사", kor: "~를 이해하다" }, { eng: "know 그 사실", kor: "그 사실을 알다" }, { eng: "notice 명사", kor: "~를 알아채다" }, { eng: "make a mistake", kor: "실수를 하다" }, { eng: "correct the mistake", kor: "실수를 바로잡다" }, { eng: "solve the problem", kor: "문제를 해결하다" }, { eng: "decide 명사", kor: "~를 결정하다" }, { eng: "choose 명사", kor: "~를 선택하다 / 고르다" }, { eng: "fail the exam", kor: "시험에서 떨어지다" }, { eng: "pass the exam", kor: "시험에 합격하다" }, { eng: "take a test", kor: "시험을 치르다" }, { eng: "search for 정보", kor: "정보를 검색하다" }, { eng: "download 파일", kor: "파일을 다운로드하다" }, { eng: "upload 사진", kor: "사진을 업로드하다" }, { eng: "print the document", kor: "문서를 인쇄하다" }, { eng: "memorize 단어", kor: "단어를 외우다" }, { eng: "forget the password", kor: "비밀번호를 잊다" }, { eng: "practice English", kor: "영어를 연습하다" }, { eng: "attend the meeting", kor: "회의에 참석하다" }, { eng: "hear that news", kor: "그 뉴스를 듣다" }, { eng: "hide 명사", kor: "~를 숨기다" }, { eng: "drop your phone", kor: "핸드폰을 떨어뜨리다" }, { eng: "break your phone", kor: "핸드폰을 깨뜨리다" }, { eng: "charge your phone", kor: "핸드폰을 충전하다" }, { eng: "rent an apartment", kor: "아파트를 렌트하다" }, { eng: "move to 새 집", kor: "새 집으로 이사하다" }, { eng: "smoke", kor: "담배를 피우다" }, { eng: "drink alcohol", kor: "술을 마시다" }, { eng: "celebrate your birthday", kor: "생일을 축하하다" }, { eng: "get a job", kor: "직장을 구하다" }, { eng: "quit your job", kor: "회사를 그만두다" }, { eng: "marry 사람", kor: "~와 결혼하다" }, { eng: "plan a party", kor: "파티를 계획하다" }, { eng: "join the club", kor: "동호회/클럽에 가입하다" }, { eng: "cancel the reservation", kor: "예약을 취소하다" }, { eng: "post a comment", kor: "댓글을 달다" }, { eng: "share the video", kor: "영상을 공유하다" }, { eng: "win the game", kor: "게임에서 이기다" }, { eng: "lose the game", kor: "게임에서 지다" }
+        ];
+
+        const verbEngDiv = document.getElementById('verbEng');
+        const verbKorDiv = document.getElementById('verbKor');
+        const btnRandom = document.getElementById('btnRandom');
+
+        let availableVerbs = [];
+
+        function initVerbPool() {
+            availableVerbs = [...verbList];
+            for (let i = availableVerbs.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [availableVerbs[i], availableVerbs[j]] = [availableVerbs[j], availableVerbs[i]];
+            }
+        }
+
+        function getRandomVerb() {
+            if (verbList.length === 0) return;
+            if (availableVerbs.length === 0) {
+                initVerbPool();
+            }
+            const selected = availableVerbs.pop();
+            verbEngDiv.innerText = selected.eng;
+            verbKorDiv.innerText = selected.kor;
+        }
+
+        initVerbPool();
+        getRandomVerb();
+
+        btnRandom.addEventListener('click', getRandomVerb);
+
+        const bannerMsgs = [
+            { icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, 
+            { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }
+        ];
+        let currentBannerIdx = 0;
+        setInterval(() => {
+            currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+            const msg = bannerMsgs[currentBannerIdx];
+            document.getElementById('banner-icon').innerText = msg.icon;
+            document.getElementById('banner-title').innerText = msg.text;
+        }, 4000);
+    </script>
+</body>
+</html>
