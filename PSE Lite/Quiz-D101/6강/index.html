@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>There is / There are Core Pattern Trainer</title>
+    <!-- Pretendard 폰트 불러오기 (CDN) -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-blue: #1a365d;
+            --btn-blue: #2b6cb0;
+            --accent-green: #27ae60;
+            --bg-gray: #f8f9fa;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #333; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            text-align: center; width: 95%; max-width: 500px; border: 1px solid #eee; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        /* 상단 제어 바 (구석 버튼들) */
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;
+            order: 1; gap: 8px;
+        }
+        .top-controls.active { display: flex; }
+
+        /* 우측 상단 토글들 세로 정렬 */
+        .right-controls {
+            display: flex; flex-direction: column; gap: 6px; align-items: flex-end;
+        }
+
+        /* 제목 스타일 */
+        h1 { 
+            color: var(--primary-blue); font-size: 20px !important; margin: 10px 0 5px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2; order: 2;
+        }
+
+        /* 진행률 표시기 */
+        .progress-counter {
+            font-size: 13px; font-weight: 700; color: #718096; margin-bottom: 15px; order: 2.5;
+            background: #edf2f7; padding: 2px 10px; border-radius: 20px; display: none;
+        }
+        .progress-counter.active { display: inline-block; }
+
+        /* 큰 문구 및 힌트 컨테이너 영역 고정 */
+        .task-container {
+            min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; order: 3; margin: 10px 0 15px 0; width: 100%;
+        }
+
+        #korean-task { 
+            font-size: 19px; font-weight: 700; 
+            color: #2d3748; line-height: 1.6; word-break: keep-all; 
+            padding: 0 10px; letter-spacing: -0.02em;
+        }
+
+        /* 💡 힌트 텍스트 스타일 */
+        #hint-text {
+            font-size: 14px; font-weight: 600; color: #3182ce; margin-top: 8px;
+            background: #ebf8ff; padding: 4px 12px; border-radius: 12px;
+            display: none; word-break: keep-all;
+        }
+        #hint-text.show { display: inline-block; }
+
+        /* 시작 버튼 컨테이너: 큰 문구 아래 */
+        .start-container { order: 4; margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--btn-blue); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(43, 108, 176, 0.2);
+        }
+        /* 구석으로 이동했을 때의 다시 섞기 버튼 스타일 */
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(43, 108, 176, 0.15); margin-top: 2px; }
+        .lvl-btn:active { transform: scale(0.95); }
+
+        /* 토글 버튼 공통 */
+        .auto-toggle {
+            display: flex; align-items: center; gap: 3px; background: #eee; padding: 4px; border-radius: 12px;
+        }
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: #868e96; transition: all 0.15s;
+        }
+        .toggle-btn.active { background: var(--primary-blue); color: white; }
+        .toggle-btn.hint-active { background: #3182ce; color: white; }
+        
+        /* 정답창 영역 고정 */
+        .answer-container {
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%; order: 5;
+        }
+
+        #english-answer { 
+            font-size: 16px; color: var(--accent-green); width: 100%; padding: 15px; 
+            background: #f0fff4; border-radius: 12px; border: 1px solid #c6f6d5; font-weight: 600; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { order: 6; width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 8px; }
+        .ans-btn { background: var(--btn-blue); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #4a5568; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #adb5bd; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #dee2e6; font-size: 13px; margin-top: 15px; width: 100%; }
+        
+        .hidden { display: none !important; }
+        #banner-container { order: 7; }
+
+        /* 자동 모드 진행 바 */
+        #auto-progress {
+            width: 0%; height: 4px; background: #f59e0b; position: absolute; top: 0; left: 0; border-radius: 24px 24px 0 0; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+
+    <!-- 연습 시작 후 나타날 구석 제어 바 -->
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini"></div>
+        <div class="right-controls">
+            <!-- 수동/자동 토글 버튼 -->
+            <div class="auto-toggle">
+                <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+                <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+            </div>
+            <!-- 💡 힌트 토글 버튼 -->
+            <div class="auto-toggle">
+                <button id="hint-off" class="toggle-btn active" onclick="setHintMode(false)">힌트 끔</button>
+                <button id="hint-on" class="toggle-btn" onclick="setHintMode(true)">힌트 켬</button>
+            </div>
+        </div>
+    </div>
+
+    <h1>⚡ There is / There are 핵심 문형 트레이너</h1>
+
+    <!-- 실시간 진행 갯수 카운터 -->
+    <div id="progress-counter" class="progress-counter">[ 0 / 113 ]</div>
+    
+    <!-- 한국어 문제와 힌트 텍스트가 함께 들어가는 공간 -->
+    <div class="task-container">
+        <div id="korean-task">입으로 소리 내어 훈련하세요! 🗣️</div>
+        <div id="hint-text">💡 힌트 영역</div>
+    </div>
+    
+    <!-- 첫 화면 중앙 시작 버튼 -->
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <!-- PSE 광고 배너 -->
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
+            <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+            <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center">
+                <h3 id="banner-title" class="font-black text-slate-800 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 관사(a/an), 복수 어미(-s), 소유격 등이 완벽하게 반영된 데이터셋
+    const allClaims = [
+        { "kr": "차 밑에 고양이 한 마리 있어.", "en": "There’s a cat under the car.", "hint": "a cat + the car" },
+        { "kr": "하늘에 구름 한 점 없어.", "en": "There isn’t a cloud in the sky.", "hint": "a cloud + the sky" },
+        { "kr": "호텔 근처에 편의점 있나요?", "en": "Is there a convenience store near the hotel?", "hint": "a convenience store + the hotel" },
+        { "kr": "방 안에 쓰레기통 없나요?", "en": "Isn’t there a trash can in the room?", "hint": "a trash can + the room" },
+        { "kr": "식탁 위에 열쇠들 있어.", "en": "There are keys on the table.", "hint": "keys + the table" },
+        { "kr": "발코니에는 의자가 2개 있어.", "en": "There are 2 chairs in the balcony.", "hint": "2 chairs + the balcony" },
+        { "kr": "냉장고에 달걀 있어?", "en": "Are there eggs in the fridge?", "hint": "eggs + the fridge" },
+        { "kr": "우편함에 나한테 온 편지들 없어?", "en": "Aren’t there letters for me in the mailbox?", "hint": "letters + the mailbox" },
+        { "kr": "벽에 파리가 한 마리 붙어 있어.", "en": "There’s a fly on the wall.", "hint": "a fly + the wall" },
+        { "kr": "오늘 아침엔 회의가 없었어.", "en": "There wasn’t a meeting this morning.", "hint": "a meeting + this morning" },
+        { "kr": "다리 위에서 사고가 있었나요?", "en": "Was there an accident on the bridge?", "hint": "an accident + the bridge" },
+        { "kr": "문 앞에 택배 없었어?", "en": "Wasn’t there a package at the door?", "hint": "a package + the door" },
+        { "kr": "네 셔츠에 얼룩들이 묻어 있었어.", "en": "There were stains on your shirt.", "hint": "stains + your shirt" },
+        { "kr": "교실에 학생들이 없었어.", "en": "There weren’t students in the classroom.", "hint": "students + the classroom" },
+        { "kr": "컴퓨터에 문제가 있었나요?", "en": "Was there a problem with the computer?", "hint": "a problem + the computer" },
+        { "kr": "찬장에 컵들 없어?", "en": "Aren’t there cups in the cupboard?", "hint": "cups + the cupboard" },
+        { "kr": "화장실에 거미가 한 마리 있어.", "en": "There’s a spider in the bathroom.", "hint": "a spider + the bathroom" },
+        { "kr": "엘리베이터에 거울이 없어.", "en": "There isn’t a mirror in the elevator.", "hint": "a mirror + the elevator" },
+        { "kr": "이 건물에 은행 있나요?", "en": "Is there a bank in this building?", "hint": "a bank + this building" },
+        { "kr": "네 지갑에 쿠폰 없니?", "en": "Isn’t there a coupon in your wallet?", "hint": "a coupon + your wallet" },
+        { "kr": "꽃병에 꽃들이 있어.", "en": "There are flowers in the vase.", "hint": "flowers + the vase" },
+        { "kr": "지하에는 창문들이 없어요.", "en": "There aren’t windows in the basement.", "hint": "windows + the basement" },
+        { "kr": "화장실에 수건들 있나요?", "en": "Are there towels in the bathroom?", "hint": "towels + the bathroom" },
+        { "kr": "어제 공원에서 콘서트가 있었어.", "en": "There was a concert at the park yesterday.", "hint": "a concert + the park" },
+        { "kr": "그에게서 답장이 없었어.", "en": "There wasn’t an answer from him.", "hint": "an answer + him" },
+        { "kr": "저한테 온 메시지 있었나요?", "en": "Was there a message for me?", "hint": "a message + me" },
+        { "kr": "빵집에 줄 없었어?", "en": "Wasn’t there a line at the bakery?", "hint": "a line + the bakery" },
+        { "kr": "상자에 쿠키들이 있었어.", "en": "There were cookies in the box.", "hint": "cookies + the box" },
+        { "kr": "버스에 빈자리들이 있었어.", "en": "There were empty seats on the bus.", "hint": "empty seats + the bus" },
+        { "kr": "텐트 안에 벌레가 있었어?", "en": "Was there a bug in the tent?", "hint": "a bug + the tent" },
+        { "kr": "책상 위에 노트북이 있어.", "en": "There’s a laptop on the desk.", "hint": "a laptop + the desk" },
+        { "kr": "테이블 위에 티슈가 없어요.", "en": "There isn’t a tissue on the table.", "hint": "a tissue + the table" },
+        { "kr": "이 주변에 약국 있나요?", "en": "Is there a pharmacy around here?", "hint": "a pharmacy" },
+        { "kr": "문에 잠금장치 없나요?", "en": "Isn’t there a lock on the door?", "hint": "a lock + the door" },
+        { "kr": "냉장고에 사진들이 붙어 있어.", "en": "There are pictures on the fridge.", "hint": "pictures + the fridge" },
+        { "kr": "그 근처에 택시들 없어?", "en": "Aren’t there taxies near there?", "hint": "taxies" },
+        { "kr": "어젯밤에 사무실에서 파티가 있었어.", "en": "There was a party at the office last night.", "hint": "a party + the office" },
+        { "kr": "방에 귀신이 있었나요?", "en": "Was there a ghost in the room?", "hint": "a ghost + the room" },
+        { "kr": "이 상품에 할인 있나요?", "en": "Is there a discount on this item?", "hint": "a discount + this item" },
+        { "kr": "바닥에 서류들이 있었어.", "en": "There were documents on the floor.", "hint": "documents + the floor" },
+        { "kr": "바구니에 음식은 없었어.", "en": "There wasn’t food in the basket.", "hint": "food + the basket" },
+        { "kr": "이메일에 자세한 내용들이 있었나요?", "en": "Were there details in the email?", "hint": "details + the email" },
+        { "kr": "면접 중에 문제가 있었나요?", "en": "Was there a problem during the interview?", "hint": "a problem + the interview" },
+        { "kr": "네 넥타이에 얼룩이 묻어 있어.", "en": "There’s a stain on your tie.", "hint": "a stain + your tie" },
+        { "kr": "이 방에는 와이파이 신호가 안 잡혀.", "en": "There isn’t a Wi-Fi signal in this room.", "hint": "a Wi-Fi signal + this room" },
+        { "kr": "네 가방 안에 거울 있어?", "en": "Is there a mirror in your bag?", "hint": "a mirror + your bag" },
+        { "kr": "소파 위에 베개가 있어.", "en": "There is a pillow on the sofa.", "hint": "a pillow + the sofa" },
+        { "kr": "싱크대에 포크 있어.", "en": "There are forks in the sink.", "hint": "forks + the sink" },
+        { "kr": "지난주에 폭풍우가 쳤었어.", "en": "There was a storm last week.", "hint": "a storm + last week" },
+        { "kr": "차 안에 물병이 없었어.", "en": "There wasn’t a water bottle in the car.", "hint": "a water bottle + the car" },
+        { "kr": "게시판에 공지글이 있어.", "en": "There is a notice on the board.", "hint": "a notice + the board" },
+        { "kr": "카페트에 얼룩들이 묻어 있었어.", "en": "There were stains on the carpet.", "hint": "stains + the carpet" },
+        { "kr": "놀이터에 아이들이 있었니?", "en": "Were there kids at the playground?", "hint": "kids + the playground" },
+        { "kr": "보고서에 오류들이 있었어요.", "en": "There were errors in the report.", "hint": "errors + the report" },
+        { "kr": "벽에 달력이 걸려 있어.", "en": "There’s a calendar on the wall.", "hint": "a calendar + the wall" },
+        { "kr": "리모컨에 건전지가 없어.", "en": "There isn’t a battery in the remote.", "hint": "a battery + the remote" },
+        { "kr": "이 근처에 주유소 있나요?", "en": "Is there a gas station near here?", "hint": "a gas station" },
+        { "kr": "거실에 식물들이 있어.", "en": "There are plants in the living room.", "hint": "plants + the living room" },
+        { "kr": "옷장에 흰 셔츠들이 없어.", "en": "There aren’t white shirts in the closet.", "hint": "white shirts + the closet" },
+        { "kr": "대학교에서 축제가 있었어.", "en": "There was a festival at the university.", "hint": "a festival + the university" },
+        { "kr": "프레젠테이션 중에 질문이 있었나요?", "en": "Was there a question during the presentation?", "hint": "a question + the presentation" },
+        { "kr": "건물에 화재가 나지 않았었나요?", "en": "Wasn’t there a fire in the building?", "hint": "a fire + the building" },
+        { "kr": "일정에 변경 사항들이 있어.", "en": "There are changes in the schedule.", "hint": "changes + the schedule" },
+        { "kr": "이 교실에는 시계가 없어.", "en": "There isn’t a clock in this classroom.", "hint": "a clock + this classroom" },
+        { "kr": "이 청바지엔 가격표가 안 붙어있어.", "en": "There isn’t a price tag on these jeans.", "hint": "a price tag + these jeans" },
+        { "kr": "현관에 신발들이 있어.", "en": "There are shoes at the entrance.", "hint": "shoes + the entrance" },
+        { "kr": "테이블 위에 냅킨들이 있어.", "en": "There are napkins on the table.", "hint": "napkins + the table" },
+        { "kr": "오늘 아침에 면접이 있었어.", "en": "There was an interview this morning.", "hint": "an interview + this morning" },
+        { "kr": "화면에 스크래치 있어?", "en": "Is there a scratch on the screen?", "hint": "a scratch + the screen" },
+        { "kr": "갤러리에서 전시회가 있나요?", "en": "Is there an exhibition at the gallery?", "hint": "an exhibition + the gallery" },
+        { "kr": "네 주머니에 티켓 없었어?", "en": "Wasn’t there a ticket in your pocket?", "hint": "a ticket + your pocket" },
+        { "kr": "복도에 상자들이 있어.", "en": "There are boxes in the hallway.", "hint": "boxes + the hallway" },
+        { "kr": "고객들의 불만 사항들이 있어.", "en": "There are complaints from the customers.", "hint": "complaints + the customers" },
+        { "kr": "가게에 무료 샘플들이 있나요?", "en": "Are there free samples at the store?", "hint": "free samples + the store" },
+        { "kr": "1층에 커피숍이 있어.", "en": "There’s a coffee shop on the first floor.", "hint": "a coffee shop + the first floor" },
+        { "kr": "이 방엔 전등이 없어.", "en": "There isn’t a light in this room.", "hint": "a light + this room" },
+        { "kr": "호텔에 수영장 있나요?", "en": "Is there a swimming pool in the hotel?", "hint": "a swimming pool + the hotel" },
+        { "kr": "내일 시험 있나요?", "en": "Is there a test tomorrow?", "hint": "a test + tomorrow" },
+        { "kr": "모니터에 포스트잇들이 붙어 있어.", "en": "There are post-its on the monitor.", "hint": "post-its + the monitor" },
+        { "kr": "섬으로 가는 직항편들이 있어요.", "en": "There are direct flights to the island.", "hint": "direct flights + the island" },
+        { "kr": "라벨에 경고 문구가 붙어 있었어.", "en": "There is a warning on the label.", "hint": "a warning + the label" },
+        { "kr": "오늘 밤에 축구 경기 있지 않아?", "en": "Isn’t there a soccer match tonight?", "hint": "a soccer match + tonight" },
+        { "kr": "벽에 금 간 곳들이 있어.", "en": "There are cracks in the wall.", "hint": "cracks + the wall" },
+        { "kr": "주방에 깨끗한 접시들이 있어요.", "en": "There are clean plates in the kitchen.", "hint": "clean plates + the kitchen" },
+        { "kr": "대문 뒤에 개 한 마리 있어.", "en": "There’s a dog behind the gate.", "hint": "a dog + the gate" },
+        { "kr": "사무실 근처에 주차장이 없어.", "en": "There isn’t a parking lot near the office.", "hint": "a parking lot + the office" },
+        { "kr": "화장실에 창문이 없었어.", "en": "There wasn’t a window in the bathroom.", "hint": "a window + the bathroom" },
+        { "kr": "서랍에 깨끗한 양말들이 있어요.", "en": "There are clean socks in the drawer.", "hint": "clean socks + the drawer" },
+        { "kr": "트렁크에 우산이 있었어.", "en": "There was an umbrella in the trunk.", "hint": "an umbrella + the trunk" },
+        { "kr": "화요일에 세미나 있어요?", "en": "Is there a seminar on Tuesday?", "hint": "a seminar + Tuesday" },
+        { "kr": "부작용들이 있었어.", "en": "There were side effects.", "hint": "side effects" },
+        { "kr": "이웃들의 항의가 있나요?", "en": "Are there complaints from the neighbors?", "hint": "complaints + the neighbors" },
+        { "kr": "해변에서 콘서트가 있었어.", "en": "There was a concert at the beach.", "hint": "a concert + the beach" },
+        { "kr": "천장에 물 새는 곳이 있어요.", "en": "There is a leak in the ceiling.", "hint": "a leak + the ceiling" },
+        { "kr": "탁자에 흠집이 하나 있어.", "en": "There’s a scratch on the table.", "hint": "a scratch + the table" },
+        { "kr": "공원 근처엔 화장실이 없어.", "en": "There isn’t a restroom near the park.", "hint": "a restroom + the park" },
+        { "kr": "네 가방에 충전 케이블 있니?", "en": "Is there a charging cable in your bag?", "hint": "a charging cable + your bag" },
+        { "kr": "샐러드에 토마토 들어있나요?", "en": "Are there tomatoes in the salad?", "hint": "tomatoes + the salad" },
+        { "kr": "차에 흠집 하나 없었어.", "en": "There wasn’t a scratch on the car.", "hint": "a scratch + the car" },
+        { "kr": "네 손가락에 반창고가 붙어 있어.", "en": "There’s a band-aid on your finger.", "hint": "a band-aid + your finger" },
+        { "kr": "차에 티슈 있나요?", "en": "Is there a tissue in the car?", "hint": "a tissue + the car" },
+        { "kr": "노트북에 스티커들이 붙어 있어.", "en": "There are stickers on the laptop.", "hint": "stickers + the laptop" },
+        { "kr": "정수기 근처에 종이컵들이 있어요.", "en": "There are paper cups near the water dispenser.", "hint": "paper cups + the water dispenser" },
+        { "kr": "케이크 위에 딸기들 있어?", "en": "Are there strawberries on the cake?", "hint": "strawberries + the cake" },
+        { "kr": "웹사이트에 업데이트가 있었어요.", "en": "There was an update on the website.", "hint": "an update + the website" },
+        { "kr": "벤치 근처에 쓰레기통이 없어.", "en": "There isn’t a trash can near the bench.", "hint": "a trash can + the bench" },
+        { "kr": "사무실에 프린터 있나요?", "en": "Is there a printer in the office?", "hint": "a printer + the office" },
+        { "kr": "강을 따라 나무들이 있어.", "en": "There are trees along the river.", "hint": "trees + the river" },
+        { "kr": "쇼핑몰에서 행사가 있었어.", "en": "There was an event at the mall.", "hint": "an event + the mall" },
+        { "kr": "연결에 문제가 있었나요?", "en": "Was there a problem with the connection?", "hint": "a problem + the connection" },
+        { "kr": "과일 주변에 파리들이 꼬여 있어.", "en": "There are flies around the fruit.", "hint": "flies + the fruit" },
+        { "kr": "수영장에 아이들이 있니?", "en": "Are there kids in the pool?", "hint": "kids + the pool" },
+        { "kr": "지붕 위에 새가 한 마리 있어.", "en": "There’s a bird on the roof.", "hint": "a bird + the roof" },
+        { "kr": "지하 1층에 서점이 있어요.", "en": "There is a bookstore on B1.", "hint": "a bookstore + B1" }
+    ];
+
+    let orderArray = [];       
+    let orderPointer = -1;     
+    let currentTask = { kr: '', en: '', hint: '' };
+    let history = [];          
+    let playMode = 'manual';
+    let isHintEnabled = false; // 💡 초기 세팅 '힌트 끔'
+    let autoTimer = null;
+
+    function shuffleOrder() {
+        orderArray = Array.from({length: allClaims.length}, (_, i) => i);
+        for (let i = orderArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [orderArray[i], orderArray[j]] = [orderArray[j], orderArray[i]];
+        }
+        orderPointer = 0; 
+    }
+
+    function startTrainer() {
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        document.getElementById('progress-counter').classList.add('active');
+        
+        const miniContainer = document.getElementById('lvl-container-mini');
+        miniContainer.innerHTML = `<button class="lvl-btn" onclick="resetShuffleAndGenerate()">다시 섞기 🎲</button>`;
+        
+        shuffleOrder();
+        generate();
+    }
+
+    function resetShuffleAndGenerate() {
+        history = []; 
+        shuffleOrder();
+        generate();
+    }
+
+    function setHintMode(enabled) {
+        isHintEnabled = enabled;
+        document.getElementById('hint-off').className = `toggle-btn ${!enabled ? 'active' : ''}`;
+        document.getElementById('hint-on').className = `toggle-btn ${enabled ? 'hint-active' : ''}`;
+        
+        const hintEl = document.getElementById('hint-text');
+        if (enabled && currentTask.hint) {
+            hintEl.classList.add('show');
+        } else {
+            hintEl.classList.remove('show');
+        }
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+
+        if (isAuto) {
+            generate();
+        } else {
+            clearTimeout(autoTimer);
+            updateProgressBar(0, 0);
+        }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        
+        if (currentTask.kr) {
+            history.push({...currentTask});
+        }
+        if (history.length > 50) history.shift();
+
+        if (orderPointer >= orderArray.length || orderPointer < 0) {
+            shuffleOrder();
+        }
+
+        const targetIndex = orderArray[orderPointer];
+        currentTask = allClaims[targetIndex];
+        
+        updateDisplay();
+        document.getElementById('progress-counter').innerText = `[ ${orderPointer + 1} / ${allClaims.length} ]`;
+        
+        orderPointer++;
+
+        if (playMode === 'auto') {
+            runAutoCycle();
+        }
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000);
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000);
+            autoTimer = setTimeout(() => {
+                generate();
+            }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        
+        orderPointer--;
+        if(orderPointer < 1) orderPointer = 1;
+
+        currentTask = history.pop();
+        updateDisplay();
+        document.getElementById('progress-counter').innerText = `[ ${orderPointer - 1 || 1} / ${allClaims.length} ]`;
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.kr;
+        
+        const hintEl = document.getElementById('hint-text');
+        if (currentTask.hint) {
+            hintEl.innerText = `💡 단어 힌트: ${currentTask.hint}`;
+            if (isHintEnabled) hintEl.classList.add('show');
+            else hintEl.classList.remove('show');
+        } else {
+            hintEl.classList.remove('show');
+        }
+
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() {
+        document.getElementById('english-answer').classList.add('show');
+    }
+
+    const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
+    let currentBannerIdx = 0;
+    setInterval(() => {
+        currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+        const msg = bannerMsgs[currentBannerIdx];
+        document.getElementById('banner-icon').innerText = msg.icon;
+        document.getElementById('banner-title').innerText = msg.text;
+    }, 4000);
+</script>
+
+</body>
+</html>
