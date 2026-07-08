@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Can Request Pattern Trainer</title>
+    <!-- Pretendard 폰트 불러오기 (CDN) -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-blue: #1a365d;
+            --btn-blue: #2b6cb0;
+            --accent-green: #27ae60;
+            --bg-gray: #f8f9fa;
+        }
+
+        body { 
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
+            min-height: 100vh; background-color: var(--bg-gray); margin: 0; padding: 40px 0; color: #333; -webkit-font-smoothing: antialiased;
+        }
+
+        .card { 
+            background: white; padding: 30px 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            text-align: center; width: 95%; max-width: 500px; border: 1px solid #eee; position: relative; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        /* 상단 제어 바 (구석 버튼들) */
+        .top-controls {
+            display: none; width: 100%; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;
+            order: 1; gap: 8px;
+        }
+        .top-controls.active { display: flex; }
+
+        /* 우측 상단 토글들 세로 정렬 */
+        .right-controls {
+            display: flex; flex-direction: column; gap: 6px; align-items: flex-end;
+        }
+
+        /* 제목 스타일 */
+        h1 { 
+            color: var(--primary-blue); font-size: 20px !important; margin: 10px 0 5px 0; 
+            font-weight: 900; letter-spacing: -0.05em; line-height: 1.2; order: 2;
+        }
+
+        /* 진행률 표시기 */
+        .progress-counter {
+            font-size: 13px; font-weight: 700; color: #718096; margin-bottom: 15px; order: 2.5;
+            background: #edf2f7; padding: 2px 10px; border-radius: 20px; display: none;
+        }
+        .progress-counter.active { display: inline-block; }
+
+        /* 큰 문구 및 힌트 컨테이너 영역 고정 */
+        .task-container {
+            min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; order: 3; margin: 10px 0 15px 0; width: 100%;
+        }
+
+        #korean-task { 
+            font-size: 19px; font-weight: 700; 
+            color: #2d3748; line-height: 1.6; word-break: keep-all; 
+            padding: 0 10px; letter-spacing: -0.02em;
+        }
+
+        /* 💡 힌트 텍스트 스타일 */
+        #hint-text {
+            font-size: 14px; font-weight: 600; color: #3182ce; margin-top: 8px;
+            background: #ebf8ff; padding: 4px 12px; border-radius: 12px;
+            display: none; word-break: keep-all;
+        }
+        #hint-text.show { display: inline-block; }
+
+        /* 시작 버튼 컨테이너: 큰 문구 아래 */
+        .start-container { order: 4; margin-bottom: 20px; }
+        .lvl-btn { 
+            background: var(--btn-blue); color: white; border: none; padding: 12px 32px; 
+            border-radius: 50px; font-size: 15px; cursor: pointer; font-weight: 800; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(43, 108, 176, 0.2);
+        }
+        /* 구석으로 이동했을 때의 다시 섞기 버튼 스타일 */
+        .top-controls .lvl-btn { padding: 6px 14px; font-size: 12px; opacity: 0.9; box-shadow: 0 2px 8px rgba(43, 108, 176, 0.15); margin-top: 2px; }
+        .lvl-btn:active { transform: scale(0.95); }
+
+        /* 토글 버튼 공통 */
+        .auto-toggle {
+            display: flex; align-items: center; gap: 3px; background: #eee; padding: 4px; border-radius: 12px;
+        }
+        .toggle-btn {
+            padding: 4px 10px; font-size: 11px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; color: #868e96; transition: all 0.15s;
+        }
+        .toggle-btn.active { background: var(--primary-blue); color: white; }
+        .toggle-btn.hint-active { background: #3182ce; color: white; }
+        
+        /* 정답창 영역 고정 */
+        .answer-container {
+            min-height: 90px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 100%; order: 5;
+        }
+
+        #english-answer { 
+            font-size: 16px; color: var(--accent-green); width: 100%; padding: 15px; 
+            background: #f0fff4; border-radius: 12px; border: 1px solid #c6f6d5; font-weight: 600; 
+            line-height: 1.5; visibility: hidden; opacity: 0; transition: opacity 0.3s ease;
+        }
+        #english-answer.show { visibility: visible; opacity: 1; }
+
+        #action-area { order: 6; width: 100%; }
+        .main-controls { display: flex; justify-content: center; gap: 8px; }
+        .ans-btn { background: var(--btn-blue); color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .next-btn { background: #4a5568; color: white; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; border:none; font-size: 15px; }
+        .back-btn { background: transparent; color: #adb5bd; padding: 10px; border-radius: 12px; font-weight: 600; cursor: pointer; border: 1px dashed #dee2e6; font-size: 13px; margin-top: 15px; width: 100%; }
+        
+        .hidden { display: none !important; }
+        #banner-container { order: 7; }
+
+        /* 자동 모드 진행 바 */
+        #auto-progress {
+            width: 0%; height: 4px; background: #f59e0b; position: absolute; top: 0; left: 0; border-radius: 24px 24px 0 0; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="auto-progress"></div>
+
+    <!-- 연습 시작 후 나타날 구석 제어 바 -->
+    <div id="top-controls" class="top-controls">
+        <div id="lvl-container-mini"></div>
+        <div class="right-controls">
+            <!-- 수동/자동 토글 버튼 -->
+            <div class="auto-toggle">
+                <button id="mode-manual" class="toggle-btn active" onclick="setPlayMode('manual')">수동</button>
+                <button id="mode-auto" class="toggle-btn" onclick="setPlayMode('auto')">자동</button>
+            </div>
+            <!-- 💡 힌트 토글 버튼 -->
+            <div class="auto-toggle">
+                <button id="hint-off" class="toggle-btn active" onclick="setHintMode(false)">힌트 끔</button>
+                <button id="hint-on" class="toggle-btn" onclick="setHintMode(true)">힌트 켬</button>
+            </div>
+        </div>
+    </div>
+
+    <h1>⚡ Can 부탁하기 핵심 패턴 트레이너</h1>
+
+    <!-- 실시간 진행 갯수 카운터 -->
+    <div id="progress-counter" class="progress-counter">[ 0 / 100 ]</div>
+    
+    <!-- 한국어 문제와 힌트 텍스트가 함께 들어가는 공간 -->
+    <div class="task-container">
+        <div id="korean-task">입으로 소리 내어 훈련하세요! 🗣️</div>
+        <div id="hint-text">💡 힌트 영역</div>
+    </div>
+    
+    <!-- 첫 화면 중앙 시작 버튼 -->
+    <div id="start-container" class="start-container">
+        <button id="btn-start-main" class="lvl-btn" onclick="startTrainer()">트레이닝 시작</button>
+    </div>
+
+    <div class="answer-container">
+        <div id="english-answer"></div>
+    </div>
+    
+    <div id="action-area" class="control-group hidden">
+        <div class="main-controls">
+            <button id="manual-ans-btn" class="ans-btn" onclick="showAnswer()">정답 확인 👀</button>
+            <button id="manual-next-btn" class="next-btn" onclick="generate()">다음 상황 🎲</button>
+        </div>
+        <button class="back-btn" onclick="goBack()">이전 문장으로 되돌리기 ↩️</button>
+    </div>
+
+    <!-- PSE 광고 배너 -->
+    <div id="banner-container" class="promo-banner bg-white border border-blue-50 p-3 rounded-[1.5rem] mt-10 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div id="banner-content" class="banner-inner flex items-center gap-3 text-left">
+            <div id="banner-icon" class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+            <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center">
+                <h3 id="banner-title" class="font-black text-slate-800 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Can을 활용한 100가지 핵심 부탁 표현 데이터셋 (타동사 '명사' 규칙 완벽 적용)
+    const allClaims = [
+        { "kr": "우리 좀 태워줄래?", "en": "Can you give us a ride?", "hint": "give 명사" },
+        { "kr": "여기 주차해도 돼?", "en": "Can I park here?", "hint": "park" },
+        { "kr": "우리 것 좀 남겨줄래?", "en": "Can you save some for us?", "hint": "save 명사" },
+        { "kr": "2시에 깨워줄래?", "en": "Can you wake me up at 2?", "hint": "wake up 명사" },
+        { "kr": "공항에서 걔네들 데리고 와줄래?", "en": "Can you pick them up at the airport?", "hint": "pick up 명사" },
+        { "kr": "여기서 좀 쉬어도 돼?", "en": "Can I get some rest here?", "hint": "get 명사" },
+        { "kr": "오늘 일찍 퇴근해도 돼?", "en": "Can I get off work early today?", "hint": "get off 명사" },
+        { "kr": "화장실 좀 써도 돼?", "en": "Can I use the restroom?", "hint": "use 명사" },
+        { "kr": "언제 마트에 들릴 수 있어?", "en": "When can you stop by the mart?", "hint": "stop by 명사" },
+        { "kr": "창문 좀 열어줄래?", "en": "Can you open the window?", "hint": "open 명사" },
+        { "kr": "문 좀 닫아줄래?", "en": "Can you close the door?", "hint": "close 명사" },
+        { "kr": "소리 좀 줄여줄래?", "en": "Can you turn down the volume?", "hint": "turn down 명사" },
+        { "kr": "불 좀 켜줄래?", "en": "Can you turn on the light?", "hint": "turn on 명사" },
+        { "kr": "불 좀 꺼줄래?", "en": "Can you turn off the light?", "hint": "turn off 명사" },
+        { "kr": "이것 좀 들어줄래?", "en": "Can you hold this for me?", "hint": "hold 명사" },
+        { "kr": "소금 좀 건네줄래?", "en": "Can you pass me the salt?", "hint": "pass 명사" },
+        { "kr": "다시 한번 말해줄래?", "en": "Can you say that again?", "hint": "say 명사" },
+        { "kr": "천천히 말해줄래?", "en": "Can you speak slowly?", "hint": "speak" },
+        { "kr": "이것 좀 도와줄래?", "en": "Can you help me with this?", "hint": "help 명사" },
+        { "kr": "저희 사진 좀 찍어줄 수 있나요?", "en": "Can you take a picture of us?", "hint": "take 명사" },
+        { "kr": "나중에 전화해 줄래?", "en": "Can you call me later?", "hint": "call 명사" },
+        { "kr": "영수증 좀 받을 수 있을까요?", "en": "Can I get a receipt?", "hint": "get 명사" },
+        { "kr": "메뉴판 좀 볼 수 있을까요?", "en": "Can I see the menu?", "hint": "see 명사" },
+        { "kr": "계산서 좀 받을 수 있을까요?", "en": "Can I get the bill?", "hint": "get 명사" },
+        { "kr": "이거 입어봐도 돼?", "en": "Can I try this on?", "hint": "try on 명사" },
+        { "kr": "여기 앉아도 돼?", "en": "Can I sit here?", "hint": "sit" },
+        { "kr": "질문 하나 해도 돼?", "en": "Can I ask a question?", "hint": "ask 명사" },
+        { "kr": "펜 좀 빌릴 수 있을까?", "en": "Can I borrow a pen?", "hint": "borrow 명사" },
+        { "kr": "네 충전기 좀 쓸 수 있을까?", "en": "Can I use your charger?", "hint": "use 명사" },
+        { "kr": "메시지 좀 남겨도 될까?", "en": "Can I leave a message?", "hint": "leave 명사" },
+        { "kr": "환불받을 수 있나요?", "en": "Can I get a refund?", "hint": "get 명사" },
+        { "kr": "할인 받을 수 있나요?", "en": "Can I get a discount?", "hint": "get 명사" },
+        { "kr": "지금 주문해도 될까요?", "en": "Can I order now?", "hint": "order" },
+        { "kr": "이거 포장해 갈 수 있나요?", "en": "Can I get this to go?", "hint": "get 명사" },
+        { "kr": "어떻게 도와드릴까요?", "en": "How can I help you?", "hint": "help 명사" },
+        { "kr": "거기에 어떻게 갈 수 있나요?", "en": "How can I get there?", "hint": "get" },
+        { "kr": "당신께 어떻게 연락 드리면 될까요?", "en": "How can I contact you?", "hint": "contact 명사" },
+        { "kr": "이거 어떻게 예약할 수 있어요?", "en": "How can I book this?", "hint": "book 명사" },
+        { "kr": "너 걔네들 언제 만날 수 있어?", "en": "When can you meet them?", "hint": "meet 명사" },
+        { "kr": "언제 시작할 수 있어요?", "en": "When can you start?", "hint": "start" },
+        { "kr": "언제 결과를 받을 수 있을까요?", "en": "When can I get the results?", "hint": "get 명사" },
+        { "kr": "언제 끝낼 수 있어?", "en": "When can you finish?", "hint": "finish" },
+        { "kr": "언제 나한테 전화해 줄 수 있어?", "en": "When can you call me?", "hint": "call 명사" },
+        { "kr": "어디서 표를 살 수 있나요?", "en": "Where can I buy a ticket?", "hint": "buy 명사" },
+        { "kr": "택시를 어디서 잡을 수 있나요?", "en": "Where can I catch a taxi?", "hint": "catch 명사" },
+        { "kr": "손을 어디서 씻으면 되나요?", "en": "Where can I wash my hands?", "hint": "wash 명사" },
+        { "kr": "제 차 어디에 주차하면 돼요?", "en": "Where can I park my car?", "hint": "park 명사" },
+        { "kr": "내 가방 어디에 놔두면 돼?", "en": "Where can I leave my bag?", "hint": "leave 명사" },
+        { "kr": "제가 뭘 주문할 수 있나요?", "en": "What can I order?", "hint": "order 명사" },
+        { "kr": "제가 뭘 가져가도 되나요?", "en": "What can I take?", "hint": "take 명사" },
+        { "kr": "내가 누구를 만날 수 있어?", "en": "Who can I meet?", "hint": "meet 명사" },
+        { "kr": "제가 누구한테 물어보면 돼요?", "en": "Who can I ask?", "hint": "ask 명사" },
+        { "kr": "누가 절 도와줄 수 있나요?", "en": "Who can help me?", "hint": "help 명사" },
+        { "kr": "넌 왜 나 못 도와줘?", "en": "Why can't you help me?", "hint": "help 명사" },
+        { "kr": "너 왜 못 와?", "en": "Why can't you come?", "hint": "come" },
+        { "kr": "전 왜 그거 못 해요?", "en": "Why can't I do that?", "hint": "do 명사" },
+        { "kr": "이거 설명해 줄래?", "en": "Can you explain this?", "hint": "explain 명사" },
+        { "kr": "이것 확인해 줄래?", "en": "Can you check this?", "hint": "check 명사" },
+        { "kr": "이거 고쳐줄래?", "en": "Can you fix this?", "hint": "fix 명사" },
+        { "kr": "이거 교환해 줄래요?", "en": "Can you exchange this?", "hint": "exchange 명사" },
+        { "kr": "이거 보관해 주실 수 있나요?", "en": "Can you keep this for me?", "hint": "keep 명사" },
+        { "kr": "더 크게 말해줄래?", "en": "Can you speak louder?", "hint": "speak" },
+        { "kr": "스펠링을 알려줄래?", "en": "Can you spell that?", "hint": "spell 명사" },
+        { "kr": "메시지 전달해줄래?", "en": "Can you pass a message?", "hint": "pass 명사" },
+        { "kr": "이것 좀 빌릴 수 있을까?", "en": "Can I borrow this?", "hint": "borrow 명사" },
+        { "kr": "잠깐만 나갔다 와도 돼?", "en": "Can I step out for a moment?", "hint": "step out" },
+        { "kr": "사진 찍어도 돼?", "en": "Can I take a picture?", "hint": "take 명사" },
+        { "kr": "이거 테스트해 봐도 돼?", "en": "Can I test this?", "hint": "test 명사" },
+        { "kr": "제 예약을 변경할 수 있을까요?", "en": "Can I change my reservation?", "hint": "change 명사" },
+        { "kr": "친구 한 명 더 데려와도 돼?", "en": "Can I bring one more friend?", "hint": "bring 명사" },
+        { "kr": "조금 더 먹어도 돼?", "en": "Can I eat some more?", "hint": "eat 명사" },
+        { "kr": "나랑 자리 좀 바꿔줄래?", "en": "Can you switch seats with me?", "hint": "switch 명사" },
+        { "kr": "나한테 위치 좀 보내줄래?", "en": "Can you send me your location?", "hint": "send 명사" },
+        { "kr": "택시 좀 불러줄래?", "en": "Can you call a taxi for me?", "hint": "call 명사" },
+        { "kr": "안내해 주실 수 있나요?", "en": "Can you guide me?", "hint": "guide 명사" },
+        { "kr": "조용히 좀 해줄래?", "en": "Can you be quiet?", "hint": "be" },
+        { "kr": "잠깐 기다려줄래?", "en": "Can you wait a second?", "hint": "wait" },
+        { "kr": "우리 나중에 이야기할 수 있을까?", "en": "Can we talk later?", "hint": "talk" },
+        { "kr": "언제 체크인할 수 있나요?", "en": "When can I check in?", "hint": "check in" },
+        { "kr": "어떻게 환불받을 수 있나요?", "en": "How can I get a refund?", "hint": "get 명사" },
+        { "kr": "어떻게 신청하면 돼요?", "en": "How can I apply?", "hint": "apply" },
+        { "kr": "이것 좀 버려줄래?", "en": "Can you throw this away?", "hint": "throw away 명사" },
+        { "kr": "나중에 다시 와 줄래?", "en": "Can you come back later?", "hint": "come back" },
+        { "kr": "내일 일찍 와줄 수 있어?", "en": "Can you come early tomorrow?", "hint": "come" },
+        { "kr": "다른 것 좀 볼 수 있을까요?", "en": "Can I see another one?", "hint": "see 명사" },
+        { "kr": "나한테 연락해 줄래?", "en": "Can you get in touch with me?", "hint": "get in touch with 명사" },
+        { "kr": "불(온도) 좀 줄여줄래?", "en": "Can you turn down the heat?", "hint": "turn down 명사" },
+        { "kr": "나도 같이 가도 돼?", "en": "Can I come with you?", "hint": "come with 명사" },
+        { "kr": "여기서 기다려도 돼?", "en": "Can I wait here?", "hint": "wait" },
+        { "kr": "언제 다시 방문하면 될까요?", "en": "When can I visit again?", "hint": "visit" },
+        { "kr": "언제 다시 전화 주실 수 있나요?", "en": "When can you call me back?", "hint": "call back 명사" },
+        { "kr": "어디서 신발을 벗어야 하나요?", "en": "Where can I take off my shoes?", "hint": "take off 명사" },
+        { "kr": "어디서 지도를 얻을 수 있나요?", "en": "Where can I get a map?", "hint": "get 명사" },
+        { "kr": "어떻게 시작하면 돼요?", "en": "How can I start?", "hint": "start" },
+        { "kr": "내가 무슨 말을 할 수 있겠어?", "en": "What can I say?", "hint": "say 명사" },
+        { "kr": "나 거기서 내려줄래?", "en": "Can you drop me off there?", "hint": "drop off 명사" },
+        { "kr": "옆으로 좀 비켜줄래?", "en": "Can you move over?", "hint": "move over" },
+        { "kr": "제가 좀 지나가도 될까요?", "en": "Can I get through?", "hint": "get through" },
+        { "kr": "나랑 잠깐 얘기 좀 할까?", "en": "Can I talk to you for a second?", "hint": "talk to 명사" },
+        { "kr": "화장실이 어디인가요?", "en": "Where can I find the restroom?", "hint": "find 명사" }
+    ];
+
+    let orderArray = [];       
+    let orderPointer = -1;     
+    let currentTask = { kr: '', en: '', hint: '' };
+    let history = [];          
+    let playMode = 'manual';
+    let isHintEnabled = false; 
+    let autoTimer = null;
+
+    function shuffleOrder() {
+        orderArray = Array.from({length: allClaims.length}, (_, i) => i);
+        for (let i = orderArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [orderArray[i], orderArray[j]] = [orderArray[j], orderArray[i]];
+        }
+        orderPointer = 0; 
+    }
+
+    function startTrainer() {
+        document.getElementById('start-container').classList.add('hidden');
+        document.getElementById('top-controls').classList.add('active');
+        document.getElementById('action-area').classList.remove('hidden');
+        document.getElementById('progress-counter').classList.add('active');
+        
+        const miniContainer = document.getElementById('lvl-container-mini');
+        miniContainer.innerHTML = `<button class="lvl-btn" onclick="resetShuffleAndGenerate()">다시 섞기 🎲</button>`;
+        
+        shuffleOrder();
+        generate();
+    }
+
+    function resetShuffleAndGenerate() {
+        history = []; 
+        shuffleOrder();
+        generate();
+    }
+
+    function setHintMode(enabled) {
+        isHintEnabled = enabled;
+        document.getElementById('hint-off').className = `toggle-btn ${!enabled ? 'active' : ''}`;
+        document.getElementById('hint-on').className = `toggle-btn ${enabled ? 'hint-active' : ''}`;
+        
+        const hintEl = document.getElementById('hint-text');
+        if (enabled && currentTask.hint) {
+            hintEl.classList.add('show');
+        } else {
+            hintEl.classList.remove('show');
+        }
+    }
+
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('mode-manual').className = `toggle-btn ${mode === 'manual' ? 'active' : ''}`;
+        document.getElementById('mode-auto').className = `toggle-btn ${mode === 'auto' ? 'active' : ''}`;
+        
+        const isAuto = (mode === 'auto');
+        document.getElementById('manual-ans-btn').disabled = isAuto;
+        document.getElementById('manual-next-btn').disabled = isAuto;
+        document.getElementById('manual-ans-btn').style.opacity = isAuto ? "0.5" : "1";
+        document.getElementById('manual-next-btn').style.opacity = isAuto ? "0.5" : "1";
+
+        if (isAuto) {
+            generate();
+        } else {
+            clearTimeout(autoTimer);
+            updateProgressBar(0, 0);
+        }
+    }
+
+    function generate() {
+        clearTimeout(autoTimer);
+        
+        if (currentTask.kr) {
+            history.push({...currentTask});
+        }
+        if (history.length > 50) history.shift();
+
+        if (orderPointer >= orderArray.length || orderPointer < 0) {
+            shuffleOrder();
+        }
+
+        const targetIndex = orderArray[orderPointer];
+        currentTask = allClaims[targetIndex];
+        
+        updateDisplay();
+        document.getElementById('progress-counter').innerText = `[ ${orderPointer + 1} / ${allClaims.length} ]`;
+        
+        orderPointer++;
+
+        if (playMode === 'auto') {
+            runAutoCycle();
+        }
+    }
+
+    function runAutoCycle() {
+        updateProgressBar(100, 5000);
+        autoTimer = setTimeout(() => {
+            showAnswer();
+            updateProgressBar(100, 3000);
+            autoTimer = setTimeout(() => {
+                generate();
+            }, 3000);
+        }, 5000);
+    }
+
+    function updateProgressBar(width, duration) {
+        const bar = document.getElementById('auto-progress');
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        if(duration > 0) {
+            setTimeout(() => {
+                bar.style.transition = `width ${duration}ms linear`;
+                bar.style.width = '100%';
+            }, 10);
+        }
+    }
+
+    function goBack() {
+        if (history.length === 0) return;
+        if (playMode === 'auto') setPlayMode('manual');
+        
+        orderPointer--;
+        if(orderPointer < 1) orderPointer = 1;
+
+        currentTask = history.pop();
+        updateDisplay();
+        document.getElementById('progress-counter').innerText = `[ ${orderPointer - 1 || 1} / ${allClaims.length} ]`;
+    }
+
+    function updateDisplay() {
+        document.getElementById('korean-task').innerText = currentTask.kr;
+        
+        const hintEl = document.getElementById('hint-text');
+        if (currentTask.hint) {
+            hintEl.innerText = `💡 동사 힌트: ${currentTask.hint}`;
+            if (isHintEnabled) hintEl.classList.add('show');
+            else hintEl.classList.remove('show');
+        } else {
+            hintEl.classList.remove('show');
+        }
+
+        const ans = document.getElementById('english-answer');
+        ans.classList.remove('show');
+        ans.innerText = currentTask.en;
+    }
+
+    function showAnswer() {
+        document.getElementById('english-answer').classList.add('show');
+    }
+
+    const bannerMsgs = [{ icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }];
+    let currentBannerIdx = 0;
+    setInterval(() => {
+        currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+        const msg = bannerMsgs[currentBannerIdx];
+        document.getElementById('banner-icon').innerText = msg.icon;
+        document.getElementById('banner-title').innerText = msg.text;
+    }, 4000);
+</script>
+
+</body>
+</html>
