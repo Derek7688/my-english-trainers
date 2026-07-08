@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>용사 노하우의 모험: 하우하우를 퇴치하라!</title>
+    <!-- Pretendard 폰트 & 레트로 폰트 불러오기 -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Galmuri9:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS (배너 및 정렬용) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            word-break: keep-all;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #05050a;
+            color: #fff;
+            font-family: 'Galmuri9', "Pretendard Variable", Pretendard, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 500px;
+            height: 780px;
+            background: #181824;
+            border: 4px solid #5a5a8a;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            position: relative;
+            box-shadow: 0 0 20px rgba(112, 161, 255, 0.2);
+            overflow: hidden;
+        }
+
+        /* 오프닝 연출 */
+        .story-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 20px 20px 20px;
+            text-align: center;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .stars-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+                        radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+                        radial-gradient(1px 1px at 90px 40px, #fff, rgba(0,0,0,0)),
+                        radial-gradient(2px 2px at 160px 120px, #ddd, rgba(0,0,0,0)),
+                        radial-gradient(1.5px 1.5px at 230px 190px, #fff, rgba(0,0,0,0)),
+                        radial-gradient(2px 2px at 300px 80px, #eee, rgba(0,0,0,0)),
+                        radial-gradient(2px 2px at 370px 240px, #fff, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 400px 300px;
+            opacity: 0.8;
+            animation: twinkle 4s infinite alternate;
+            z-index: 1;
+        }
+
+        @keyframes twinkle {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.05); opacity: 0.9; }
+        }
+
+        .story-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .star-wars-title {
+            font-family: 'Press Start 2P', cursive;
+            color: #ffe81f;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px rgba(255, 232, 31, 0.7);
+            animation: titlePulse 2s infinite alternate;
+        }
+
+        @keyframes titlePulse {
+            0% { transform: scale(0.98); }
+            100% { transform: scale(1.03); }
+        }
+
+        .story-scroll-box {
+            flex: 1;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            margin: 10px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .story-scroll {
+            position: absolute;
+            width: 100%;
+            color: #f1f1f1;
+            font-size: 0.95rem;
+            line-height: 1.9;
+            text-shadow: 0 0 5px rgba(255, 232, 31, 0.4);
+            animation: scrollText 14s linear infinite;
+            padding: 0 10px;
+        }
+
+        .story-scroll p {
+            margin: 10px 0;
+            word-break: keep-all;
+        }
+
+        @keyframes scrollText {
+            0% { top: 100%; }
+            100% { top: -130%; }
+        }
+
+        .story-scroll strong {
+            color: #ffe81f;
+        }
+
+        .start-btn {
+            position: relative;
+            z-index: 2;
+            font-family: 'Galmuri9', sans-serif;
+            background: #ffe81f;
+            color: #000;
+            border: 3px solid #fff;
+            padding: 12px 35px;
+            font-size: 1.15rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 232, 31, 0.6);
+            transition: all 0.2s;
+            margin-bottom: 12px;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.08);
+            background: #ffffff;
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.9);
+        }
+
+        /* 상태창 */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #252538;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+            border: 1px solid #444466;
+        }
+
+        .hearts {
+            color: #ff4757;
+            letter-spacing: 2px;
+        }
+
+        /* 전투 영역 */
+        .battle-arena {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin: 10px 0;
+        }
+
+        .monster-box {
+            text-align: center;
+            transition: transform 0.1s ease;
+        }
+
+        .monster-avatar {
+            font-size: 70px;
+            filter: drop-shadow(0 0 12px rgba(255, 71, 87, 0.6));
+            animation: monsterFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes monsterFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .monster-name {
+            font-size: 1.1rem;
+            color: #ff6b81;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        .dialog-box {
+            background: rgba(0, 0, 0, 0.75);
+            border: 2px solid #70a1ff;
+            border-radius: 10px;
+            padding: 12px;
+            width: 100%;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 1rem;
+            line-height: 1.4;
+            color: #eccc68;
+            min-height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 10px rgba(112, 161, 255, 0.3);
+            word-break: keep-all;
+        }
+
+        /* 선택지 */
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .option-btn {
+            font-family: 'Galmuri9', sans-serif;
+            background: #2ed573;
+            color: #1e1e2f;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: #7bed9f;
+            transform: translateY(-2px);
+        }
+
+        .option-btn.disabled {
+            background: #444455 !important;
+            color: #888899 !important;
+            cursor: not-allowed !important;
+            text-decoration: line-through;
+            opacity: 0.6;
+            transform: none !important;
+        }
+
+        /* 다음 문제 진행 버튼 */
+        .next-stage-btn {
+            font-family: 'Galmuri9', sans-serif;
+            background: #ffe81f;
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+            box-shadow: 0 0 10px rgba(255, 232, 31, 0.4);
+            animation: pulseBtn 1.5s infinite alternate;
+        }
+
+        @keyframes pulseBtn {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.02); }
+        }
+
+        .next-stage-btn:hover {
+            background: #ffffff;
+        }
+
+        /* 애니메이션 효과 */
+        .hit-monster {
+            animation: hitAnimation 0.4s ease;
+        }
+
+        .player-damaged {
+            animation: damageAnimation 0.4s ease;
+        }
+
+        @keyframes hitAnimation {
+            0% { transform: scale(1); filter: brightness(1); }
+            20% { transform: scale(0.8) rotate(-10deg); filter: brightness(3) drop-shadow(0 0 20px red); }
+            40% { transform: scale(1.1) rotate(10deg); }
+            100% { transform: scale(1); filter: brightness(1); }
+        }
+
+        @keyframes damageAnimation {
+            0% { background-color: #181824; }
+            50% { background-color: #ff4757; }
+            100% { background-color: #181824; }
+        }
+
+        /* 엔딩 / 오버레이 */
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            text-align: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .wasted-text {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 3rem;
+            color: #ff4757;
+            text-shadow: 0 0 20px rgba(255, 71, 87, 0.8);
+            margin-bottom: 20px;
+        }
+
+        .victory-text {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.3rem;
+            color: #eccc68;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .ending-desc {
+            font-size: 1rem;
+            color: #ffa502;
+            margin-bottom: 20px;
+            line-height: 1.7;
+            word-break: keep-all;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            max-width: 320px;
+            margin: 0 auto;
+        }
+
+        .restart-btn, .review-btn {
+            font-family: 'Galmuri9', sans-serif;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            text-align: center;
+        }
+
+        .restart-btn {
+            background: #70a1ff;
+            color: #fff;
+        }
+
+        .restart-btn:hover {
+            background: #1e90ff;
+        }
+
+        .review-btn {
+            background: #eccc68;
+            color: #1e1e2f;
+        }
+
+        .review-btn:hover {
+            background: #ffa502;
+        }
+
+        .review-box {
+            display: none;
+            width: 100%;
+            max-width: 380px;
+            max-height: 260px;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid #5a5a8a;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: left;
+            margin: 0 auto 20px auto;
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+
+        .review-item {
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #444466;
+        }
+
+        .review-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .wrong-ans {
+            color: #ff4757;
+            text-decoration: line-through;
+        }
+
+        .correct-ans {
+            color: #2ed573;
+            font-weight: bold;
+        }
+
+        .promo-banner {
+            font-family: "Pretendard Variable", Pretendard, sans-serif !important;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <!-- 오프닝 스토리 화면 -->
+    <div class="story-overlay" id="story-screen">
+        <div class="stars-bg"></div>
+        <div class="story-content">
+            <div class="star-wars-title">Episode IV<br>A NEW KNOW-HOW</div>
+            <div class="story-scroll-box">
+                <div class="story-scroll">
+                    <p>평화롭던 영어 회화 제국...</p>
+                    <p>의문문 생태계를 흔드는 괴물<br><strong>'하우하우'</strong>가 나타났다!</p>
+                    <p>녀석은 한국인을 낚는 교묘한 질문으로<br>말문을 막히게 하고 있었다.</p>
+                    <p>이에 맞선 유일한 용사 <strong>'나'</strong>...</p>
+                    <p>황금 비율로 조합된 10개의 관문을 통과하고<br>지혜를 증명하여, 전설의 마스터<br><strong>"노하우"</strong>가 되어라!</p>
+                </div>
+            </div>
+            <button class="start-btn" onclick="startGame()">⚔️ 게임 시작</button>
+            
+            <!-- 첫 화면 배너 광고 -->
+            <div class="promo-banner bg-white border border-blue-50 p-2.5 rounded-[1.2rem] cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto relative z-10" 
+                 onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+                <div class="banner-inner flex items-center gap-3 text-left">
+                    <div class="banner-icon w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-lg shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+                    <div class="flex-1 overflow-hidden h-9 flex flex-col justify-center">
+                        <h3 class="banner-title font-black text-slate-800 text-[12px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                        <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 상태창 -->
+    <div class="status-bar">
+        <div>STAGE <span id="stage-num">1</span> / 10</div>
+        <div class="hearts" id="hearts">❤️❤️❤️</div>
+    </div>
+
+    <!-- 전투 아레나 -->
+    <div class="battle-arena">
+        <div class="monster-box" id="monster">
+            <div class="monster-avatar">👾</div>
+            <div class="monster-name">하우하우</div>
+        </div>
+        <div class="dialog-box" id="dialog">
+            "내 문제를 맞춰봐라!"
+        </div>
+    </div>
+
+    <!-- 선택지 -->
+    <div class="options-container" id="options"></div>
+
+    <!-- 게임 화면 인게임 배너 광고 -->
+    <div class="promo-banner bg-white border border-blue-50 p-2.5 rounded-[1.2rem] cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+         onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+        <div class="banner-inner flex items-center gap-3 text-left">
+            <div class="banner-icon w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-lg shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+            <div class="flex-1 overflow-hidden h-9 flex flex-col justify-center">
+                <h3 class="banner-title font-black text-slate-800 text-[12px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 결과 오버레이 (가운데 정렬 반영) -->
+    <div class="overlay" id="overlay">
+        <div id="overlay-content" class="flex flex-col items-center justify-center w-full"></div>
+    </div>
+</div>
+
+<script>
+    const masterQuizBank = [
+        // a. WAS_IS
+        { cat: "WAS_IS", q: "새로 개봉한 영화 어땠어?", options: ["How is the new movie?", "How was the new movie?", "How far was the new movie?"], answer: 1 },
+        { cat: "WAS_IS", q: "어제 면접 분위기 어땠어?", options: ["How was the atmosphere at the interview yesterday?", "How much was the atmosphere at the interview yesterday?", "How were you the atmosphere at the interview yesterday?"], answer: 0 },
+        { cat: "WAS_IS", q: "지난주 여행 어땠어?", options: ["How was your trip last week?", "How was last week’s trip?", "How was your trip on the last week?"], answer: 0 },
+        { cat: "WAS_IS", q: "어제 콘서트 분위기 어땠어?", options: ["How was the atmosphere at the concert yesterday?", "How is the atmosphere at the concert yesterday?", "How far was the atmosphere at the concert yesterday?"], answer: 0 },
+        { cat: "WAS_IS", q: "어제 저녁 파티 음식 어땠어?", options: ["How was the food at the party last night?", "How is the food at the party last night?", "How far was the food at the party last night?"], answer: 0 },
+        { cat: "WAS_IS", q: "지난 주말 날씨 어땠어?", options: ["How was the weather last weekend?", "How is the weather last weekend?", "How far was the weather last weekend?"], answer: 0 },
+        { cat: "WAS_IS", q: "오늘 아침 회의 어땠어?", options: ["How was the morning meeting today?", "How is the morning meeting today?", "How far was the morning meeting today?"], answer: 0 },
+        { cat: "WAS_IS", q: "지난밤 야시장 분위기 어땠어?", options: ["How was the atmosphere at the night market last night?", "How is the atmosphere at the night market last night?", "How far was the atmosphere at the night market last night?"], answer: 0 },
+
+        // b. FAR
+        { cat: "FAR", q: "여기서 공항까지 얼마나 멀어?", options: ["How much far is the airport from here?", "How far is the airport from here?", "How much is the airport from here?"], answer: 1 },
+        { cat: "FAR", q: "여기서 지하철역까지 얼마나 멀어?", options: ["How far is the subway station from here?", "How much far is the subway station from here?", "How is the subway station far from here?"], answer: 0 },
+        { cat: "FAR", q: "네 집에서 회사까지 얼마나 멀어?", options: ["How long is your house from the office?", "How far is your house from the office?", "How distance is your house from the office?"], answer: 1 },
+        { cat: "FAR", q: "너희 학교에서 마트까지 얼마나 멀어?", options: ["How far is the market from your school?", "How much far is the market from your school?", "How much is the market from your school?"], answer: 0 },
+        { cat: "FAR", q: "너희 집에서 해변까지 얼마나 멀어?", options: ["How far is the beach from your house?", "How long is the beach from your house?", "How much is the beach from your house?"], answer: 0 },
+        { cat: "FAR", q: "여기서 버스 정류장까지 얼마나 멀어?", options: ["How far is the bus stop from here?", "How long is the bus stop from here?", "How much is the bus stop from here?"], answer: 0 },
+        { cat: "FAR", q: "네 사무실에서 은행까지 얼마나 멀어?", options: ["How far is the bank from your office?", "How long is the bank from your office?", "How much distance is the bank from your office?"], answer: 0 },
+        { cat: "FAR", q: "너희 학교에서 도서관까지 얼마나 멀어?", options: ["How far is the library from your school?", "How long is the library from your school?", "How much is the library from your school?"], answer: 0 },
+        { cat: "FAR", q: "호텔에서 공항까지 얼마나 멀어?", options: ["How far is the airport from the hotel?", "How long is the airport from the hotel?", "How much is the airport from the hotel?"], answer: 0 },
+        { cat: "FAR", q: "너희 집에서 가장 가까운 병원까지 얼마나 멀어?", options: ["How far is the nearest hospital from your house?", "How long is the nearest hospital from your house?", "How much distance is the nearest hospital from your house?"], answer: 0 },
+
+        // c. CLOSE
+        { cat: "CLOSE", q: "너 걔(여자)랑 얼마나 친해?", options: ["How closed are you with her?", "How close are you to her?", "How much close are you to her?"], answer: 1 },
+        { cat: "CLOSE", q: "너 새 회사 동료랑 얼마나 친해?", options: ["How much close are you to your new coworker?", "How close are you to your new coworker?", "How is your coworker close to you?"], answer: 1 },
+        { cat: "CLOSE", q: "너 그 감독이랑 얼마나 친해?", options: ["How close are you to the director?", "How close is you with the director?", "How much close are you to the director?"], answer: 0 },
+        { cat: "CLOSE", q: "너 새로 온 룸메이트랑 얼마나 친해?", options: ["How close are you to your new roommate?", "How much close are you with your new roommate?", "How are you close to your new roommate?"], answer: 0 },
+        { cat: "CLOSE", q: "너 네 사촌이랑 얼마나 친해?", options: ["How close are you to your cousin?", "How close is you to your cousin?", "How much close are you to your cousin?"], answer: 0 },
+        { cat: "CLOSE", q: "너 이웃들이랑 얼마나 친해?", options: ["How close are you to your neighbors?", "How close is you to your neighbors?", "How much close are you to your neighbors?"], answer: 0 },
+        { cat: "CLOSE", q: "너 네 직장 상사랑 얼마나 친해?", options: ["How close are you to your boss?", "How close is you with your boss?", "How much close are you to your boss?"], answer: 0 },
+        { cat: "CLOSE", q: "너 동아리 부원들이랑 얼마나 친해?", options: ["How close are you to your club members?", "How close is you to your club members?", "How much close are you to your club members?"], answer: 0 },
+        { cat: "CLOSE", q: "너 네 멘토랑 얼마나 친해?", options: ["How close are you to your mentor?", "How close is you to your mentor?", "How much close are you to your mentor?"], answer: 0 },
+        { cat: "CLOSE", q: "너 옆집 사람하고 얼마나 친해?", options: ["How close are you to your next-door neighbor?", "How close is you with your next-door neighbor?", "How much close are you to your next-door neighbor?"], answer: 0 },
+
+        // d. FEELING
+        { cat: "FEELING", q: "너 어제 파티에서 얼마나 취했던 거야?", options: ["How drunk were you at the party yesterday?", "How were you drunk at the party yesterday?", "How much were you drunk at the party yesterday?"], answer: 0 },
+        { cat: "FEELING", q: "너 어제 얼마나 피곤했던 거야?", options: ["How much tired were you yesterday?", "How tired are you yesterday?", "How tired were you yesterday?"], answer: 2 },
+        { cat: "FEELING", q: "너 어제 얼마나 화났던 거야?", options: ["How angry were you yesterday?", "How much angry were you yesterday?", "How were you angry yesterday?"], answer: 0 },
+        { cat: "FEELING", q: "너 지난주에 얼마나 아팠던 거야?", options: ["How much sick were you last week?", "How sick were you last week?", "How were you sick last week?"], answer: 1 },
+        { cat: "FEELING", q: "너 시험 끝나고 얼마나 기뻤던 거야?", options: ["How happy were you after the exam?", "How happy was you after the exam?", "How much happy were you after the exam?"], answer: 0 },
+        { cat: "FEELING", q: "너 소식을 듣고 얼마나 놀랐던 거야?", options: ["How surprised were you at the news?", "How surprised was you at the news?", "How much surprised were you at the news?"], answer: 0 },
+        { cat: "FEELING", q: "너 어제 소식 듣고 얼마나 슬펐던 거야?", options: ["How sad were you yesterday?", "How sad was you yesterday?", "How much sad were you yesterday?"], answer: 0 },
+        { cat: "FEELING", q: "너 어제 경기 지고 얼마나 안타까웠던 거야?", options: ["How disappointed were you yesterday?", "How disappointed was you yesterday?", "How much disappointed were you yesterday?"], answer: 0 },
+        { cat: "FEELING", q: "너 사고 소식 듣고 얼마나 걱정했던 거야?", options: ["How worried were you about the accident?", "How worried was you about the accident?", "How much worried were you about the accident?"], answer: 0 },
+        { cat: "FEELING", q: "너 시험 결과 보고 얼마나 감격했던 거야?", options: ["How touched were you by the exam result?", "How touched was you by the exam result?", "How much touched were you by the exam result?"], answer: 0 },
+        { cat: "FEELING", q: "너 복권 당첨됐을 때 얼마나 신났던 거야?", options: ["How excited were you when you won the lottery?", "How excited was you when you won the lottery?", "How much excited were you when you won the lottery?"], answer: 0 },
+
+        // e. POPULAR
+        { cat: "POPULAR", q: "미국에서 한국 음식 인기 얼마나 대단해?", options: ["How famous is K-food in America?", "How popular is K-food in America?", "How much popular is K-food in America?"], answer: 1 },
+        { cat: "POPULAR", q: "LA에서 손흥민 선수 얼마나 인기 있어?", options: ["How famous is Son Heung-min in LA?", "How popular is Son Heung-min in LA?", "How much popular is Son Heung-min in LA?"], answer: 1 },
+        { cat: "POPULAR", q: "한국에서 그가 얼마나 인기 있어?", options: ["How popular is he in Korea?", "How is he popular in Korea?", "How much popular is he in Korea?"], answer: 0 },
+        { cat: "POPULAR", q: "남미에서 축구가 얼마나 인기 있어?", options: ["How popular is soccer in South America?", "How is soccer popular in South America?", "How much popular is soccer in South America?"], answer: 0 },
+        { cat: "POPULAR", q: "프랑스에서 한국 드라마 얼마나 인기 있어?", options: ["How popular is Korean drama in France?", "How famous is Korean drama in France?", "How many popular is Korean drama in France?"], answer: 0 },
+        { cat: "POPULAR", q: "북미에서 라면 얼마나 인기 있어?", options: ["How popular is Ramen in North America?", "How famous is Ramen in North America?", "How many popular is Ramen in North America?"], answer: 0 },
+        { cat: "POPULAR", q: "아시아에서 손흥민 선수 얼마나 인기 있어?", options: ["How popular is Son Heung-min in Asia?", "How famous is Son Heung-min in Asia?", "How many popular is Son Heung-min in Asia?"], answer: 0 },
+        { cat: "POPULAR", q: "베트남에서 떡볶이 얼마나 인기 있어?", options: ["How popular is Tteokbokki in Vietnam?", "How famous is Tteokbokki in Vietnam?", "How many popular is Tteokbokki in Vietnam?"], answer: 0 },
+        { cat: "POPULAR", q: "캐나다에서 아이스하키 얼마나 인기 있어?", options: ["How popular is ice hockey in Canada?", "How famous is ice hockey in Canada?", "How many popular is ice hockey in Canada?"], answer: 0 },
+        { cat: "POPULAR", q: "태국에서 한국 화장품 얼마나 인기 있어?", options: ["How popular is Korean cosmetics in Thailand?", "How famous is Korean cosmetics in Thailand?", "How many popular is Korean cosmetics in Thailand?"], answer: 0 },
+
+        // f. TALL
+        { cat: "TALL", q: "너 고등학생 때 키가 얼마였어?", options: ["How much high were you in high school?", "How tall were you in high school?", "How many tall are you in high school?"], answer: 1 },
+        { cat: "TALL", q: "너 중학생 때 키가 몇이었어?", options: ["How high were you in middle school?", "How tall were you in middle school?", "How tall was you in middle school?"], answer: 1 },
+        { cat: "TALL", q: "너 초등학생 때 키 몇이었어?", options: ["How tall were you in elementary school?", "How high were you in elementary school?", "How tall was you in elementary school?"], answer: 0 },
+        { cat: "TALL", q: "너 군대에 있을 때 키 몇이었어?", options: ["How tall were you in the army?", "How high were you in the army?", "How tall is you in the army?"], answer: 0 },
+        { cat: "TALL", q: "너 20살 때 키 몇이었어?", options: ["How tall were you at twenty?", "How high were you at twenty?", "How tall was you at twenty?"], answer: 0 },
+        { cat: "TALL", q: "너 고등학교 졸업할 때 키 몇이었어?", options: ["How tall were you at high school graduation?", "How high were you at high school graduation?", "How tall was you at high school graduation?"], answer: 0 },
+        { cat: "TALL", q: "너 대학 입학할 때 키 몇이었어?", options: ["How tall were you in college?", "How high were you in college?", "How tall was you in college?"], answer: 0 },
+        { cat: "TALL", q: "너 신체검사할 때 키 몇이었어?", options: ["How tall were you during the medical checkup?", "How high were you during the medical checkup?", "How tall was you during the medical checkup?"], answer: 0 },
+        { cat: "TALL", q: "너 지난달 건강검진 때 키 몇이었어?", options: ["How tall were you at the health checkup last month?", "How high were you at the health checkup last month?", "How tall was you at the health checkup last month?"], answer: 0 },
+        { cat: "TALL", q: "너 중학교 졸업할 때 키 몇이었어?", options: ["How tall were you at middle school graduation?", "How high were you at middle school graduation?", "How tall was you at middle school graduation?"], answer: 0 },
+
+        // g. THERE
+        { cat: "THERE", q: "너 여기 오는 길에 차 얼마나 막혔어?", options: ["How much traffic was there on your way here?", "How many was there traffic on your way here?", "How many cars was there traffic on your way here?"], answer: 0 },
+        { cat: "THERE", q: "쉬는 시간까지 몇 분 남았어?", options: ["How much minutes are there left until the break time?", "How many minutes are there left until the break time?", "How many are there minutes left until the break time?"], answer: 1 },
+        { cat: "THERE", q: "사무실에 A4 용지 얼마나 남았어?", options: ["How much A4 paper is there left in the office?", "How many A4 papers are there left in the office?", "How much A4 papers are there left in the office?"], answer: 0 },
+        { cat: "THERE", q: "잠실역까지 몇 정거장 남았어?", options: ["How many stations are there left until Jamsil station?", "How much stations are there left until Jamsil station?", "How many are there stations left until Jamsil station?"], answer: 0 },
+        { cat: "THERE", q: "이번 달에 생일인 사람 몇 명이나 있어?", options: ["How many birthdays are there this month?", "How many people are there birthdays this month?", "How many people’s birthdays are there this month?"], answer: 0 },
+        { cat: "THERE", q: "냉장고에 계란 몇 개 남아있어?", options: ["How much eggs are there left in the fridge?", "How many eggs are there left in the fridge?", "How many are there eggs left in the fridge?"], answer: 1 },
+        { cat: "THERE", q: "오늘 업무가 얼마나 남아있어?", options: ["How much work is there left today?", "How many works are there left today?", "How much is there work left today?"], answer: 0 },
+        { cat: "THERE", q: "도서관에 남아있는 좌석 얼마나 있어?", options: ["How much seat are there left in the library?", "How many seats are there left in the library?", "How many seats is there left in the library?"], answer: 1 },
+        { cat: "THERE", q: "목적지까지 몇 정거장 남았나요?", options: ["How many stops are there left to the destination?", "How many are there stops left to the destination?", "How far are there stops left to the destination?"], answer: 0 },
+        { cat: "THERE", q: "오늘 출근길에 차 얼마나 막혔어?", options: ["How many traffic was there on your way to work?", "How much traffic was there on your way to work?", "How heavy traffic was there on your way to work?"], answer: 1 },
+        { cat: "THERE", q: "퇴근하기 전까지 몇 시간 남았어?", options: ["How many times are there left before off-work?", "How many hours are there left before off-work?", "How many are there hours left before off-work?"], answer: 1 },
+        { cat: "THERE", q: "병에 물 얼마나 남아있어?", options: ["How much water is there left in the bottle?", "How many water is there left in the bottle?", "How much waters are there left in the bottle?"], answer: 0 },
+        { cat: "THERE", q: "다음 휴가지까지 몇 킬로미터 남았어?", options: ["How many kilometers are there left to the beach?", "How much kilometers are there left to the beach?", "How far kilometers are there left to the beach?"], answer: 0 },
+        { cat: "THERE", q: "오늘 버스에 승객 얼마나 있었어?", options: ["How much passenger were there on the bus?", "How many passengers were there on the bus?", "How many were there passengers on the bus?"], answer: 1 },
+        { cat: "THERE", q: "주전자 속에 차 얼마나 남아있어?", options: ["How much tea is there left in the teapot?", "How many teas are there left in the teapot?", "How much teas are there left in the teapot?"], answer: 0 },
+        { cat: "THERE", q: "행사까지 몇 분 남았어?", options: ["How many minutes are there left before the event?", "How much minutes are there left before the event?", "How many minutes is there left before the event?"], answer: 0 },
+        { cat: "THERE", q: "서울역까지 몇 정거장 남았어?", options: ["How many stations are there left until Seoul station?", "How much stations are there left until Seoul station?", "How far stations are there left until Seoul station?"], answer: 0 },
+        { cat: "THERE", q: "퇴근길 고속도로에 차 얼마나 막혔어?", options: ["How much traffic was there on the highway?", "How many traffic was there on the highway?", "How heavy traffic was there on the highway?"], answer: 0 },
+        { cat: "THERE", q: "점심시간까지 몇 분 남았어?", options: ["How many minutes are there left until lunch time?", "How much minutes are there left until lunch time?", "How many minutes is there left until lunch time?"], answer: 0 },
+        { cat: "THERE", q: "프린터에 종이 얼마나 남아있어?", options: ["How much paper is there left in the printer?", "How many paper is there left in the printer?", "How much papers are there left in the printer?"], answer: 0 },
+        { cat: "THERE", q: "강남역까지 몇 정거장 남았어?", options: ["How many stops are there left to Gangnam station?", "How much stops are there left to Gangnam station?", "How far stops are there left to Gangnam station?"], answer: 0 },
+        { cat: "THERE", q: "오늘 마트에 사람 얼마나 있었어?", options: ["How many people were there at the mart?", "How much people were there at the mart?", "How many people was there at the mart?"], answer: 0 },
+        { cat: "THERE", q: "차 세차할 시간 얼마나 남아있어?", options: ["How much time is there left for car wash?", "How many time is there left for car wash?", "How much times are there left for car wash?"], answer: 0 },
+        { cat: "THERE", q: "프로젝트 완료까지 몇 일 남았어?", options: ["How many days are there left for the project?", "How much days are there left for the project?", "How many days is there left for the project?"], answer: 0 },
+        { cat: "THERE", q: "다음 휴게소까지 몇 킬로미터 남았어?", options: ["How many kilometers are there left to the rest area?", "How much kilometers are there left to the rest area?", "How far kilometers are there left to the rest area?"], answer: 0 },
+        { cat: "THERE", q: "오늘 아침 기차에 사람 얼마나 많았어?", options: ["How many people were there on the train?", "How much people were there on the train?", "How many people was there on the train?"], answer: 0 },
+        { cat: "THERE", q: "지갑에 현금 얼마나 남아있어?", options: ["How much cash is there left in your wallet?", "How many cash is there left in your wallet?", "How much cashes are there left in your wallet?"], answer: 0 },
+        { cat: "THERE", q: "올해 남은 쉬는 날 몇 일 있어?", options: ["How many holidays are there left this year?", "How much holidays are there left this year?", "How many holidays is there left this year?"], answer: 0 },
+        { cat: "THERE", q: "다음 정거장까지 몇 분 남았어?", options: ["How many minutes are there left to the next stop?", "How much minutes are there left to the next stop?", "How many minutes is there left to the next stop?"], answer: 0 },
+        { cat: "THERE", q: "오늘 해변에 피서객 얼마나 있었어?", options: ["How many people were there on the beach?", "How much people were there on the beach?", "How many people was there on the beach?"], answer: 0 },
+        { cat: "THERE", q: "냉장고에 우유 얼마나 남아있어?", options: ["How much milk is there left in the fridge?", "How many milk is there left in the fridge?", "How much milks are there left in the fridge?"], answer: 0 },
+        { cat: "THERE", q: "수업 종료까지 몇 분 남았어?", options: ["How many minutes are there left until the class ends?", "How much minutes are there left until the class ends?", "How many minutes is there left until the class ends?"], answer: 0 },
+        { cat: "THERE", q: "이번 출장지까지 몇 킬로미터 남았어?", options: ["How many kilometers are there left to the destination?", "How much kilometers are there left to the destination?", "How far kilometers are there left to the destination?"], answer: 0 },
+        { cat: "THERE", q: "공연장에 관객 얼마나 있었어?", options: ["How many audiences were there in the hall?", "How much audiences were there in the hall?", "How many audiences was there in the hall?"], answer: 0 },
+        { cat: "THERE", q: "주전자 속에 커피 얼마나 남아있어?", options: ["How much coffee is there left in the pot?", "How many coffee is there left in the pot?", "How much coffees are there left in the pot?"], answer: 0 },
+        { cat: "THERE", q: "올해 남은 한 해 몇 달 있어?", options: ["How many months are there left this year?", "How much months are there left this year?", "How many months is there left this year?"], answer: 0 },
+        { cat: "THERE", q: "종점까지 몇 정거장 남았어?", options: ["How many stations are there left to the last stop?", "How much stations are there left to the last stop?", "How far stations are there left to the last stop?"], answer: 0 },
+        { cat: "THERE", q: "오늘 도로에 차 얼마나 막혔어?", options: ["How much traffic was there on the road?", "How many traffic was there on the road?", "How heavy traffic was there on the road?"], answer: 0 },
+        { cat: "THERE", q: "배터리 충전 완료까지 몇 분 남았어?", options: ["How many minutes are there left until full charge?", "How much minutes are there left until full charge?", "How many minutes is there left until full charge?"], answer: 0 },
+        { cat: "THERE", q: "팩스 종이 얼마나 남아있어?", options: ["How much paper is there left in the fax machine?", "How many paper is there left in the fax machine?", "How much papers are there left in the fax machine?"], answer: 0 },
+        { cat: "THERE", q: "시청역까지 몇 정거장 남았어?", options: ["How many stops are there left to City Hall station?", "How much stops are there left to City Hall station?", "How far stops are there left to City Hall station?"], answer: 0 }
+    ];
+
+    const hitDialogs = [
+        "\"크아악! 열심히 연습을 했군!\"",
+        "\"꽤 하는 걸? 날 더 즐겁게 해다오!\"",
+        "\"이럴수가! 이것까지 뚫었다고?\"",
+        "\"크윽... 언제 이런 실력을 쌓은 거지?\"",
+        "\"좋은 대답이었다. 훌륭해.\""
+    ];
+
+    let quizData = [];
+    let currentStage = 0;
+    let lives = 3;
+    let wrongHistory = [];
+
+    const storyScreen = document.getElementById('story-screen');
+    const stageNumEl = document.getElementById('stage-num');
+    const heartsEl = document.getElementById('hearts');
+    const dialogEl = document.getElementById('dialog');
+    const optionsEl = document.getElementById('options');
+    const monsterEl = document.getElementById('monster');
+    const containerEl = document.getElementById('game-container');
+    const overlayEl = document.getElementById('overlay');
+    const overlayContentEl = document.getElementById('overlay-content');
+
+    function shuffleArray(array) {
+        let arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function generateRatioQuizSet() {
+        const groupAF_Categories = ["WAS_IS", "FAR", "CLOSE", "FEELING", "POPULAR", "TALL"];
+        
+        let afPool = masterQuizBank.filter(q => groupAF_Categories.includes(q.cat));
+        afPool = shuffleArray(afPool);
+
+        let selectedAF = [];
+        let usedCats = new Set();
+
+        for (let q of afPool) {
+            if (!usedCats.has(q.cat) && selectedAF.length < 5) {
+                selectedAF.push(q);
+                usedCats.add(q.cat);
+            }
+        }
+        if (selectedAF.length < 5) {
+            for (let q of afPool) {
+                if (!selectedAF.includes(q) && selectedAF.length < 5) {
+                    selectedAF.push(q);
+                }
+            }
+        }
+
+        let gPool = masterQuizBank.filter(q => q.cat === "THERE");
+        gPool = shuffleArray(gPool);
+        let selectedG = gPool.slice(0, 5);
+
+        return [...shuffleArray(selectedAF), ...shuffleArray(selectedG)];
+    }
+
+    function startGame() {
+        storyScreen.style.display = 'none';
+        quizData = generateRatioQuizSet();
+        currentStage = 0;
+        lives = 3;
+        wrongHistory = [];
+        overlayEl.classList.remove('active');
+        updateStatus();
+        loadStage();
+    }
+
+    function updateStatus() {
+        stageNumEl.textContent = currentStage + 1;
+        heartsEl.textContent = '❤️'.repeat(lives) + '🖤'.repeat(3 - lives);
+    }
+
+    function loadStage() {
+        if (currentStage >= quizData.length) {
+            showEnding();
+            return;
+        }
+
+        updateStatus();
+        const currentQuiz = quizData[currentStage];
+        dialogEl.textContent = `"${currentQuiz.q}"`;
+
+        optionsEl.innerHTML = '';
+        currentQuiz.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.id = `opt-${idx}`;
+            btn.textContent = `${idx + 1}. ${opt}`;
+            btn.onclick = () => checkAnswer(idx);
+            optionsEl.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selectedIndex) {
+        const currentQuiz = quizData[currentStage];
+        const selectedBtn = document.getElementById(`opt-${selectedIndex}`);
+
+        if (selectedIndex === currentQuiz.answer) {
+            monsterEl.classList.add('hit-monster');
+            
+            // 랜덤 대사 생성
+            const randomHitDialog = hitDialogs[Math.floor(Math.random() * hitDialogs.length)];
+            dialogEl.textContent = randomHitDialog;
+            
+            // 선택지 영역을 [다음 문제 ➡️] 진행 버튼으로 변경 (자동 진행 해제)
+            optionsEl.innerHTML = `
+                <button class="next-stage-btn" onclick="nextStage()">다음 문제 ➡️</button>
+            `;
+
+            setTimeout(() => {
+                monsterEl.classList.remove('hit-monster');
+            }, 600);
+
+        } else {
+            lives--;
+            containerEl.classList.add('player-damaged');
+            dialogEl.textContent = "\"크하하! 헷갈릴 줄 알았다!⚡\"";
+
+            wrongHistory.push({
+                q: currentQuiz.q,
+                wrongOpt: currentQuiz.options[selectedIndex],
+                correctOpt: currentQuiz.options[currentQuiz.answer]
+            });
+
+            selectedBtn.classList.add('disabled');
+            selectedBtn.disabled = true;
+            selectedBtn.textContent = `- ${currentQuiz.options[selectedIndex]}`;
+
+            setTimeout(() => {
+                containerEl.classList.remove('player-damaged');
+                if (lives <= 0) {
+                    showGameOver();
+                } else {
+                    updateStatus();
+                }
+            }, 500);
+        }
+    }
+
+    // 다음 문제로 넘어가는 함수
+    function nextStage() {
+        currentStage++;
+        loadStage();
+    }
+
+    function showGameOver() {
+        renderEndingUI("WASTED", "하우하우의 낚시 질문에 정신을 잃었습니다...");
+    }
+
+    function showEnding() {
+        renderEndingUI("MISSION COMPLETE", "10개의 관문을 모두 통과했습니다!<br>당신은 지혜와 용기를 겸비한 마스터<br><strong>\"노하우 (Know-How)\"</strong>가 되었습니다! ⚔️✨");
+    }
+
+    // 오버레이 및 버튼 정렬 보정
+    function renderEndingUI(titleText, descHTML) {
+        overlayContentEl.innerHTML = `
+            <div class="${titleText === 'WASTED' ? 'wasted-text' : 'victory-text'}">${titleText}</div>
+            <div class="ending-desc">${descHTML}</div>
+            
+            <div class="review-box" id="review-box">
+                ${getReviewHTML()}
+            </div>
+
+            <div class="btn-group">
+                ${wrongHistory.length > 0 ? `<button class="review-btn" onclick="toggleReview()">🔍 틀린 문제 요약 보기</button>` : ''}
+                <button class="restart-btn" onclick="goHome()">🏠 처음으로 돌아가기</button>
+            </div>
+        `;
+        overlayEl.classList.add('active');
+    }
+
+    function getReviewHTML() {
+        if (wrongHistory.length === 0) return "<p style='text-align:center;'>틀린 문제가 없습니다! 완벽합니다! 🎉</p>";
+        return wrongHistory.map((item, index) => `
+            <div class="review-item">
+                <div><strong>Q. ${item.q}</strong></div>
+                <div>❌ 선택한 오답: <span class="wrong-ans">${item.wrongOpt}</span></div>
+                <div>⭕ 올바른 정답: <span class="correct-ans">${item.correctOpt}</span></div>
+            </div>
+        `).join('');
+    }
+
+    function toggleReview() {
+        const reviewBox = document.getElementById('review-box');
+        const reviewBtn = document.querySelector('.review-btn');
+        if (reviewBox.style.display === 'block') {
+            reviewBox.style.display = 'none';
+            reviewBtn.textContent = '🔍 틀린 문제 요약 보기';
+        } else {
+            reviewBox.style.display = 'block';
+            reviewBtn.textContent = '🙈 요약 닫기';
+        }
+    }
+
+    function goHome() {
+        overlayEl.classList.remove('active');
+        storyScreen.style.display = 'flex';
+    }
+
+    // PSE 배너 자동 롤링
+    const bannerMsgs = [
+        { icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" },
+        { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }
+    ];
+    let currentBannerIdx = 0;
+    setInterval(() => {
+        currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+        const msg = bannerMsgs[currentBannerIdx];
+        
+        const icons = document.querySelectorAll('.banner-icon');
+        const titles = document.querySelectorAll('.banner-title');
+        
+        icons.forEach(el => el.innerText = msg.icon);
+        titles.forEach(el => el.innerText = msg.text);
+    }, 4000);
+</script>
+
+</body>
+</html>
