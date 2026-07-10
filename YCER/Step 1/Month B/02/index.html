@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>영어 블록 조립소 (현재진행 편)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght=400;700;900&display=swap');
+        
+        :root {
+            --primary: #3b82f6;
+            --danger: #ef4444;
+            --success: #10b981;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --warning: #f59e0b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', 'Malgun Gothic', sans-serif; }
+        
+        body { background-color: var(--light); color: var(--dark); padding: 15px; display: flex; flex-direction: column; min-height: 100vh; }
+        
+        header { padding: 12px 20px; background: var(--dark); color: white; border-radius: 12px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; position: relative; }
+        header h1 { font-size: 22px; font-weight: 900; text-align: center; flex: 1; }
+        
+        .home-btn, .setting-open-btn { background: rgba(255, 255, 255, 0.1); border: none; border-radius: 8px; width: 40px; height: 40px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; -webkit-tap-highlight-color: transparent; }
+        .home-btn:hover, .setting-open-btn:hover { background: rgba(255, 255, 255, 0.2); transform: scale(1.05); }
+        .home-btn:active, .setting-open-btn:active { transform: scale(0.95); }
+
+        .main-container { display: flex; flex-direction: column; gap: 15px; flex: 1; }
+        
+        @media (min-width: 768px) {
+            body { height: 100vh; padding: 20px; }
+            .main-container { flex-direction: row; min-height: 0; }
+            .stage { flex: 1; height: 100%; overflow-y: auto; }
+        }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; padding: 15px; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content { background: white; border-radius: 16px; width: 100%; max-width: 400px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); transform: scale(0.9); transition: transform 0.2s ease; max-height: 90vh; overflow-y: auto; }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+
+        .panel-title { font-weight: bold; margin-bottom: 10px; color: #64748b; font-size: 13px; text-transform: uppercase; }
+        
+        .pattern-grid-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+        .pattern-mini-btn { padding: 10px 2px; border: 2px solid #e2e8f0; border-radius: 8px; background: white; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 11px; text-align: center; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+        @media (min-width: 375px) { .pattern-mini-btn { font-size: 12px; padding: 10px 4px; } }
+        @media (min-width: 480px) { .pattern-mini-btn { font-size: 14px; padding: 12px 8px; } }
+        .pattern-mini-btn:hover { border-color: var(--primary); background: #eff6ff; }
+        .pattern-mini-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .pattern-mini-btn.danger.active { background: var(--danger); border-color: var(--danger); }
+        
+        .time-select-container { display: flex; flex-wrap: wrap; gap: 5px; }
+        .time-btn { flex: 1; min-width: 42px; padding: 8px 4px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; cursor: pointer; font-size: 12px; font-weight: bold; text-align: center; }
+        .time-btn.active { background: #cbd5e1; color: var(--dark); border-color: #cbd5e1; }
+
+        .list-btn { width: 100%; text-align: left; padding: 14px 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #f8fafc; cursor: pointer; transition: all 0.2s; -webkit-tap-highlight-color: transparent; }
+        .list-btn:hover { background: #e2e8f0; }
+        .list-btn.active { border-color: var(--primary); background: #eff6ff; }
+
+        .mod-btn { width: 100%; text-align: left; padding: 14px 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #f8fafc; cursor: pointer; transition: all 0.2s; -webkit-tap-highlight-color: transparent; }
+        .mod-btn:hover { background: #e2e8f0; }
+        .mod-btn.active { border-color: var(--primary); background: #eff6ff; }
+
+        .stage { display: flex; flex-direction: column; gap: 15px; }
+        
+        .display-board { background: var(--dark); color: white; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; padding: 20px 12px; text-align: center; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); min-height: 180px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .kor-hint { font-size: 19px; color: #e2e8f0; margin-bottom: 12px; font-weight: bold; word-break: keep-all; line-height: 1.4; }
+        
+        .eng-sentence { font-size: 17px; font-weight: 800; letter-spacing: -0.2px; min-height: 45px; display: flex; flex-wrap: wrap; justify-content: center; items: center; gap: 6px; margin-top: 8px; margin-bottom: 12px; width: 100%; }
+        
+        @media (min-width: 480px) { .kor-hint { font-size: 23px; } .eng-sentence { font-size: 22px; gap: 8px; } }
+        @media (min-width: 768px) { .kor-hint { font-size: 26px; } .eng-sentence { font-size: 28px; } .display-board { flex: 2; } }
+        
+        .inline-challenge-btn { padding: 12px 35px; border: none; border-radius: 8px; font-weight: bold; font-size: 18px; cursor: pointer; background: var(--warning); color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: all 0.2s; -webkit-tap-highlight-color: transparent; }
+        .inline-next-btn { padding: 12px 30px; border: none; border-radius: 8px; font-weight: bold; font-size: 18px; cursor: pointer; background: #6366f1; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: all 0.2s; margin-bottom: 5px; -webkit-tap-highlight-color: transparent; }
+        .inline-next-btn:hover { background: #4f46e5; transform: scale(1.05); }
+
+        .tile { padding: 3px 8px; border-radius: 6px; background: rgba(255,255,255,0.1); animation: pop 0.3s ease; white-space: nowrap; }
+        .tile.skeleton { background: #3b82f6; color: white; }
+        .tile.skeleton.neg { background: #ef4444; }
+        .tile.verb { background: #10b981; color: white; }
+        .tile.modifier { background: #8b5cf6; color: white; }
+        @media (min-width: 480px) { .tile { padding: 4px 12px; } }
+        
+        @keyframes pop { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .timer-container { width: 100%; height: 8px; background: #475569; position: absolute; bottom: 0; left: 0; border-radius: 0 0 15px 15px; overflow: hidden; }
+        .timer-bar { width: 0%; height: 100%; background: var(--success); }
+
+        .toggle-label { display: flex; align-items: center; cursor: pointer; gap: 8px; font-weight: bold; font-size: 14px; color: #475569; user-select: none; }
+        .toggle-checkbox { position: absolute; opacity: 0; width: 0; height: 0; }
+        .toggle-switch { width: 44px; height: 24px; background: #cbd5e1; border-radius: 20px; position: relative; transition: background 0.2s; }
+        .toggle-switch:before { content: ""; position: absolute; width: 18px; height: 18px; border-radius: 50%; top: 3px; left: 3px; background: white; transition: transform 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .toggle-checkbox:checked + .toggle-switch { background: var(--primary); }
+        .toggle-checkbox:checked + .toggle-switch:before { transform: translateX(20px); }
+
+        .banner-inner { transition: all 0.5s ease; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <template id="banner-template">
+        <div class="promo-banner bg-white border border-blue-50 p-4 rounded-[2.2rem] mb-2 mt-0.5 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-xl mx-auto" 
+             onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+            <div class="banner-inner flex items-center gap-4">
+                <div class="banner-icon w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+                <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center text-left">
+                    <h3 class="banner-title font-black text-slate-800 text-[14px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                    <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <header>
+        <button class="home-btn" onclick="resetFactory()" title="조립소 새로 시작">🏠</button>
+        <h1>🧱 영어 블록 조립소 (현재진행 편)</h1>
+        <button class="setting-open-btn" onclick="openSettings()" title="설정 열기">⚙️</button>
+    </header>
+
+    <div class="main-container">
+        <div class="stage w-full">
+            <div id="main-banner-area" class="w-full max-w-xl mx-auto"></div>
+
+            <div class="display-board" onclick="handleBoardClick()">
+                <div class="kor-hint" id="kor-display">원하는 블록들을 조합하세요!</div>
+                <div class="eng-sentence" id="eng-display"></div>
+                <div id="challenge-btn-zone" class="w-full flex justify-center mt-2">
+                    <button class="inline-challenge-btn" onclick="event.stopPropagation(); startChallenge();">🔥 도전</button>
+                </div>
+                <div class="timer-container">
+                    <div class="timer-bar" id="timer"></div>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-2">
+                <div class="panel-title">1. 구조 선택</div>
+                <div class="pattern-grid-row" id="pattern-grid">
+                    <button class="pattern-mini-btn active" data-pattern="pos" onclick="setPattern('pos', this)">평서문</button>
+                    <button class="pattern-mini-btn danger" data-pattern="neg" onclick="setPattern('neg', this)">부정문</button>
+                    <button class="pattern-mini-btn" data-pattern="ques" onclick="setPattern('ques', this)">의문문</button>
+                    <button class="pattern-mini-btn danger" data-pattern="neg_ques" onclick="setPattern('neg_ques', this)">부정의문</button>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-2">
+                <div class="panel-title">2. 동사 선택</div>
+                <div id="verb-list" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-2">
+                <div class="panel-title">3. 살 붙이기 (Plus)</div>
+                <div id="mod-storage" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="setting-modal" onclick="closeSettings()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h2 class="text-lg font-black text-slate-800">🛠️ 조립소 환경 설정</h2>
+                <button class="text-slate-400 hover:text-slate-600 text-xl font-bold" onclick="closeSettings()">&times;</button>
+            </div>
+            <div class="flex flex-col gap-5">
+                <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <span class="font-bold text-sm text-slate-700">🔤 한국어 + 영어 함께 보기</span>
+                    <label class="toggle-label">
+                        <input type="checkbox" id="showEnglishCheck" class="toggle-checkbox" onchange="handleLangOptionChange()">
+                        <div class="toggle-switch"></div>
+                    </label>
+                </div>
+                <div>
+                    <div class="panel-title">⏱️ 제한 시간 세팅 (⏱️ <span id="time-val">3</span>초)</div>
+                    <div class="time-select-container">
+                        <button class="time-btn" onclick="setLimitTime(1, this)">1초</button>
+                        <button class="time-btn" onclick="setLimitTime(2, this)">2초</button>
+                        <button class="time-btn active" onclick="setLimitTime(3, this)">3초</button>
+                        <button class="time-btn" onclick="setLimitTime(4, this)">4초</button>
+                        <button class="time-btn" onclick="setLimitTime(5, this)">5초</button>
+                        <button class="time-btn" onclick="setLimitTime(7, this)">7초</button>
+                        <button class="time-btn" onclick="setLimitTime(10, this)">10초</button>
+                    </div>
+                </div>
+                <div class="border-t pt-4">
+                    <div class="panel-title">🎲 랜덤 문제 설정</div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-col gap-3">
+                        <label class="toggle-label justify-between w-full">
+                            <span class="text-sm font-bold text-slate-600">형태 고정</span>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="fixPatternCheck" class="toggle-checkbox">
+                                <div class="toggle-switch"></div>
+                            </div>
+                        </label>
+                        <label class="toggle-label justify-between w-full">
+                            <span class="text-sm font-bold text-slate-600">동사 고정</span>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="fixVerbCheck" class="toggle-checkbox">
+                                <div class="toggle-switch"></div>
+                            </div>
+                        </label>
+                        <label class="toggle-label justify-between w-full">
+                            <span class="text-sm font-bold text-slate-600">살 제외</span>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="noModCheck" class="toggle-checkbox">
+                                <div class="toggle-switch"></div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <button class="w-full mt-6 bg-slate-800 text-white font-bold p-3 rounded-xl hover:bg-slate-700 active:scale-95 transition-all" onclick="closeSettings()">설정 완료</button>
+        </div>
+    </div>
+
+    <script>
+        const verbs = [
+            { 
+                engPos: "wait for my friend", engQues: "wait for your friend",
+                assembling: "waiting for my friend", assemblingQues: "waiting for your friend",
+                korBase: "친구를", baseVerb: "기다리다",
+                conjugation: { pos: "기다리고 있어", neg: "기다리는 거 아냐", ques: "기다리고 있니?", neg_ques: "기다리고 있지 않아?" }
+            },
+            { 
+                engPos: "hang out with my friends", engQues: "hang out with your friends",
+                assembling: "hanging out with my friends", assemblingQues: "hanging out with your friends",
+                korBase: "친구랑", baseVerb: "놀다",
+                conjugation: { pos: "놀고 있어", neg: "놀고 있지 않아", ques: "놀고 있니?", neg_ques: "놀고 있지 않아?" }
+            },
+            { 
+                engPos: "eat dinner", engQues: "eat dinner",
+                assembling: "eating dinner", assemblingQues: "eating dinner",
+                korBase: "저녁을", baseVerb: "먹다",
+                conjugation: { pos: "먹고 있어", neg: "먹고 있지 않아", ques: "먹고 있니?", neg_ques: "먹고 있지 않아?" }
+            },
+            { 
+                engPos: "work late", engQues: "work late",
+                assembling: "working late", assemblingQues: "working late",
+                korBase: "야근을", baseVerb: "하다",
+                conjugation: { pos: "하고 있어", neg: "하는 거 아냐", ques: "하고 있니?", neg_ques: "하고 있는 거 아냐?" }
+            },
+            { 
+                engPos: "look for a job", engQues: "look for a job",
+                assembling: "looking for a job", assemblingQues: "looking for a job",
+                korBase: "일자리를", baseVerb: "찾다",
+                conjugation: { pos: "찾고 있어", neg: "찾고 있지 않아", ques: "찾고 있니?", neg_ques: "찾고 있지 않아?" }
+            },
+            { 
+                engPos: "save money", engQues: "save money",
+                assembling: "saving money", assemblingQues: "saving money",
+                korBase: "돈을", baseVerb: "모으다",
+                conjugation: { pos: "모으고 있어", neg: "모으고 있지 않아", ques: "모으고 있니?", neg_ques: "모으고 있지 않아?" }
+            },
+            { 
+                engPos: "get some rest", engQues: "get some rest",
+                assembling: "getting some rest", assemblingQues: "getting some rest",
+                korBase: "쉬다", baseVerb: "쉬다",
+                conjugation: { pos: "쉬고 있어", neg: "쉬는 거 아냐", ques: "쉬고 있니?", neg_ques: "쉬고 있지 않아?" }
+            },
+            { 
+                engPos: "see someone", engQues: "see someone",
+                assembling: "seeing someone", assemblingQues: "seeing someone",
+                korBase: "누군가를", baseVerb: "만나다",
+                conjugation: { pos: "만나고 있어", neg: "만나고 있지 않아", ques: "만나고 있니?", neg_ques: "만나고 있지 않아?" }
+            },
+            { 
+                engPos: "watch Shorts", engQues: "watch Shorts",
+                assembling: "watching Shorts", assemblingQues: "watching Shorts",
+                korBase: "쇼츠를", baseVerb: "보다",
+                conjugation: { pos: "보고 있어", neg: "보고 있지 않아", ques: "보고 있니?", neg_ques: "보고 있지 않아?" }
+            }
+        ];
+
+        const modifiers = [
+            { id: 1, type: "time", engPos: "now", engQues: "now", korPos: "지금", korQues: "지금" },
+            { id: 3, type: "time", engPos: "these days", engQues: "these days", korPos: "요즘", korQues: "요즘" },
+            { id: 5, type: "where", engPos: "in Gangnam", engQues: "in Gangnam", korPos: "강남에서", korQues: "강남에서" },
+            { id: 6, type: "where", engPos: "at home", engQues: "at home", korPos: "집에서", korQues: "집에서" },
+            { id: 11, type: "where", engPos: "at a cafe", engQues: "at a cafe", korPos: "카페에서", korQues: "카페에서" },
+            { id: 7, type: "with", engPos: "alone", engQues: "alone", korPos: "혼자", korQues: "혼자" },
+            { id: 8, type: "instrument", engPos: "on my phone", engQues: "on your phone", korPos: "핸드폰으로", korQues: "핸드폰으로" },
+            { id: 9, type: "manner", engPos: "lying in bed", engQues: "lying in bed", korPos: "침대에 누워서", korQues: "침대에 누워서" },
+            { id: 10, type: "manner", engPos: "secretly", engQues: "secretly", korPos: "몰래", korQues: "몰래" }
+        ];
+
+        let currentPattern = 'pos'; 
+        let currentVerb = null;
+        let selectedMods = [];
+        let isChallengeStarted = false; 
+        let isRevealed = false;
+        let timerInterval = null;
+        let limitTime = 3000; 
+
+        let quizPool = [];
+        let quizIndex = 0;
+
+        const bannerMsgs = [
+            { icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" },
+            { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }
+        ];
+        let currentBannerIdx = 0;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            injectBanners();
+            init();
+            setInterval(rotateBanners, 4000);
+        });
+
+        function openSettings() {
+            document.getElementById('setting-modal').classList.add('active');
+        }
+        function closeSettings() {
+            document.getElementById('setting-modal').classList.remove('active');
+        }
+
+        function injectBanners() {
+            const template = document.getElementById('banner-template');
+            const area = document.getElementById('main-banner-area');
+            if (area) area.appendChild(template.content.cloneNode(true));
+        }
+
+        function rotateBanners() {
+            currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+            const msg = bannerMsgs[currentBannerIdx];
+            document.querySelectorAll('.promo-banner').forEach(banner => {
+                const inner = banner.querySelector('.banner-inner');
+                if(!inner) return;
+                inner.style.opacity = 0;
+                inner.style.transform = "translateY(3px)";
+                setTimeout(() => {
+                    banner.querySelector('.banner-icon').innerText = msg.icon;
+                    banner.querySelector('.banner-title').innerText = msg.text;
+                    inner.style.opacity = 1;
+                    inner.style.transform = "translateY(0)";
+                }, 500);
+            });
+        }
+
+        function init() {
+            renderVerbs();
+            renderModifiers();
+            resetFactory();
+        }
+
+        // ⚙️ [살 1개 제한 셔플 풀 빌더] 
+        function buildAndShufflePool() {
+            quizPool = [];
+            const patterns = ['pos', 'neg', 'ques', 'neg_ques'];
+            const fixPattern = document.getElementById('fixPatternCheck').checked;
+            const fixVerb = document.getElementById('fixVerbCheck').checked;
+            const noMod = document.getElementById('noModCheck').checked;
+
+            const activePatterns = fixPattern ? [currentPattern] : patterns;
+            const activeVerbs = (fixVerb && currentVerb) ? [currentVerb] : verbs;
+
+            activePatterns.forEach(p => {
+                activeVerbs.forEach(v => {
+                    // 1. 살이 아예 없는 순수 기본형 무조건 장전
+                    quizPool.push({ pattern: p, verb: v, mods: [] });
+
+                    // 2. 💡 [선생님 디렉션] 살(Plus)이 붙는다면 오직 딱 1개만 허용 (이중 포문 루프 연산 영구 폐기)
+                    if (!noMod) {
+                        for (let i = 0; i < modifiers.length; i++) {
+                            if (checkLogicalValidity(p, v, [modifiers[i].id])) {
+                                quizPool.push({ pattern: p, verb: v, mods: [modifiers[i].id] });
+                            }
+                        }
+                    }
+                });
+            });
+
+            // 피셔-예이츠 무작위 전곡 섞기 가동
+            for (let i = quizPool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [quizPool[i], quizPool[j]] = [quizPool[j], quizPool[i]];
+            }
+            quizIndex = 0;
+        }
+
+        // 🛠️ 철저한 문맥 무결점 전수조사 연산식
+        function checkLogicalValidity(pattern, verb, mods) {
+            if (mods.length === 0) return true;
+            const hasId = (id) => mods.includes(id);
+            const vEng = verb.engPos;
+
+            // 야근하다 (work late) ➡️ 사무실 환경만 인정
+            if (vEng === "work late" && (hasId(6) || hasId(11) || hasId(7) || hasId(8) || hasId(10) || hasId(9))) return false;
+            
+            // 친구랑 놀다 (hang out) ➡️ 실물 대면 한정
+            if (vEng === "hang out with my friends" && (hasId(6) || hasId(7) || hasId(8) || hasId(9) || hasId(10))) return false;
+
+            // 저녁을 먹다 (eat dinner)
+            if (vEng === "eat dinner" && (hasId(8) || hasId(9) || hasId(10))) return false;
+
+            // 쉬다 (get some rest)
+            if (vEng === "get some rest" && (hasId(8) || hasId(10))) return false;
+
+            // 누군가를 만나다 (see someone) ➡️ 고백형 뉘앙스로만 활용, 장소/행동 차단
+            if (vEng === "see someone" && (hasId(6) || hasId(8) || hasId(9) || hasId(10) || hasId(7) || hasId(11) || hasId(5))) return false;
+
+            // 친구를 기다리다 (wait for friend)
+            if (vEng === "wait for my friend" && (hasId(6) || hasId(8) || hasId(9) || hasId(10))) return false;
+
+            return true;
+        }
+
+        function generateRandomQuiz() {
+            if (quizPool.length === 0 || quizIndex >= quizPool.length) {
+                buildAndShufflePool();
+            }
+
+            if (quizPool.length === 0) {
+                alert("선택한 필터 조건에 맞는 문제가 없습니다.");
+                return;
+            }
+
+            const currentQuiz = quizPool[quizIndex];
+            quizIndex++;
+
+            currentPattern = currentQuiz.pattern;
+            currentVerb = currentQuiz.verb;
+            selectedMods = currentQuiz.mods;
+
+            document.querySelectorAll('#pattern-grid .pattern-mini-btn').forEach(b => {
+                b.classList.remove('active');
+                if(b.getAttribute('data-pattern') === currentPattern) b.setAttribute('class', b.getAttribute('class').includes('danger') ? 'pattern-mini-btn danger active' : 'pattern-mini-btn active');
+            });
+
+            renderVerbs(); 
+            document.querySelectorAll('#verb-list .list-btn').forEach(b => {
+                b.classList.remove('active');
+                if(b.getAttribute('data-eng') === currentVerb.engPos) b.classList.add('active');
+            });
+
+            resetChallengeState();
+            renderModifiers();
+            updateDisplay();
+        }
+
+        function renderVerbs() {
+            const showEnglish = document.getElementById('showEnglishCheck')?.checked || false;
+            const container = document.getElementById('verb-list');
+            const isQues = (currentPattern === 'ques' || currentPattern === 'neg_ques');
+            
+            container.innerHTML = verbs.map(v => {
+                const baseEngText = isQues ? v.engQues : v.engPos;
+                const engText = showEnglish ? `<span class="font-black block text-[11px] opacity-60 overflow-hidden text-ellipsis whitespace-nowrap">${baseEngText}</span>` : '';
+                const displayKorName = v.engPos === "get some rest" ? "쉬다" : `${v.korBase} ${v.baseVerb}`;
+                return `
+                    <button class="list-btn" data-eng="${v.engPos}" onclick="selectVerb('${v.engPos}', this)">
+                        ${engText}
+                        <span class="font-bold text-base block text-slate-800">${displayKorName}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function renderModifiers() {
+            const showEnglish = document.getElementById('showEnglishCheck')?.checked || false;
+            const container = document.getElementById('mod-storage');
+            const isQues = (currentPattern === 'ques' || currentPattern === 'neg_ques');
+            
+            container.innerHTML = modifiers.map(m => {
+                const displayEng = isQues ? m.engQues : m.engPos;
+                const displayKor = isQues ? m.korQues : m.korPos;
+                const activeClass = selectedMods.includes(m.id) ? 'active' : '';
+                const engText = showEnglish ? `<span class="font-black block text-[11px] opacity-60 overflow-hidden text-ellipsis whitespace-nowrap">+ ${displayEng}</span>` : '';
+                
+                return `
+                    <button class="mod-btn ${activeClass}" data-id="${m.id}" onclick="toggleModifier(${m.id})">
+                        ${engText}
+                        <span class="font-bold text-base block text-slate-800">${displayKor}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function handleLangOptionChange() {
+            renderVerbs();
+            renderModifiers();
+            if (currentVerb) {
+                document.querySelectorAll('#verb-list .list-btn').forEach(b => {
+                    if(b.getAttribute('data-eng') === currentVerb.engPos) b.classList.add('active');
+                });
+            }
+        }
+
+        function resetChallengeState() {
+            clearInterval(timerInterval);
+            isChallengeStarted = false;
+            isRevealed = false;
+            document.getElementById('timer').style.width = '0%';
+            
+            document.getElementById('challenge-btn-zone').innerHTML = `
+                <button class="inline-challenge-btn" onclick="event.stopPropagation(); startChallenge();">🔥 도전</button>
+            `;
+        }
+
+        function handleBoardClick() {
+            if (!currentVerb) return;
+            if (!isChallengeStarted) {
+                startChallenge();
+            } else if (isChallengeStarted && !isRevealed) {
+                revealEnglish();
+            }
+        }
+
+        function setLimitTime(seconds, btnObj) {
+            limitTime = seconds * 1000;
+            document.getElementById('time-val').innerText = seconds;
+            document.querySelectorAll('.time-select-container .time-btn').forEach(b => b.classList.remove('active'));
+            btnObj.classList.add('active');
+            
+            if (isChallengeStarted && !isRevealed) {
+                startTimer();
+            }
+        }
+
+        function setPattern(pattern, btnObj) {
+            currentPattern = pattern;
+            document.querySelectorAll('#pattern-grid .pattern-mini-btn').forEach(b => b.classList.remove('active'));
+            btnObj.classList.add('active');
+            
+            quizPool = [];
+            resetChallengeState(); 
+            renderVerbs(); 
+            renderModifiers(); 
+            updateDisplay();
+        }
+
+        function selectVerb(eng, btnObj) {
+            currentVerb = verbs.find(v => v.engPos === eng);
+            document.querySelectorAll('#verb-list .list-btn').forEach(b => b.classList.remove('active'));
+            btnObj.classList.add('active');
+            
+            quizPool = [];
+            resetChallengeState(); 
+            updateDisplay();
+        }
+
+        function toggleModifier(id) {
+            const index = selectedMods.indexOf(id);
+            const chip = document.querySelector(`.mod-btn[data-id="${id}"]`);
+            
+            if (index > -1) {
+                selectedMods.splice(index, 1);
+                chip.classList.remove('active');
+            } else {
+                selectedMods.push(id);
+                chip.classList.add('active');
+            }
+            
+            quizPool = [];
+            resetChallengeState(); 
+            updateDisplay();
+        }
+
+        function startChallenge() {
+            if (!currentVerb) {
+                alert("연습할 동사를 먼저 선택해 주세요!");
+                return;
+            }
+            isChallengeStarted = true;
+            isRevealed = false;
+            document.getElementById('challenge-btn-zone').innerHTML = ""; 
+            updateDisplay();
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            const timerBar = document.getElementById('timer');
+            timerBar.style.width = '100%';
+            timerBar.style.backgroundColor = 'var(--success)';
+            
+            let start = Date.now();
+            timerInterval = setInterval(() => {
+                let timePassed = Date.now() - start;
+                let progress = 100 - (timePassed / limitTime * 100);
+                
+                if (progress <= 0) {
+                    clearInterval(timerInterval);
+                    timerBar.style.width = '0%';
+                    timerBar.style.backgroundColor = 'var(--danger)';
+                    if(!isRevealed) revealEnglish(); 
+                } else {
+                    timerBar.style.width = progress + '%';
+                }
+            }, 20);
+        }
+
+        function updateDisplay() {
+            const korDisplayReal = document.getElementById('kor-display');
+            const engDisplay = document.getElementById('eng-display');
+            
+            if (!currentVerb) {
+                korDisplayReal.innerText = "원하는 블록들을 조합하세요!";
+                document.getElementById('challenge-btn-zone').innerHTML = `
+                    <button class="inline-challenge-btn" onclick="event.stopPropagation(); startChallenge();">🔥 도전</button>
+                `;
+                engDisplay.innerHTML = "";
+                return;
+            }
+
+            const isQues = (currentPattern === 'ques' || currentPattern === 'neg_ques');
+
+            let subject = isQues ? "너 " : "나 ";
+            let modPieces = selectedMods.map(id => {
+                const m = modifiers.find(mod => mod.id === id);
+                return isQues ? m.korQues : m.korPos;
+            });
+            let modText = modPieces.length > 0 ? modPieces.join(' ') + ' ' : '';
+            
+            let korObject = currentVerb.engPos === "get some rest" ? "" : currentVerb.korBase;
+            if (korObject) korObject += ' ';
+            let verbEnding = currentVerb.conjugation[currentPattern];
+
+            let finalKor = `${subject}${modText}${korObject}${verbEnding}`.replace(/\s+/g, ' ').trim();
+            
+            if(!finalKor.endsWith('?')) {
+                if(finalKor.endsWith('.')) finalKor = finalKor.slice(0, -1);
+                if(isQues) finalKor += '?';
+                else finalKor += '.';
+            }
+
+            korDisplayReal.innerText = finalKor;
+
+            if (!isChallengeStarted) {
+                engDisplay.innerHTML = `<span class="text-amber-500 text-[15px] font-bold">🔥 도전을 누르세요.</span>`;
+                return;
+            }
+
+            if (isChallengeStarted && !isRevealed) {
+                engDisplay.innerHTML = `<span class="text-slate-400 text-[15px] font-bold">❓ 학생들의 대답을 기다리는 중... (터치 시 공개)</span>`;
+                return;
+            }
+
+            let engHTML = "";
+            if (currentPattern === 'pos') engHTML += `<span class="tile skeleton">I am</span>`;
+            if (currentPattern === 'neg') engHTML += `<span class="tile skeleton neg">I am not</span>`;
+            if (currentPattern === 'ques') engHTML += `<span class="tile skeleton">Are you</span>`;
+            if (currentPattern === 'neg_ques') engHTML += `<span class="tile skeleton neg">Aren't you</span>`;
+
+            const finalAssembledVerb = isQues ? currentVerb.assemblingQues : currentVerb.assembling;
+            engHTML += `<span class="tile verb">${finalAssembledVerb}</span>`;
+
+            selectedMods.forEach(id => {
+                const m = modifiers.find(mod => mod.id === id);
+                const finalEngMod = isQues ? m.engQues : m.engPos;
+                engHTML += `<span class="tile modifier">${finalEngMod}</span>`;
+            });
+
+            if(isQues) {
+                engHTML += `<span class="text-white ml-0.5 font-bold">?</span>`;
+            } else {
+                engHTML += `<span class="text-white ml-0.5 font-bold">.</span>`;
+            }
+
+            engDisplay.innerHTML = engHTML;
+
+            document.getElementById('challenge-btn-zone').innerHTML = `
+                <button class="inline-next-btn" onclick="event.stopPropagation(); generateRandomQuiz();">➡️ 다음 랜덤 문제</button>
+            `;
+        }
+
+        function revealEnglish() {
+            if(!currentVerb) return;
+            isChallengeStarted = true; 
+            isRevealed = true;
+            clearInterval(timerInterval);
+            document.getElementById('timer').style.width = '0%';
+            updateDisplay();
+        }
+
+        function resetFactory() {
+            clearInterval(timerInterval);
+            currentVerb = null;
+            selectedMods = [];
+            isChallengeStarted = false;
+            isRevealed = false;
+            currentPattern = 'pos';
+            
+            quizPool = [];
+            
+            document.getElementById('fixPatternCheck').checked = false;
+            document.getElementById('fixVerbCheck').checked = false;
+            document.getElementById('noModCheck').checked = false;
+            if(document.getElementById('showEnglishCheck')) {
+                document.getElementById('showEnglishCheck').checked = false;
+            }
+
+            document.querySelectorAll('#pattern-grid .pattern-mini-btn').forEach(b => {
+                b.classList.remove('active');
+            });
+            document.querySelectorAll('#pattern-grid .pattern-mini-btn')[0].classList.add('active');
+            
+            renderVerbs();
+            renderModifiers();
+            resetChallengeState();
+            updateDisplay();
+        }
+    </script>
+</body>
+</html>
