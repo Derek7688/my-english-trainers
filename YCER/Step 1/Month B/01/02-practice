@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>⚡ [2기 1강] 기본 의문문 완성기 (Pro)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght=400;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; touch-action: manipulation; }
+    </style>
+</head>
+<body class="bg-slate-955 bg-slate-950 min-h-screen flex flex-col items-center justify-start p-4 text-white">
+
+    <div class="w-full max-w-md my-auto">
+        
+        <div id="introScreen" class="bg-slate-900 p-8 rounded-[2.5rem] shadow-2xl w-full border border-slate-800 text-center">
+            <span class="bg-blue-955 text-blue-300 px-4 py-1 rounded-full text-xs font-bold mb-3 inline-block uppercase tracking-widest border border-blue-900">Step 2: Main Game</span>
+            <h1 class="text-3xl font-black text-white mb-2 tracking-tight">기본 의문문 완성기</h1>
+            <p class="text-blue-400 font-bold text-sm italic mb-4">98문장 완전체 스피킹 훈련</p>
+            <p class="text-slate-400 font-medium text-sm mb-6 leading-relaxed">1단계에서 훈련한 갈림길 주파수를 바탕으로,<br>화면에 뜨는 한국어를 보자마자 제한 시간 내에<br><span class="text-blue-400 font-bold">완전한 영어 문장</span>을 즉시 뱉어내는 실전 훈련입니다.</p>
+            
+            <div class="mb-5 px-2 text-left">
+                <label class="text-slate-300 font-bold text-sm block mb-2">🎯 훈련 구역 선택</label>
+                <div class="grid grid-cols-3 gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                    <button id="filter-all" class="py-2.5 rounded-lg font-bold text-xs sm:text-sm transition-all bg-blue-600 text-white" onclick="changeModeFilter('ALL')">전체 (98)</button>
+                    <button id="filter-statement" class="py-2.5 rounded-lg font-bold text-xs sm:text-sm transition-all text-slate-400 hover:text-white" onclick="changeModeFilter('STATEMENT')">긍정문 (49)</button>
+                    <button id="filter-question" class="py-2.5 rounded-lg font-bold text-xs sm:text-sm transition-all text-slate-400 hover:text-white" onclick="changeModeFilter('QUESTION')">의문문 (49)</button>
+                </div>
+            </div>
+
+            <div class="mb-6 px-2 text-left">
+                <label class="text-slate-300 font-bold text-sm block mb-2" for="introTimeSelect">⏱️ 목표 스피킹 제한 시간 설정</label>
+                <select id="introTimeSelect" class="w-full p-4 rounded-2xl border-2 border-slate-800 font-bold text-slate-200 bg-slate-955 bg-slate-955 bg-slate-950 outline-none cursor-pointer text-base">
+                    <option value="0">⏱️ 시간 제한 없음 (개별 복습용)</option>
+                    <option value="2000">2초 (동시 통역사 레벨)</option>
+                    <option value="3000">3초 (직장인 추천 에이스)</option>
+                    <option value="4000" selected>4초 (표준 반사 속도)</option>
+                    <option value="5000">5초 (여유로운 세팅)</option>
+                </select>
+            </div>
+            
+            <button id="start-btn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-5 rounded-2xl font-bold text-lg shadow-xl transition-all active:scale-95" onclick="startMainGame(false)">실전 훈련 시작하기 🚀</button>
+        </div>
+
+        <div id="quizScreen" class="hidden w-full">
+            <div class="flex justify-between items-center mb-4 px-2">
+                <button onclick="goToIntro()" class="p-2 hover:bg-slate-900 rounded-full transition-colors text-slate-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                </button>
+                <div class="text-slate-400 font-black text-sm tracking-widest uppercase text-center flex-1" id="progress">0 / 0</div>
+                <div class="w-10"></div>
+            </div>
+            
+            <div id="timerContainer" class="w-full h-[6px] bg-slate-900 rounded-full overflow-hidden mb-6">
+                <div id="timerBar" class="h-full bg-blue-500" style="width: 100%;"></div>
+            </div>
+
+            <div class="bg-white p-8 rounded-[3rem] shadow-2xl h-[260px] text-center border border-slate-200 relative overflow-hidden mb-6 select-none flex flex-col justify-center items-center">
+                <div class="absolute top-4 left-0 right-0">
+                    <span class="bg-slate-100 text-slate-400 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border border-slate-200" id="modeCardLabel">SWITCHING CARD</span>
+                </div>
+                
+                <div class="w-[95%] text-xl sm:text-2xl font-bold text-slate-800 tracking-tight leading-relaxed break-keep mt-2 mb-4" id="korText">가져오는 중...</div>
+                
+                <div class="w-[90%] text-2xl sm:text-3xl font-black text-blue-600 opacity-0 transition-opacity duration-150 break-keep min-h-12 flex items-center justify-center" id="engText">English...</div>
+            </div>
+
+            <div id="effectMsg" class="text-center font-black text-xs h-6 mb-4 text-slate-500">한국어를 보자마자 영어 완전체 문장을 소리 내어 뱉으세요!</div>
+
+            <div class="mb-6 w-full" id="defaultBtnGroup">
+                <button class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold text-lg shadow-xl active:scale-95 transition-all border border-blue-400" onclick="showAnswer()">정답 확인 ⚡</button>
+            </div>
+
+            <div class="hidden grid grid-cols-2 gap-4 mb-6 w-full" id="judgeBtnGroup">
+                <button class="bg-gradient-to-b from-rose-500 to-rose-600 text-white py-5 rounded-2xl font-bold text-base active:scale-95 transition-all shadow-lg flex items-center justify-center gap-1" onclick="submitResult(false)">
+                    <span>❌</span> <span>틀렸음/시간초과</span>
+                </button>
+                <button class="bg-gradient-to-b from-emerald-500 to-emerald-600 text-white py-5 rounded-2xl font-bold text-base active:scale-95 transition-all shadow-lg flex items-center justify-center gap-1" onclick="submitResult(true)">
+                    <span>⭕</span> <span>시간 내 성공</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="resultScreen" class="hidden bg-slate-900 p-8 rounded-[2.5rem] shadow-2xl w-full border border-slate-700 text-left">
+            <div class="text-xl font-black text-center mb-1 text-white">🎉 훈련 종료 성적표</div>
+            <div id="scoreRatioSummary" class="font-bold text-slate-400 mb-1 text-center text-sm">성공률: 0 / 0 (0%)</div>
+            <div id="totalTimeSummary" class="font-black text-blue-400 mb-6 text-center text-base tracking-tight">⏱ Im 총 소요 시간: 0초</div>
+            
+            <div class="max-h-[220px] overflow-y-auto mb-6 pr-1 space-y-3" id="resultList"></div>
+            
+            <div class="flex flex-col gap-2 w-full">
+                <button id="review-failed-btn" class="hidden w-full bg-orange-500 text-white py-4 rounded-2xl font-bold text-base shadow-xl transition-all active:scale-95" onclick="startMainGame(true)">❌ 틀린 문제만 다시 도전하기 🔄</button>
+                <button class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-base shadow-xl transition-all active:scale-95" onclick="goToIntro()">처음으로 가기 🔄</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 🛠️ 선생님이 직접 긍정문 최종 검수 완료한 49문항 + 대칭 의문문 49문항 마스터팩 이식 완료
+        const masterDataset = {
+            statement: [
+                // 1) 습관 (routine)
+                { category: "습관", kor: "나 {강남에서 일해}.", eng: "I work in Gangnam." },
+                { category: "습관", kor: "나 주로 {강남에서 놀아}.", eng: "I usually hang out in Gangnam." },
+                { category: "습관", kor: "나 {지하철 타고 다녀}.", eng: "I take the subway." },
+                { category: "습관", kor: "나 {11시에 자}.", eng: "I go to bed at 11." },
+                { category: "습관", kor: "나 {7시에 일어나}.", eng: "I wake up at 7." },
+                { category: "습관", kor: "나 {매일 쇼츠 봐}.", eng: "I watch Shorts every day." },
+                { category: "습관", kor: "나 {쉴 땐 유튜브 봐}.", eng: "I watch Youtube in my free time." },
+                // 2) 상태 (status)
+                { category: "상태", kor: "나 지금 {피곤해}.", eng: "I am tired now." },
+                { category: "상태", kor: "나 요즘 {기분 좋아}.", eng: "I am happy these days." },
+                { category: "상태", kor: "나 지금 {놀랐어}.", eng: "I am surprised now." },
+                { category: "상태", kor: "나 요즘 {심심해}.", eng: "I am bored these days." },
+                { category: "상태", kor: "나 지금 {귀찮아}.", eng: "I am lazy now." },
+                { category: "상태", kor: "나 요즘 {바빠}.", eng: "I am busy these days." },
+                { category: "상태", kor: "나 지금 {집이야}.", eng: "I am at home now." },
+                { category: "상태", kor: "나 지금 {잠실이야}.", eng: "I am in Jamsil now." },
+                { category: "상태", kor: "나 지금 {혼자야}.", eng: "I am alone now." },
+                { category: "상태", kor: "나 지금 {화장실이야}.", eng: "I am in the restroom now." },
+                { category: "상태", kor: "나 지금 {강남역이야}.", eng: "I am at Gangnam Station now." },
+                { category: "상태", kor: "나 지금 {카페야}.", eng: "I am at a cafe now." },
+                { category: "상태", kor: "나 지금 {회사야}.", eng: "I am at work right now." },
+                { category: "상태", kor: "나 지금 {마트야}.", eng: "I am at the mart now." },
+                { category: "상태", kor: "나 지금 {사무실이야}.", eng: "I am in the office now." },
+                { category: "상태", kor: "나 지금 {지하철역이야}.", eng: "I am at the subway station now." },
+                { category: "상태", kor: "나 지금 {버스 정류장이야}.", eng: "I am at the bus stop now." },
+                { category: "상태", kor: "나 지금 {은행이야}.", eng: "I am at the bank now." },
+                { category: "상태", kor: "나 지금 {서점이야}.", eng: "I am at the bookstore now." },
+                // 3) 진행 (live)
+                { category: "진행", kor: "나 {친구랑 놀고 있는 중이야}.", eng: "I am hanging out with my friends." },
+                { category: "진행", kor: "나 요즘 {일자리를 찾고 있어}.", eng: "I am looking for a job these days." },
+                { category: "진행", kor: "나 {영화 보는 중이야}.", eng: "I am watching a movie." },
+                { category: "진행", kor: "나 {돈을 모으고 있는 중이야}.", eng: "I am saving money." },
+                { category: "진행", kor: "나 {친구를 기다리고 있어}.", eng: "I am waiting for my friend." },
+                { category: "진행", kor: "나 지금 {저녁을 먹고 있어}.", eng: "I am eating dinner now." },
+                { category: "진행", kor: "나 지금 {일하는 중이야}.", eng: "I am working now." },
+                { category: "진행", kor: "나 지금 {야근하고 있어}.", eng: "I am working late now." },
+                { category: "진행", kor: "나 지금 {쉬는 중이야}.", eng: "I am getting some rest now." },
+                { category: "진행", kor: "나 {침대에 누워 있어}.", eng: "I am lying in bed." },
+                { category: "진행", kor: "나 요즘 {누구 만나고 있어}.", eng: "I am seeing someone these days." },
+                { category: "진행", kor: "나 지금 {쇼츠를 보고 있어}.", eng: "I am watching Shorts now." },
+                { category: "진행", kor: "나 요즘 {운동 하고 있어}.", eng: "I am working out these days." },
+                { category: "진행", kor: "나 지금 {저녁 만들고 있어}.", eng: "I am making dinner now." },
+                { category: "진행", kor: "나 지금 {영어 공부하는 중이야}.", eng: "I am studying English now." },
+                { category: "진행", kor: "나 {전화 통화하는 중이야}.", eng: "I am talking on the phone." },
+                { category: "진행", kor: "나 {음악 듣고 있는 중이야}.", eng: "I am listening to music." },
+                { category: "진행", kor: "나 {방 청소하는 중이야}.", eng: "I am cleaning the room." },
+                { category: "진행", kor: "나 {친구랑 커피 마시는 중이야}.", eng: "I am drinking coffee with my friend." },
+                { category: "진행", kor: "나 지금 {넷플릭스 보고 있어}.", eng: "I am watching Netflix now." },
+                { category: "진행", kor: "나 {화장하고 있어}.", eng: "I am putting on makeup." },
+                { category: "진행", kor: "나 지금 {집에 가고 있어}.", eng: "I am going home now." },
+                { category: "진행", kor: "나 지금 {이메일 쓰는 중이야}.", eng: "I am writing an email now." },
+                { category: "진행", kor: "나 {손 씻는 중이야}.", eng: "I am washing my hands." },
+                { category: "진행", kor: "나 {운전 중이야}.", eng: "I am driving." },
+                { category: "진행", kor: "나 지금 {술 마시고 있어}.", eng: "I am drinking now." },
+                { category: "진행", kor: "나 지금 {담배 피고 있어}.", eng: "I am smoking now." },
+                { category: "진행", kor: "나 지금 {기다리는 중이야}.", eng: "I am waiting now." },
+                { category: "진행", kor: "나 {설거지하고 있어}.", eng: "I am washing the dishes now." },
+                { category: "진행", kor: "나 {빨래하고 있어}.", eng: "I am doing the laundry." },
+                { category: "진행", kor: "나 {집안일 하고 있어}.", eng: "I am doing the housework." },
+                { category: "진행", kor: "나 요즘 {아침 일찍 일어나고 있어}.", eng: "I am waking up early these days." },
+                { category: "진행", kor: "나 요즘 {조깅하고 있어}.", eng: "I am jogging these days." }
+            ],
+            question: [
+                // 1) 습관? (routine)
+                { category: "습관?", kor: "너 {강남에서 일해}?", eng: "Do you work in Gangnam?" },
+                { category: "너 주로 {강남에서 놀아}?", eng: "Do you usually hang out in Gangnam?" },
+                { category: "너 {지하철 타고 다녀}?", eng: "Do you take the subway?" },
+                { category: "너 {11시에 자}?", eng: "Do you go to bed at 11?" },
+                { category: "너 {7시에 일어나}?", eng: "Do you wake up at 7?" },
+                { category: "너 {매일 쇼츠 봐}?", eng: "Do you watch Shorts every day?" },
+                { category: "너 {쉴 땐 유튜브 봐}?", eng: "Do you watch Youtube in your free time?" },
+                // 2) 상태? (status)
+                { category: "상태?", kor: "너 지금 {피곤해}?", eng: "Are you tired now?" },
+                { category: "너 요즘 {기분 좋아}?", eng: "Are you happy these days?" },
+                { category: "너 지금 {놀랐어}?", eng: "Are you surprised now?" },
+                { category: "너 요즘 {심심해}?", eng: "Are you bored these days?" },
+                { category: "너 지금 {귀찮아}?", eng: "Are you lazy now?" },
+                { category: "너 요즘 {바빠}?", eng: "Are you busy these days?" },
+                { category: "너 지금 {집이야}?", eng: "Are you at home now?" },
+                { category: "너 지금 {잠실이야}?", eng: "Are you in Jamsil now?" },
+                { category: "너 지금 {혼자야}?", eng: "Are you alone now?" },
+                { category: "너 지금 {화장실이야}?", eng: "Are you in the restroom now?" },
+                { category: "너 지금 {강남역이야}?", eng: "Are you at Gangnam Station now?" },
+                { category: "너 지금 {카페야}?", eng: "Are you at a cafe now?" },
+                { category: "너 지금 {회사야}?", eng: "Are you at work right now?" },
+                { category: "너 지금 {마트야}?", eng: "Are you at the mart now?" },
+                { category: "너 지금 {사무실이야}?", eng: "Are you in the office now?" },
+                { category: "너 지금 {지하철역이야}?", eng: "Are you at the subway station now?" },
+                { category: "너 지금 {버스 정류장이야}?", eng: "Are you at the bus stop now?" },
+                { category: "너 지금 {은행이야}?", eng: "Are you at the bank now?" },
+                { category: "너 지금 {서점이야}?", eng: "Are you at the bookstore now?" },
+                // 3) 진행? (live)
+                { category: "진행?", kor: "너 {친구랑 놀고 있는 중이니}?", eng: "Are you hanging out with your friends?" },
+                { category: "너 요즘 {일자리를 찾고 있니}?", eng: "Are you looking for a job these days?" },
+                { category: "너 {영화 보는 중이니}?", eng: "Are you watching a movie?" },
+                { category: "너 {돈을 모으고 있는 중이니}?", eng: "Are you saving money?" },
+                { category: "너 {친구를 기다리고 있니}?", eng: "Are you waiting for your friend?" },
+                { category: "너 지금 {저녁을 먹고 있니}?", eng: "Are you eating dinner now?" },
+                { category: "너 지금 {일하는 중이니}?", eng: "Are you working now?" },
+                { category: "너 지금 {야근하고 있니}?", eng: "Are you working late now?" },
+                { category: "너 지금 {쉬는 중이니}?", eng: "Are you getting some rest now?" },
+                { category: "너 {침대에 누워 있니}?", eng: "Are you lying in bed?" },
+                { category: "너 요즘 {누구 만나고 있니}?", eng: "Are you seeing someone these days?" },
+                { category: "너 지금 {쇼츠를 보고 있니}?", eng: "Are you watching Shorts now?" },
+                { category: "너 요즘 {운동 하고 있니}?", eng: "Are you working out these days?" },
+                { category: "너 지금 {저녁 만들고 있니}?", eng: "Are you making dinner now?" },
+                { category: "너 지금 {영어 공부하는 중이니}?", eng: "Are you studying English now?" },
+                { category: "너 {전화 통화하는 중이니}?", eng: "Are you talking on the phone?" },
+                { category: "너 {음악 듣고 있는 중이니}?", eng: "Are you listening to music?" },
+                { category: "너 {방 청소하는 중이니}?", eng: "Are you cleaning the room?" },
+                { category: "너 {친구랑 커피 마시는 중이니}?", eng: "Are you drinking coffee with your friend?" },
+                { category: "너 지금 {넷플릭스 보고 있니}?", eng: "Are you watching Netflix now?" },
+                { category: "너 {화장하고 있니}?", eng: "Are you putting on makeup?" },
+                { category: "너 지금 {집에 가고 있니}?", eng: "Are you going home now?" },
+                { category: "너 지금 {이메일 쓰는 중이니}?", eng: "Are you writing an email now?" },
+                { category: "너 {손 씻는 중이니}?", eng: "Are you washing your hands?" },
+                { category: "너 {운전 중이니}?", eng: "Are you driving?" },
+                { category: "너 지금 {술 마시고 있니}?", eng: "Are you drinking now?" },
+                { category: "너 지금 {담배 피고 있니}?", eng: "Are you smoking now?" },
+                { category: "너 지금 {기다리는 중이니}?", eng: "Are you waiting now?" },
+                { category: "너 {설거지하고 있니}?", eng: "Are you washing the dishes now?" },
+                { category: "너 {빨래하고 있니}?", eng: "Are you doing the laundry?" },
+                { category: "너 {집안일 하고 있니}?", eng: "Are you doing the housework?" },
+                { category: "너 요즘 {아침 일찍 일어나고 있니}?", eng: "Are you waking up early these days?" },
+                { category: "너 요즘 {조깅하고 있니}?", eng: "Are you jogging these days?" }
+            ]
+        };
+
+        let quizPool = [];
+        let currentIndex = 0;
+        let score = 0;
+        let timeLimit = 4000;
+        let timerInterval = null;
+        let startTime = 0;
+        let gameStartTime = 0;
+        let results = [];
+        let isTimedOut = false;
+        let currentFilterMode = "ALL"; // ALL, STATEMENT, QUESTION
+
+        function changeModeFilter(mode) {
+            currentFilterMode = mode;
+            const buttons = {
+                "ALL": document.getElementById('filter-all'),
+                "STATEMENT": document.getElementById('filter-statement'),
+                "QUESTION": document.getElementById('filter-question')
+            };
+            
+            Object.keys(buttons).forEach(key => {
+                if(key === mode) {
+                    buttons[key].className = "py-2.5 rounded-lg font-bold text-sm transition-all bg-blue-600 text-white";
+                } else {
+                    buttons[key].className = "py-2.5 rounded-lg font-bold text-sm transition-all text-slate-400 hover:text-white";
+                }
+            });
+
+            let count = 98;
+            if (mode === "STATEMENT" || mode === "QUESTION") count = 49;
+            document.getElementById('start-btn').innerText = `선택한 ${count}문장 훈련 시작하기 🚀`;
+        }
+
+        function startMainGame(isReviewMode) {
+            const introSelect = document.getElementById('introTimeSelect');
+            timeLimit = parseInt(introSelect.value);
+
+            document.getElementById('introScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+
+            if (timeLimit === 0) {
+                document.getElementById('timerContainer').classList.add('hidden');
+            } else {
+                document.getElementById('timerContainer').classList.remove('hidden');
+            }
+
+            currentIndex = 0;
+            score = 0;
+
+            if (isReviewMode) {
+                quizPool = results.filter(r => !r.success).map(r => ({
+                    kor: r.rawKor,
+                    eng: r.eng,
+                    category: r.category,
+                    originMode: r.originMode
+                }));
+            } else {
+                if (currentFilterMode === "ALL") {
+                    const sData = masterDataset.statement.map(item => ({...item, originMode: "긍정문"}));
+                    const qData = masterDataset.question.map(item => ({...item, originMode: "의문문"}));
+                    quizPool = [...sData, ...qData];
+                } else if (currentFilterMode === "STATEMENT") {
+                    quizPool = masterDataset.statement.map(item => ({...item, originMode: "긍정문"}));
+                } else if (currentFilterMode === "QUESTION") {
+                    quizPool = masterDataset.question.map(item => ({...item, originMode: "의문문"}));
+                }
+            }
+
+            results = [];
+            quizPool.sort(() => Math.random() - 0.5);
+            gameStartTime = Date.now();
+
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if (currentIndex >= quizPool.length) {
+                finishGame();
+                return;
+            }
+
+            isTimedOut = false;
+            document.getElementById('progress').innerText = `${currentIndex + 1} / ${quizPool.length}`;
+            
+            const currentItem = quizPool[currentIndex];
+            let rawKor = currentItem.kor;
+            let formattedKor = rawKor.replace("{", "<span class='text-blue-500 font-black text-2xl sm:text-3xl mx-0.5 border-b-2 border-blue-200/60'>").replace("}", "</span>");
+            
+            document.getElementById('korText').innerHTML = formattedKor;
+            document.getElementById('engText').innerText = currentItem.eng;
+            document.getElementById('engText').classList.add('opacity-0');
+            
+            // 상단 인디케이터 태그 라벨 매칭 (긍정문/의문문 출처 표시)
+            document.getElementById('modeCardLabel').innerText = `${currentItem.originMode} • ${currentItem.category || "코어"}`;
+
+            if (timeLimit === 0) {
+                document.getElementById('effectMsg').innerText = "♾️ 시간 제한이 없습니다. 완벽하게 뱉은 후 정답을 확인하세요.";
+                document.getElementById('effectMsg').className = "text-center font-black text-xs h-6 mb-4 text-slate-400";
+            } else {
+                document.getElementById('effectMsg').innerText = "⏰ 타이머가 다 줄어들기 전에 영어로 발사하세요!";
+                document.getElementById('effectMsg').className = "text-center font-black text-xs h-6 mb-4 text-slate-400";
+                startTimer();
+            }
+
+            document.getElementById('defaultBtnGroup').classList.remove('hidden');
+            document.getElementById('judgeBtnGroup').classList.add('hidden');
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            const timerBar = document.getElementById('timerBar');
+            timerBar.className = "h-full bg-blue-500 transition-none";
+            timerBar.style.width = "100%";
+
+            startTime = Date.now();
+            
+            timerInterval = setInterval(() => {
+                if (timeLimit === 0) return;
+                const elapsedTime = Date.now() - startTime;
+                const remainingRatio = Math.max(0, (timeLimit - elapsedTime) / timeLimit) * 100;
+                
+                timerBar.style.width = `${remainingRatio}%`;
+
+                if (remainingRatio < 30) {
+                    timerBar.className = "h-full bg-rose-500";
+                } else if (remainingRatio < 60) {
+                    timerBar.className = "h-full bg-amber-500";
+                }
+
+                if (elapsedTime >= timeLimit) {
+                    clearInterval(timerInterval);
+                    timerBar.style.width = "0%";
+                    isTimedOut = true;
+                    document.getElementById('effectMsg').innerText = "⏰ 시간 초과! 정답을 확인하고 실패 버튼을 누르세요.";
+                    document.getElementById('effectMsg').className = "text-center font-black text-sm h-6 mb-4 text-rose-500 animate-pulse";
+                }
+            }, 25);
+        }
+
+        function showAnswer() {
+            clearInterval(timerInterval);
+            document.getElementById('engText').classList.remove('opacity-0');
+            
+            document.getElementById('defaultBtnGroup').classList.add('hidden');
+            document.getElementById('judgeBtnGroup').classList.remove('hidden');
+        }
+
+        function submitResult(isSuccess) {
+            const currentItem = quizPool[currentIndex];
+            const finalSuccess = (isSuccess && !isTimedOut);
+            
+            if (finalSuccess) {
+                score++;
+            }
+
+            results.push({
+                category: currentItem.category,
+                originMode: currentItem.originMode,
+                rawKor: currentItem.kor,
+                kor: currentItem.kor.replace("{","").replace("}",""),
+                eng: currentItem.eng,
+                success: finalSuccess 
+            });
+
+            currentIndex++;
+            showQuestion();
+        }
+
+        function finishGame() {
+            clearInterval(timerInterval);
+            
+            const totalElapsedTimeMs = Date.now() - gameStartTime;
+            const totalSeconds = Math.floor(totalElapsedTimeMs / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            const timeString = minutes > 0 ? `⏱️ 총 소요 시간: ${minutes}분 ${seconds}초` : `⏱️ 총 소요 시간: ${seconds}초`;
+            document.getElementById('totalTimeSummary').innerText = timeString;
+
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+
+            const ratio = Math.round((score / quizPool.length) * 100);
+            document.getElementById('scoreRatioSummary').innerText = `성공률: ${score} / ${quizPool.length} (${ratio}%)`;
+
+            let failedAnswers = results.filter(r => !r.success);
+            const reviewBtn = document.getElementById('review-failed-btn');
+            
+            if (failedAnswers.length > 0) {
+                reviewBtn.classList.remove('hidden');
+                reviewBtn.innerText = `❌ 틀린 문제 ${failedAnswers.length}개만 다시 도전하기 🔄`;
+            } else {
+                reviewBtn.classList.add('hidden');
+            }
+
+            const resultList = document.getElementById('resultList');
+            resultList.innerHTML = '';
+
+            results.forEach(res => {
+                const item = document.createElement('div');
+                item.className = `p-3 rounded-2xl border ${res.success ? 'bg-emerald-950/40 border-emerald-800' : 'bg-rose-950/40 border-rose-800'} text-sm flex flex-col gap-0.5`;
+                
+                item.innerHTML = `
+                    <div class="flex items-center gap-1.5 font-bold">
+                        <span>${res.success ? '⭕' : '❌'}</span>
+                        <span class="text-xs bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded border border-slate-700 font-medium">${res.originMode}</span>
+                        <span class="${res.success ? 'text-emerald-400' : 'text-rose-400'}">${res.kor}</span>
+                    </div>
+                    <div class="text-slate-400 text-xs pl-6 italic font-medium">${res.eng}</div>
+                `;
+                resultList.appendChild(item);
+            });
+        }
+
+        function goToIntro() {
+            clearInterval(timerInterval);
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('introScreen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
