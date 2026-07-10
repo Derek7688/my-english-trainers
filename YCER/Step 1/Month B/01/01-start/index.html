@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🏃 1강: 입을 떼는 1초 판단 훈련</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght=400;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; touch-action: manipulation; }
+    </style>
+</head>
+<body class="bg-slate-900 min-h-screen flex flex-col items-center justify-start p-4 text-white">
+
+    <div class="w-full max-w-md my-auto">
+        
+        <!-- 인트로 스크린 -->
+        <div id="introScreen" class="bg-slate-800 p-8 rounded-[2.5rem] shadow-2xl w-full border border-slate-700 text-center">
+            <h1 class="text-3xl font-black text-white mb-2 tracking-tight">1강: 입을 떼는 1초 판단 훈련</h1>
+            <p class="text-blue-400 font-bold text-sm italic mb-6">습관(I) vs 상태(I am) vs 진행(I am -ing) 직관 테스트</p>
+            <p class="text-slate-400 font-medium text-xs sm:text-sm mb-8 leading-relaxed">
+                한국어를 보자마자 세 갈래의 무기 중 하나를<br>
+                설정한 제한 시간 내에 칼같이 낚아채세요!
+            </p>
+            
+            <!-- 세팅 존 -->
+            <div class="space-y-4 mb-8 px-2 text-left">
+                <div>
+                    <label class="text-slate-300 font-bold text-sm block mb-2">🎛️ 훈련 모드 선택</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="modeStatementBtn" class="py-3 rounded-xl font-bold text-sm bg-blue-600 text-white border-2 border-blue-400" onclick="switchTrainMode('statement')">긍정문</button>
+                        <button id="modeQuestionBtn" class="py-3 rounded-xl font-bold text-sm bg-slate-900 text-slate-400 border-2 border-slate-700" onclick="switchTrainMode('question')">의문문</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-slate-300 font-bold text-sm block mb-2" for="introTimeSelect">⏱️ 목표 반사 신경 제한 시간</label>
+                    <select id="introTimeSelect" class="w-full p-4 rounded-xl border-2 border-slate-700 font-bold text-slate-200 bg-slate-900 outline-none cursor-pointer text-sm">
+                        <option value="0">⏱️ 시간 제한 없음 (개별 자습용)</option>
+                        <option value="1500">1.5초 (원어민 반사 신경)</option>
+                        <option value="2000" selected>2초 (추천 표준 세팅)</option>
+                        <option value="3000">3초 (초보자 워밍업용)</option>
+                        <option value="5000">5초 (여유로운 세팅)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4.5 rounded-2xl font-bold text-lg shadow-xl transition-all active:scale-95" onclick="startWarmup(false)">판별 예열 시작 🚀</button>
+        </div>
+
+        <!-- 퀴즈 스크린 -->
+        <div id="quizScreen" class="hidden w-full">
+            <div class="flex justify-between items-center mb-4 px-2">
+                <button onclick="goToIntro()" class="p-2 hover:bg-slate-800 rounded-full transition-colors text-slate-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                </button>
+                <div class="text-slate-400 font-black text-sm tracking-widest uppercase text-center flex-1" id="progress">0 / 0</div>
+                <div class="w-10"></div>
+            </div>
+            
+            <div id="timerContainer" class="w-full h-[6px] bg-slate-800 rounded-full overflow-hidden mb-6">
+                <div id="timerBar" class="h-full bg-blue-500" style="width: 100%;"></div>
+            </div>
+
+            <div class="bg-white p-6 rounded-[3rem] shadow-2xl h-[220px] text-center border border-slate-200 relative overflow-hidden mb-5 select-none flex flex-col justify-center items-center">
+                <div class="absolute top-4 left-0 right-0">
+                    <span class="bg-slate-100 text-slate-400 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border border-slate-200" id="coreSignalLabel">CORE FILTER</span>
+                </div>
+                
+                <div class="w-[95%] text-xl sm:text-2xl font-bold text-slate-800 tracking-tight leading-relaxed break-keep mt-2" id="korText">가져오는 중...</div>
+                
+                <div class="absolute bottom-5 left-1/2 -translate-x-1/2 w-[90%] text-sm sm:text-base font-black text-blue-600 opacity-0 transition-opacity duration-150 break-keep" id="engText">English...</div>
+            </div>
+
+            <div id="effectMsg" class="text-center font-black text-xs h-6 mb-4 text-slate-500">⏱️ 타이머가 멈추기 전에 선택하세요!</div>
+
+            <!-- 가로 3줄 스키니 버튼 정렬 배치 -->
+            <div class="grid grid-cols-3 gap-1.5 mb-6 w-full" id="actionBtnGroup">
+                <button class="bg-gradient-to-b from-emerald-500 to-emerald-600 text-white py-5 px-1 rounded-xl font-black text-xs sm:text-sm active:scale-95 transition-all shadow-md flex flex-col items-center justify-center gap-1" onclick="chooseAnswer('routine')">
+                    <span class="opacity-75 scale-90" id="btnLabel1">습관</span>
+                    <span class="tracking-tighter font-black" id="btnBlock1">I + 동사</span>
+                </button>
+                <button class="bg-gradient-to-b from-amber-500 to-amber-600 text-white py-5 px-1 rounded-xl font-black text-xs sm:text-sm active:scale-95 transition-all shadow-md flex flex-col items-center justify-center gap-1" onclick="chooseAnswer('status')">
+                    <span class="opacity-75 scale-90" id="btnLabel2">상태</span>
+                    <span class="tracking-tighter font-black" id="btnBlock2">I am + 상태</span>
+                </button>
+                <button class="bg-gradient-to-b from-blue-500 to-blue-600 text-white py-5 px-1 rounded-xl font-black text-xs sm:text-sm active:scale-95 transition-all shadow-md flex flex-col items-center justify-center gap-1" onclick="chooseAnswer('live')">
+                    <span class="opacity-75 scale-90" id="btnLabel3">진행</span>
+                    <span class="tracking-tighter font-black" id="btnBlock3">I am + ~ing</span>
+                </button>
+            </div>
+
+            <div class="hidden w-full mb-6" id="nextBtnGroup">
+                <button class="w-full bg-slate-700 hover:bg-slate-600 text-white py-4 rounded-2xl font-bold text-base transition-all" onclick="nextQuestion()">다음 문제로 패스 ➡️</button>
+            </div>
+        </div>
+
+        <!-- 결과 스크린 -->
+        <div id="resultScreen" class="hidden bg-slate-800 p-6 rounded-[2.5rem] shadow-2xl w-full border border-slate-700 text-left">
+            <div class="text-xl font-black text-center mb-1 text-white">🎉 갈림길 격파 성적표</div>
+            <div id="scoreRatioSummary" class="font-bold text-slate-400 mb-1 text-center text-sm">성공률: 0 / 0 (0%)</div>
+            <div id="totalTimeSummary" class="font-black text-blue-400 mb-6 text-center text-base tracking-tight">⏱️ 전체 격파 속도: 0초</div>
+            
+            <div class="max-h-[240px] overflow-y-auto mb-6 pr-1 space-y-3" id="resultList"></div>
+            
+            <div class="flex flex-col gap-2 w-full">
+                <button id="review-failed-btn" class="hidden w-full bg-orange-500 text-white py-4 rounded-2xl font-bold text-base shadow-xl transition-all active:scale-95" onclick="startWarmup(true)">❌ 틀린 문제만 다시 판별하기 🔄</button>
+                <button class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-base shadow-xl transition-all active:scale-95" onclick="goToIntro()">다시 처음부터 도전 🔄</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 🛠️ 선생님 검수 완료 100% 반영 무결점 최종 데이터베이스 마스터팩 장전
+        const masterDataset = {
+            statement: [
+                // 1) 습관 (routine)
+                { kor: "나 {강남에서 일해}.", ans: "routine", eng: "I work in Gangnam." },
+                { kor: "나 주로 {강남에서 놀아}.", ans: "routine", eng: "I usually hang out in Gangnam." },
+                { kor: "나 {지하철 타고 다녀}.", ans: "routine", eng: "I take the subway." },
+                { kor: "나 {11시에 자}.", ans: "routine", eng: "I go to bed at 11." },
+                { kor: "나 {7시에 일어나}.", ans: "routine", eng: "I wake up at 7." },
+                { kor: "나 {매일 쇼츠 봐}.", ans: "routine", eng: "I watch Shorts every day." },
+                { kor: "나 {쉴 땐 유튜브 봐}.", ans: "routine", eng: "I watch Youtube in my free time." },
+                
+                // 2) 상태 (status)
+                { kor: "나 지금 {피곤해}.", ans: "status", eng: "I am tired now." },
+                { kor: "나 요즘 {기분 좋아}.", ans: "status", eng: "I am happy these days." },
+                { kor: "나 지금 {놀랐어}.", ans: "status", eng: "I am surprised now." },
+                { kor: "나 요즘 {심심해}.", ans: "status", eng: "I am bored these days." },
+                { kor: "나 지금 {귀찮아}.", ans: "status", eng: "I am lazy now." },
+                { kor: "나 요즘 {바빠}.", ans: "status", eng: "I am busy these days." },
+                { kor: "나 지금 {집이야}.", ans: "status", eng: "I am at home now." },
+                { kor: "나 지금 {잠실이야}.", ans: "status", eng: "I am in Jamsil now." },
+                { kor: "나 지금 {혼자야}.", ans: "status", eng: "I am alone now." },
+                { kor: "나 지금 {화장실이야}.", ans: "status", eng: "I am in the restroom now." },
+                { kor: "나 지금 {강남역이야}.", ans: "status", eng: "I am at Gangnam Station now." },
+                { kor: "나 지금 {카페야}.", ans: "status", eng: "I am at a cafe now." },
+                { kor: "나 지금 {회사야}.", ans: "status", eng: "I am at work right now." },
+                { kor: "나 지금 {마트야}.", ans: "status", eng: "I am at the mart now." },
+                { kor: "나 지금 {사무실이야}.", ans: "status", eng: "I am in the office now." },
+                { kor: "나 지금 {지하철역이야}.", ans: "status", eng: "I am at the subway station now." },
+                { kor: "나 지금 {버스 정류장이야}.", ans: "status", eng: "I am at the bus stop now." },
+                { kor: "나 지금 {은행이야}.", ans: "status", eng: "I am at the bank now." },
+                { kor: "나 지금 {서점이야}.", ans: "status", eng: "I am at the bookstore now." },
+
+                // 3) 진행 (live)
+                { kor: "나 {친구랑 놀고 있는 중이야}.", ans: "live", eng: "I am hanging out with my friends." },
+                { kor: "나 요즘 {일자리를 찾고 있어}.", ans: "live", eng: "I am looking for a job these days." },
+                { kor: "나 {영화 보는 중이야}.", ans: "live", eng: "I am watching a movie." },
+                { kor: "나 {돈을 모으고 있는 중이야}.", ans: "live", eng: "I am saving money." },
+                { kor: "나 {친구를 기다리고 있어}.", ans: "live", eng: "I am waiting for my friend." },
+                { kor: "나 지금 {저녁을 먹고 있어}.", ans: "live", eng: "I am eating dinner now." },
+                { kor: "나 지금 {일하는 중이야}.", ans: "live", eng: "I am working now." },
+                { kor: "나 지금 {야근하고 있어}.", ans: "live", eng: "I am working late now." },
+                { kor: "나 지금 {쉬는 중이야}.", ans: "live", eng: "I am getting some rest now." },
+                { kor: "나 {침대에 누워 있어}.", ans: "live", eng: "I am lying in bed." },
+                { kor: "나 요즘 {누구 만나고 있어}.", ans: "live", eng: "I am seeing someone these days." },
+                { kor: "나 지금 {쇼츠를 보고 있어}.", ans: "live", eng: "I am watching Shorts now." },
+                { kor: "나 요즘 {운동 하고 있어}.", ans: "live", eng: "I am working out these days." },
+                { kor: "나 지금 {저녁 만들고 있어}.", ans: "live", eng: "I am making dinner now." },
+                { kor: "나 지금 {영어 공부하는 중이야}.", ans: "live", eng: "I am studying English now." },
+                { kor: "나 {전화 통화하는 중이야}.", ans: "live", eng: "I am talking on the phone." },
+                { kor: "나 {음악 듣고 있는 중이야}.", ans: "live", eng: "I am listening to music." },
+                { kor: "나 {방 청소하는 중이야}.", ans: "live", eng: "I am cleaning the room." },
+                { kor: "나 {친구랑 커피 마시는 중이야}.", ans: "live", eng: "I am drinking coffee with my friend." },
+                { kor: "나 지금 {넷넷플릭스 보고 있어}.", ans: "live", eng: "I am watching Netflix now." },
+                { kor: "나 {화장하고 있어}.", ans: "live", eng: "I am putting on makeup." },
+                { kor: "나 지금 {집에 가고 있어}.", ans: "live", eng: "I am going home now." },
+                { kor: "나 지금 {이메일 쓰는 중이야}.", ans: "live", eng: "I am writing an email now." },
+                { kor: "나 {손 씻는 중이야}.", ans: "live", eng: "I am washing my hands." },
+                { kor: "나 {운전 중이야}.", ans: "live", eng: "I am driving." },
+                { kor: "나 지금 {술 마시고 있어}.", ans: "live", eng: "I am drinking now." },
+                { kor: "나 지금 {담배 피고 있어}.", ans: "live", eng: "I am smoking now." },
+                { kor: "나 지금 {기다리는 중이야}.", ans: "live", eng: "I am waiting now." },
+                { kor: "나 {설거지하고 있어}.", ans: "live", eng: "I am washing the dishes now." },
+                { kor: "나 {빨래하고 있어}.", ans: "live", eng: "I am doing the laundry." },
+                { kor: "나 {집안일 하고 있어}.", ans: "live", eng: "I am doing the housework." },
+                { kor: "나 요즘 {아침 일찍 일어나고 있어}.", ans: "live", eng: "I am waking up early these days." },
+                { kor: "나 요즘 {조깅하고 있어}.", ans: "live", eng: "I am jogging these days." }
+            ],
+            question: [
+                // 1) 습관? (routine)
+                { kor: "너 {강남에서 일해}?", ans: "routine", eng: "Do you work in Gangnam?" },
+                { kor: "너 주로 {강남에서 놀아}?", ans: "routine", eng: "Do you usually hang out in Gangnam?" },
+                { kor: "너 {지하철 타고 다녀}?", ans: "routine", eng: "Do you take the subway?" },
+                { kor: "너 {11시에 자}?", ans: "routine", eng: "Do you go to bed at 11?" },
+                { kor: "너 {7시에 일어나}?", ans: "routine", eng: "Do you wake up at 7?" },
+                { kor: "너 {매일 쇼츠 봐}?", ans: "routine", eng: "Do you watch Shorts every day?" },
+                { kor: "너 {쉴 땐 유튜브 봐}?", ans: "routine", eng: "Do you watch Youtube in your free time?" },
+
+                // 2) 상태? (status)
+                { kor: "너 지금 {피곤해}?", ans: "status", eng: "Are you tired now?" },
+                { kor: "너 요즘 {기분 좋아}?", ans: "status", eng: "Are you happy these days?" },
+                { kor: "너 지금 {놀랐어}?", ans: "status", eng: "Are you surprised now?" },
+                { kor: "너 요즘 {심심해}?", ans: "status", eng: "Are you bored these days?" },
+                { kor: "너 지금 {귀찮아}?", ans: "status", eng: "Are you lazy now?" },
+                { kor: "너 요즘 {바빠}?", ans: "status", eng: "Are you busy these days?" },
+                { kor: "너 지금 {집이야}?", ans: "status", eng: "Are you at home now?" },
+                { kor: "너 지금 {잠실이야}?", ans: "status", eng: "Are you in Jamsil now?" },
+                { kor: "너 지금 {혼자야}?", ans: "status", eng: "Are you alone now?" },
+                { kor: "너 지금 {화장실이야}?", ans: "status", eng: "Are you in the restroom now?" },
+                { kor: "너 지금 {강남역이야}?", ans: "status", eng: "Are you at Gangnam Station now?" },
+                { kor: "너 지금 {카페야}?", ans: "status", eng: "Are you at a cafe now?" },
+                { kor: "너 지금 {회사야}?", ans: "status", eng: "Are you at work right now?" },
+                { kor: "너 지금 {마트야}?", ans: "status", eng: "Are you at the mart now?" },
+                { kor: "너 지금 {사무실이야}?", ans: "status", eng: "Are you in the office now?" },
+                { kor: "너 지금 {지하철역이야}?", ans: "status", eng: "Are you at the subway station now?" },
+                { kor: "너 지금 {버스 정류장이야}?", ans: "status", eng: "Are you at the bus stop now?" },
+                { kor: "너 지금 {은행이야}?", ans: "status", eng: "Are you at the bank now?" },
+                { kor: "너 지금 {서점이야}?", ans: "status", eng: "Are you at the bookstore now?" },
+
+                // 3) 진행? (live)
+                { kor: "너 {친구랑 놀고 있는 중이니}?", ans: "live", eng: "Are you hanging out with your friends?" },
+                { kor: "너 요즘 {일자리를 찾고 있니}?", ans: "live", eng: "Are you looking for a job these days?" },
+                { kor: "너 {영화 보는 중이니}?", ans: "live", eng: "Are you watching a movie?" },
+                { kor: "너 {돈을 모으고 있는 중이니}?", ans: "live", eng: "Are you saving money?" },
+                { kor: "너 {친구를 기다리고 있니}?", ans: "live", eng: "Are you waiting for your friend?" },
+                { kor: "너 지금 {저녁을 먹고 있니}?", ans: "live", eng: "Are you eating dinner now?" },
+                { kor: "너 지금 {일하는 중이니}?", ans: "live", eng: "Are you working now?" },
+                { kor: "너 지금 {야근하고 있니}?", ans: "live", eng: "Are you working late now?" },
+                { kor: "너 지금 {쉬는 중이니}?", ans: "live", eng: "Are you getting some rest now?" },
+                { kor: "너 {침대에 누워 있니}?", ans: "live", eng: "Are you lying in bed?" },
+                { kor: "너 요즘 {누구 만나고 있니}?", ans: "live", eng: "Are you seeing someone these days?" },
+                { kor: "너 지금 {쇼츠를 보고 있니}?", ans: "live", eng: "Are you watching Shorts now?" },
+                { kor: "너 요즘 {운동 하고 있니}?", ans: "live", eng: "Are you working out these days?" },
+                { kor: "너 지금 {저녁 만들고 있니}?", ans: "live", eng: "Are you making dinner now?" },
+                { kor: "너 지금 {영어 공부하는 중이니}?", ans: "live", eng: "Are you studying English now?" },
+                { kor: "너 {전화 통화하는 중이니}?", ans: "live", eng: "Are you talking on the phone?" },
+                { kor: "너 {음악 듣고 있는 중이니}?", ans: "live", eng: "Are you listening to music?" },
+                { kor: "너 {방 청소하는 중이니}?", ans: "live", eng: "Are you cleaning the room?" },
+                { kor: "너 {친구랑 커피 마시는 중이니}?", ans: "live", eng: "Are you drinking coffee with your friend?" },
+                { kor: "너 지금 {넷플릭스 보고 있니}?", ans: "live", eng: "Are you watching Netflix now?" },
+                { kor: "너 {화장하고 있니}?", ans: "live", eng: "Are you putting on makeup?" },
+                { kor: "너 지금 {집에 가고 있니}?", ans: "live", eng: "Are you going home now?" },
+                { kor: "너 지금 {이메일 쓰는 중이니}?", ans: "live", eng: "Are you writing an email now?" },
+                { kor: "너 {손 씻는 중이니}?", ans: "live", eng: "Are you washing your hands?" },
+                { kor: "너 {운전 중이니}?", ans: "live", eng: "Are you driving?" },
+                { kor: "너 지금 {술 마시고 있니}?", ans: "live", eng: "Are you drinking now?" },
+                { kor: "너 지금 {담배 피고 있니}?", ans: "live", eng: "Are you smoking now?" },
+                { kor: "너 지금 {기다리는 중이니}?", ans: "live", eng: "Are you waiting now?" },
+                { kor: "너 {설거지하고 있니}?", ans: "live", eng: "Are you washing the dishes now?" },
+                { kor: "너 {빨래하고 있니}?", ans: "live", eng: "Are you doing the laundry?" },
+                { kor: "너 {집안일 하고 있니}?", ans: "live", eng: "Are you doing the housework?" },
+                { kor: "너 요즘 {아침 일찍 일어나고 있니}?", ans: "live", eng: "Are you waking up early these days?" },
+                { kor: "너 요즘 {조깅하고 있니}?", ans: "live", eng: "Are you jogging these days?" }
+            ]
+        };
+
+        let selectedTrainMode = 'statement'; 
+        let currentPool = [];
+        let currentIndex = 0;
+        let score = 0;
+        let timeLimit = 2000;
+        let timerInterval = null;
+        let startTime = 0;
+        let warmupStartTime = 0;
+        let results = [];
+        let isLocked = false;
+
+        function switchTrainMode(mode) {
+            selectedTrainMode = mode;
+            const sBtn = document.getElementById('modeStatementBtn');
+            const qBtn = document.getElementById('modeQuestionBtn');
+            
+            if (mode === 'statement') {
+                sBtn.className = "py-3 rounded-xl font-bold text-sm bg-blue-600 text-white border-2 border-blue-400";
+                qBtn.className = "py-3 rounded-xl font-bold text-sm bg-slate-900 text-slate-400 border-2 border-slate-700";
+                
+                document.getElementById('btnLabel1').innerText = "습관";
+                document.getElementById('btnBlock1').innerText = "I + 동사";
+                document.getElementById('btnLabel2').innerText = "상태";
+                document.getElementById('btnBlock2').innerText = "I am + 상태";
+                document.getElementById('btnLabel3').innerText = "진행";
+                document.getElementById('btnBlock3').innerText = "I am + ~ing";
+                document.getElementById('coreSignalLabel').innerText = "STATEMENT CORE FILTER";
+            } else {
+                qBtn.className = "py-3 rounded-xl font-bold text-sm bg-blue-600 text-white border-2 border-blue-400";
+                sBtn.className = "py-3 rounded-xl font-bold text-sm bg-slate-900 text-slate-400 border-2 border-slate-700";
+                
+                document.getElementById('btnLabel1').innerText = "습관?";
+                document.getElementById('btnBlock1').innerText = "Do you + 동사";
+                document.getElementById('btnLabel2').innerText = "상태?";
+                document.getElementById('btnBlock2').innerText = "Are you + 상태";
+                document.getElementById('btnLabel3').innerText = "진행?";
+                document.getElementById('btnBlock3').innerText = "Are you + ~ing";
+                document.getElementById('coreSignalLabel').innerText = "QUESTION CORE FILTER";
+            }
+        }
+
+        function startWarmup(isReviewMode) {
+            const introSelect = document.getElementById('introTimeSelect');
+            timeLimit = parseInt(introSelect.value);
+
+            document.getElementById('introScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+
+            if (timeLimit === 0) {
+                document.getElementById('timerContainer').classList.add('hidden');
+            } else {
+                document.getElementById('timerContainer').classList.remove('hidden');
+            }
+
+            currentIndex = 0;
+            score = 0;
+            isLocked = false;
+
+            if (isReviewMode) {
+                currentPool = results.filter(r => !r.success).map(r => ({
+                    kor: r.rawKor,
+                    ans: r.ans,
+                    eng: r.eng
+                }));
+            } else {
+                currentPool = [...masterDataset[selectedTrainMode]];
+            }
+
+            results = [];
+            currentPool.sort(() => Math.random() - 0.5);
+            warmupStartTime = Date.now();
+
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if (currentIndex >= currentPool.length) {
+                finishWarmup();
+                return;
+            }
+
+            isLocked = false;
+            document.getElementById('progress').innerText = `${currentIndex + 1} / ${currentPool.length}`;
+            
+            const currentItem = currentPool[currentIndex];
+            let rawKor = currentItem.kor;
+            let formattedKor = rawKor.replace("{", "<span class='text-blue-500 font-black text-2xl sm:text-3xl mx-0.5 border-b-2 border-blue-200/60'>").replace("}", "</span>");
+            
+            document.getElementById('korText').innerHTML = formattedKor;
+            document.getElementById('engText').innerText = currentItem.eng;
+            document.getElementById('engText').classList.add('opacity-0');
+            
+            if (timeLimit === 0) {
+                document.getElementById('effectMsg').innerText = "♾️ 시간 제한이 없습니다. 알맞은 입문 블록을 고르세요.";
+                document.getElementById('effectMsg').className = "text-center font-black text-xs h-6 mb-4 text-slate-400";
+            } else {
+                document.getElementById('effectMsg').innerText = "⏱️ 타이머가 멈추기 전에 선택하세요!";
+                document.getElementById('effectMsg').className = "text-center font-black text-xs h-6 mb-4 text-slate-400";
+                startTimer();
+            }
+
+            document.getElementById('actionBtnGroup').classList.remove('hidden');
+            document.getElementById('nextBtnGroup').classList.add('hidden');
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            const timerBar = document.getElementById('timerBar');
+            timerBar.className = "h-full bg-blue-500 transition-none";
+            timerBar.style.width = "100%";
+
+            startTime = Date.now();
+            
+            timerInterval = setInterval(() => {
+                if (isLocked || timeLimit === 0) return;
+                const elapsedTime = Date.now() - startTime;
+                const remainingRatio = Math.max(0, (timeLimit - elapsedTime) / timeLimit) * 100;
+                
+                timerBar.style.width = `${remainingRatio}%`;
+
+                if (remainingRatio < 30) {
+                    timerBar.className = "h-full bg-rose-500";
+                } else if (remainingRatio < 60) {
+                    timerBar.className = "h-full bg-amber-500";
+                }
+
+                if (elapsedTime >= timeLimit) {
+                    clearInterval(timerInterval);
+                    timerBar.style.width = "0%";
+                    handleTimeout();
+                }
+            }, 20);
+        }
+
+        function chooseAnswer(userChoice) {
+            if (isLocked) return;
+            isLocked = true;
+            clearInterval(timerInterval);
+
+            const currentItem = currentPool[currentIndex];
+            const isCorrect = (userChoice === currentItem.ans);
+            
+            const labelMap = { routine: "습관", status: "상태", live: "진행" };
+
+            if (isCorrect) {
+                score++;
+                document.getElementById('effectMsg').innerText = `⭕ 정답 블록 포착! [${labelMap[currentItem.ans]}]`;
+                document.getElementById('effectMsg').className = "text-center font-black text-base h-6 mb-4 text-emerald-400 animate-bounce";
+                
+                results.push({ rawKor: currentItem.kor, kor: currentItem.kor.replace("{","").replace("}",""), ans: labelMap[currentItem.ans], eng: currentItem.eng, success: true });
+                
+                setTimeout(() => {
+                    currentIndex++;
+                    showQuestion();
+                }, 500);
+            } else {
+                document.getElementById('effectMsg').innerText = `❌ 갈림길 실패! 정답 뼈대는 [${labelMap[currentItem.ans]}]`;
+                document.getElementById('effectMsg').className = "text-center font-black text-base h-6 mb-4 text-rose-500";
+                document.getElementById('engText').classList.remove('opacity-0');
+                
+                results.push({ rawKor: currentItem.kor, kor: currentItem.kor.replace("{","").replace("}",""), ans: labelMap[currentItem.ans], eng: currentItem.eng, success: false });
+
+                document.getElementById('actionBtnGroup').classList.add('hidden');
+                document.getElementById('nextBtnGroup').classList.remove('hidden');
+            }
+        }
+
+        function handleTimeout() {
+            isLocked = true;
+            const currentItem = currentPool[currentIndex];
+            const labelMap = { routine: "습관", status: "상태", live: "진행" };
+            
+            document.getElementById('effectMsg').innerText = `⏰ 반사 신경 초과! 정답 뼈대: [${labelMap[currentItem.ans]}]`;
+            document.getElementById('effectMsg').className = "text-center font-black text-base h-6 mb-4 text-amber-500";
+            document.getElementById('engText').classList.remove('opacity-0');
+
+            results.push({ rawKor: currentItem.kor, kor: currentItem.kor.replace("{","").replace("}",""), ans: labelMap[currentItem.ans], eng: currentItem.eng, success: false });
+
+            document.getElementById('actionBtnGroup').classList.add('hidden');
+            document.getElementById('nextBtnGroup').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            showQuestion();
+        }
+
+        function finishWarmup() {
+            clearInterval(timerInterval);
+            
+            const totalElapsedTimeMs = Date.now() - warmupStartTime;
+            const totalSeconds = (totalElapsedTimeMs / 1000).toFixed(1);
+            document.getElementById('totalTimeSummary').innerText = `⏱️ 전체 격파 속도: ${totalSeconds}초`;
+
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+
+            const ratio = Math.round((score / currentPool.length) * 100);
+            document.getElementById('scoreRatioSummary').innerText = `성공률: ${score} / ${currentPool.length} (${ratio}%)`;
+
+            let failedAnswers = results.filter(r => !r.success);
+            const reviewBtn = document.getElementById('review-failed-btn');
+            
+            if (failedAnswers.length > 0) {
+                reviewBtn.classList.remove('hidden');
+                reviewBtn.innerText = `❌ 틀린 문제 ${failedAnswers.length}개만 다시 판별하기 🔄`;
+            } else {
+                reviewBtn.classList.add('hidden');
+            }
+
+            const resultList = document.getElementById('resultList');
+            resultList.innerHTML = '';
+
+            results.forEach(res => {
+                const item = document.createElement('div');
+                item.className = `p-3 rounded-2xl border ${res.success ? 'bg-emerald-950/40 border-emerald-800' : 'bg-rose-950/40 border-rose-800'} text-sm flex flex-col gap-0.5`;
+                
+                item.innerHTML = `
+                    <div class="flex items-center gap-1.5 font-bold">
+                        <span>${res.success ? '⭕' : '❌'}</span>
+                        <span class="${res.success ? 'text-emerald-400' : 'text-rose-400'}">[${res.ans}] ${res.kor}</span>
+                    </div>
+                    <div class="text-slate-400 text-xs pl-6 italic font-medium">${res.eng}</div>
+                `;
+                resultList.appendChild(item);
+            });
+        }
+
+        function goToIntro() {
+            clearInterval(timerInterval);
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('introScreen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
