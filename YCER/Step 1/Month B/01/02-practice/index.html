@@ -97,7 +97,6 @@
     </div>
 
     <script>
-        // 🛠️ 카테고리 누락 문제를 완벽히 교정한 마스터 데이터셋
         const masterDataset = {
             statement: [
                 // 1) 습관 (routine)
@@ -321,7 +320,6 @@
             document.getElementById('engText').innerText = currentItem.eng;
             document.getElementById('engText').classList.add('opacity-0');
             
-            // 상단 인디케이터 태그 라벨 매칭 (긍정문/의문문 출처 표시)
             document.getElementById('modeCardLabel').innerText = `${currentItem.originMode} • ${currentItem.category || "코어"}`;
 
             if (timeLimit === 0) {
@@ -443,17 +441,14 @@
         }
 
         function goToIntro() {
-            // 1. 실행 중인 타이머 확실하게 멈추기
             clearInterval(timerInterval);
             timerInterval = null;
 
-            // 2. 퀴즈 내부 임시 데이터 초기화 (이전 문제가 잠깐 보이는 현상 방지)
             document.getElementById('korText').innerText = "가져오는 중...";
             document.getElementById('engText').innerText = "English...";
             document.getElementById('engText').classList.add('opacity-0');
             document.getElementById('progress').innerText = "0 / 0";
 
-            // 3. 화면 전환
             document.getElementById('quizScreen').classList.add('hidden');
             document.getElementById('resultScreen').classList.add('hidden');
             document.getElementById('introScreen').classList.remove('hidden');
