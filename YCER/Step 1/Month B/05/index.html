@@ -20,7 +20,7 @@
         .banner-inner { transition: all 0.5s ease; }
     </style>
 </head>
-<body class="bg-slate-950 min-h-screen flex flex-col items-center justify-start p-4 text-white">
+<body class="bg-slate-955 bg-slate-950 min-h-screen flex flex-col items-center justify-start p-4 text-white">
 
     <!-- 📢 프로모션 배너 템플릿 -->
     <template id="banner-template">
@@ -373,40 +373,84 @@
             }
         }
 
-        // 한국인 감성에 맞춰 자연스럽게 한국어 문장을 기계식 조립이 아닌 규칙 기반으로 조립
+        // 한국어 결합 엔진 보완 및 정교화
         function makeCleanKorean(item, mode, subject) {
             let base = item.kor.trim();
             let sub = subject.kor;
             
-            // 특정 가공이 필요한 예외 동사들의 맞춤형 맵핑
+            // 1. 동사 서술어가 어색하게 누락되는 특수 패턴들의 자연스러운 의미 보완 매핑
             if (item.eng === "talk on the phone") base = "전화통화";
-            if (item.eng === "watch Shorts") base = "쇼츠";
-            if (item.eng === "wash hands") base = "손";
-            if (item.eng === "text a friend") base = "친구에게 문자";
-            if (item.eng === "walk the dog") base = "강아지 산책";
-            if (item.eng === "charge the phone") base = "핸드폰 충전";
-            if (item.eng === "pack a bag") base = "짐";
-            if (item.eng === "dry hair") base = "머리";
-            if (item.eng === "check emails") base = "이메일 확인";
-            if (item.eng === "look for keys") base = "열쇠";
-            if (item.eng === "change clothes") base = "옷";
-            if (item.eng === "brush teeth") base = "양치";
-            if (item.eng === "water plants") base = "화분에 물";
-            if (item.eng === "clip nails") base = "손톱";
-            if (item.eng === "talk to the boss") base = "상사하고 이야기";
-            if (item.eng === "charge the battery") base = "배터리 충전";
+            if (item.eng === "watch Shorts") base = "쇼츠 보기";
+            if (item.eng === "wash hands") base = "손 씻기";
+            if (item.eng === "text a friend") base = "친구에게 문자하기";
+            if (item.eng === "walk the dog") base = "강아지 산책시키기";
+            if (item.eng === "charge the phone") base = "핸드폰 충전하기";
+            if (item.eng === "pack a bag") base = "짐 싸기";
+            if (item.eng === "dry hair") base = "머리 말리기";
+            if (item.eng === "check emails") base = "이메일 확인하기";
+            if (item.eng === "look for keys") base = "열쇠 찾기";
+            if (item.eng === "change clothes") base = "옷 갈아입기";
+            if (item.eng === "brush teeth") base = "양치질";
+            if (item.eng === "water plants") base = "식물에 물 주기";
+            if (item.eng === "clip nails") base = "손톱 깎기";
+            if (item.eng === "talk to the boss") base = "상사와 이야기하기";
+            if (item.eng === "charge the battery") base = "배터리 충전하기";
 
-            // 명사목적어 분리 가공 처리된 특수 동사들의 조립 규칙
+            // 명사+동사 형태로 완벽하게 규칙화된 특수 동사 조립 공식
             const isSpecialNoun = ["talk on the phone", "watch Shorts", "wash hands", "text a friend", "walk the dog", "charge the phone", "pack a bag", "dry hair", "check emails", "look for keys", "change clothes", "brush teeth", "water plants", "clip nails", "talk to the boss", "charge the battery"].includes(item.eng);
 
             if (isSpecialNoun) {
-                if (mode === 'statement') return `${sub} ${base}하고 있었어.`;
-                if (mode === 'question') return `${sub} ${base}하고 있었니?`;
-                if (mode === 'negative') return `${sub} ${base} 안 하고 있었어.`;
-                if (mode === 'negQuestion') return `${sub} ${base} 안 하고 있었니?`;
+                // 명칭이 명사 형태로 완전히 가공된 것들의 마감 처리 (예: 전화통화, 양치질)
+                if (base === "전화통화" || base === "양치질") {
+                    if (mode === 'statement') return `${sub} ${base} 하고 있었어.`;
+                    if (mode === 'question') return `${sub} ${base} 하고 있었니?`;
+                    if (mode === 'negative') return `${sub} ${base} 안 하고 있었어.`;
+                    if (mode === 'negQuestion') return `${sub} ${base} 안 하고 있었니?`;
+                }
+                
+                // '~하기', '~씻기' 등으로 끝나는 명사문장 분리 처리 
+                // 예: "열쇠 찾기" -> "열쇠 안 찾고 있었어" 로 서술어 어근 복구
+                const stemWord = base.slice(0, -2); // '열쇠 찾', '손 씻'
+                if (mode === 'statement') return `${sub} ${stemWord}고 있었어.`;
+                if (mode === 'question') return `${sub} ${stemWord}고 있었니?`;
+                if (mode === 'negative') return `${sub} ${stemWord} 안 하고 있었어.`; // '손 씻 안 하고 있었어' 방지 -> '손 안 씻고 있었어'로 커스텀 처리
+                
+                // 부정 및 부정의문문에서 단어가 아주 매끄럽게 흐르도록 개별 커스텀 분리
+                if (mode === 'negative') {
+                    if (item.eng === "look for keys") return `${sub} 열쇠 안 찾고 있었어.`;
+                    if (item.eng === "wash hands") return `${sub} 손 안 씻고 있었어.`;
+                    if (item.eng === "watch Shorts") return `${sub} 쇼츠 안 보고 있었어.`;
+                    if (item.eng === "text a friend") return `${sub} 친구에게 문자 안 하고 있었어.`;
+                    if (item.eng === "walk the dog") return `${sub} 강아지 산책 안 시키고 있었어.`;
+                    if (item.eng === "charge the phone") return `${sub} 핸드폰 충전 안 하고 있었어.`;
+                    if (item.eng === "pack a bag") return `${sub} 짐 안 싸고 있었어.`;
+                    if (item.eng === "dry hair") return `${sub} 머리 안 말리고 있었어.`;
+                    if (item.eng === "check emails") return `${sub} 이메일 확인 안 하고 있었어.`;
+                    if (item.eng === "change clothes") return `${sub} 옷 안 갈아입고 있었어.`;
+                    if (item.eng === "water plants") return `${sub} 식물에 물 안 주고 있었어.`;
+                    if (item.eng === "clip nails") return `${sub} 손톱 안 깎고 있었어.`;
+                    if (item.eng === "talk to the boss") return `${sub} 상사와 이야기 안 하고 있었어.`;
+                    if (item.eng === "charge the battery") return `${sub} 배터리 충전 안 하고 있었어.`;
+                }
+                if (mode === 'negQuestion') {
+                    if (item.eng === "look for keys") return `${sub} 열쇠 안 찾고 있었니?`;
+                    if (item.eng === "wash hands") return `${sub} 손 안 씻고 있었니?`;
+                    if (item.eng === "watch Shorts") return `${sub} 쇼츠 안 보고 있었니?`;
+                    if (item.eng === "text a friend") return `${sub} 친구에게 문자 안 하고 있었니?`;
+                    if (item.eng === "walk the dog") return `${sub} 강아지 산책 안 시키고 있었니?`;
+                    if (item.eng === "charge the phone") return `${sub} 핸드폰 충전 안 하고 있었니?`;
+                    if (item.eng === "pack a bag") return `${sub} 짐 안 싸고 있었니?`;
+                    if (item.eng === "dry hair") return `${sub} 머리 안 말리고 있었니?`;
+                    if (item.eng === "check emails") return `${sub} 이메일 확인 안 하고 있었니?`;
+                    if (item.eng === "change clothes") return `${sub} 옷 안 갈아입고 있었니?`;
+                    if (item.eng === "water plants") return `${sub} 식물에 물 안 주고 있었니?`;
+                    if (item.eng === "clip nails") return `${sub} 손톱 안 깎고 있었니?`;
+                    if (item.eng === "talk to the boss") return `${sub} 상사와 이야기 안 하고 있었니?`;
+                    if (item.eng === "charge the battery") return `${sub} 배터리 충전 안 하고 있었니?`;
+                }
             }
 
-            // 일반 동사 마감 처리 규칙 (하다 동사 vs 일반 동사)
+            // 2. 일반 동사 마감 처리 규칙 (하다 동사 vs 일반 동사)
             const isYada = base.endsWith("하다");
             let stem = isYada ? base.slice(0, -2) : base.slice(0, -1);
 
