@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <title>⚡ 과거 진행 마스터 훈련소</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght=400;700;900&display=swap');
+        
+        :root {
+            --primary: #f97316; 
+            --dark: #0f172a;
+            --light: #f8fafc;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        body { font-family: 'Pretendard', sans-serif; touch-action: manipulation; }
+
+        .banner-inner { transition: all 0.5s ease; }
+    </style>
+</head>
+<body class="bg-slate-950 min-h-screen flex flex-col items-center justify-start p-4 text-white">
+
+    <!-- 📢 프로모션 배너 템플릿 -->
+    <template id="banner-template">
+        <div class="promo-banner bg-white border border-blue-50 p-3.5 rounded-[2rem] mb-4 cursor-pointer shadow-lg transition-all active:scale-95 w-full mx-auto" 
+             onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+            <div class="banner-inner flex items-center gap-3.5">
+                <div class="banner-icon w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold shrink-0">🔥</div>
+                <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center text-left">
+                    <h3 class="banner-title font-black text-slate-800 text-[13px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                    <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <div class="w-full max-w-md my-auto">
+        
+        <!-- 인트로 스크린 -->
+        <div id="introScreen" class="bg-slate-900 p-6 sm:p-7 rounded-[2.5rem] shadow-2xl w-full border border-slate-800 text-center">
+            <span class="bg-indigo-950 text-indigo-300 px-4 py-1.5 rounded-full text-xs font-bold mb-3 inline-block uppercase tracking-widest border border-indigo-900">과거 진행 실전 훈련</span>
+            <h1 class="text-3xl font-black text-white mb-1.5 tracking-tight">과거 진행 100 단어 카드</h1>
+            <p class="text-indigo-400 font-bold text-sm italic mb-6">한국어 질문을 보고 영어 과거 진행형으로 바로 뱉기</p>
+            
+            <!-- 5대 훈련 모드 -->
+            <div class="space-y-4 mb-5 text-left">
+                <div>
+                    <label class="text-slate-300 font-bold text-sm block mb-2">🎛️ 훈련 모드 선택</label>
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                        <button id="modeStatementBtn" class="py-3.5 rounded-xl font-black text-xs sm:text-sm bg-indigo-600 text-white border-2 border-indigo-400 shadow-lg active:scale-95 transition-all text-center" onclick="switchTrainMode('statement')">
+                            긍정문 모드<br>
+                            <span class="text-[9px] font-normal opacity-80">(was / were)</span>
+                        </button>
+                        <button id="modeQuestionBtn" class="py-3.5 rounded-xl font-black text-xs sm:text-sm bg-slate-950 text-slate-400 border-2 border-slate-800 active:scale-95 transition-all text-center" onclick="switchTrainMode('question')">
+                            의문문 모드<br>
+                            <span class="text-[9px] font-normal opacity-80">(Was / Were ...?)</span>
+                        </button>
+                        <button id="modeNegativeBtn" class="py-3.5 rounded-xl font-black text-xs sm:text-sm bg-slate-950 text-slate-400 border-2 border-slate-800 active:scale-95 transition-all text-center" onclick="switchTrainMode('negative')">
+                            부정문 모드<br>
+                            <span class="text-[9px] font-normal opacity-80">(wasn't / weren't)</span>
+                        </button>
+                        <button id="modeNegQuestionBtn" class="py-3.5 rounded-xl font-black text-xs sm:text-sm bg-slate-950 text-slate-400 border-2 border-slate-800 active:scale-95 transition-all text-center" onclick="switchTrainMode('negQuestion')">
+                            부정 의문문 모드<br>
+                            <span class="text-[9px] font-normal opacity-80">(Wasn't / Weren't ...?)</span>
+                        </button>
+                    </div>
+                    <button id="modeMixBtn" class="w-full py-3.5 rounded-xl font-black text-xs sm:text-sm bg-slate-950 text-slate-400 border-2 border-slate-800 active:scale-95 transition-all text-center" onclick="switchTrainMode('mix')">
+                        🎲 4가지 패턴 전체 믹스 (100문장 랜덤 트레이닝)
+                    </button>
+                </div>
+            </div>
+
+            <!-- 제한 시간 설정 구역 -->
+            <div class="mb-6 text-left">
+                <label class="text-slate-300 font-bold text-sm block mb-2" for="introTimeSelect">⏱️ 목표 스피킹 제한 시간 설정</label>
+                <select id="introTimeSelect" class="w-full p-4 rounded-2xl border-2 border-slate-800 font-bold text-slate-200 bg-slate-950 outline-none cursor-pointer text-base">
+                    <option value="0">⏱️ 시간 제한 없음 (개별 복습용)</option>
+                    <option value="2000">2초 (동시 통역사 레벨)</option>
+                    <option value="3000">3초 (직장인 추천 에이스)</option>
+                    <option value="4000" selected>4초 (표준 반사 속도)</option>
+                    <option value="5000">5초 (여유로운 세팅)</option>
+                </select>
+            </div>
+            
+            <!-- 시작 버튼 -->
+            <button class="w-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white py-4.5 rounded-2xl font-black text-xl shadow-2xl shadow-indigo-600/40 border border-indigo-400/30 transition-all active:scale-95 flex items-center justify-center gap-2 tracking-tight" onclick="startApp()">
+                <span>훈련 시작하기</span>
+                <span class="text-2xl">🚀</span>
+            </button>
+        </div>
+
+        <!-- 퀴즈/훈련 스크린 -->
+        <div id="quizScreen" class="hidden w-full flex flex-col items-center">
+            
+            <!-- 상단 프로모션 배너 영역 -->
+            <div id="main-banner-area" class="w-full"></div>
+
+            <!-- 상단 헤더 -->
+            <div class="flex justify-between items-center mb-3 px-2 w-full">
+                <button onclick="goToIntro()" title="홈으로" class="p-2 hover:bg-slate-900 rounded-full transition-colors text-slate-400 active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 001 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                </button>
+                
+                <div class="text-slate-400 font-black text-sm tracking-widest uppercase text-center flex-1" id="progress">1 / 100</div>
+                
+                <!-- 오른쪽 이전 단어 돌아가기 버튼 -->
+                <button onclick="prevCard()" title="이전 단어" class="p-2 hover:bg-slate-900 rounded-full transition-colors text-slate-400 active:scale-95 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+                </button>
+            </div>
+
+            <!-- 실시간 타이머 바 -->
+            <div id="timerContainer" class="w-full h-[6px] bg-slate-900 rounded-full overflow-hidden mb-4">
+                <div id="timerBar" class="h-full bg-blue-500" style="width: 100%;"></div>
+            </div>
+
+            <!-- 메인 플래시 카드 -->
+            <div id="mainCard" class="bg-white p-6 rounded-[2.5rem] shadow-2xl h-[400px] w-full text-center border-4 border-indigo-500 relative overflow-hidden select-none flex flex-col justify-between items-center cursor-pointer active:scale-98 transition-transform" onclick="handleCardClick()">
+                
+                <!-- 카드 내부 상단 STEP 지침 가이드 -->
+                <div id="stepHeaderTag" class="w-full bg-indigo-50 border border-indigo-100 rounded-2xl py-2 px-3 flex items-center justify-center gap-2 shrink-0 h-10">
+                    <span id="stepBadge" class="bg-amber-500 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">QUESTION</span>
+                    <span id="stepGuideText" class="text-indigo-950 font-bold text-xs sm:text-sm">위 한글 문장을 소리내어 영작하세요!</span>
+                </div>
+                
+                <!-- 중앙 제시어 (한글 질문 바로 노출) -->
+                <div class="my-auto flex flex-col items-center justify-center w-full shrink-0 px-2">
+                    <!-- 한글 문제 텍스트 -->
+                    <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight break-keep" id="verbKorQuestionText">
+                        나 전화통화 하고 있었어.
+                    </div>
+                    <!-- 힌트용 동사 기본형 -->
+                    <div class="text-xs sm:text-sm font-bold text-slate-400 mt-4" id="verbEngBaseHint">
+                        (동사 힌트: talk on the phone)
+                    </div>
+                </div>
+                
+                <!-- 고정 높이 정답 박스 컨테이너 -->
+                <div class="w-full h-[95px] flex flex-col items-center justify-center shrink-0">
+                    
+                    <!-- 영어 정답 박스 -->
+                    <div id="answerEngBox" class="w-full bg-indigo-50 border-2 border-indigo-300 rounded-2xl py-2.5 px-3 h-[80px] flex flex-col items-center justify-center transition-all opacity-0 invisible">
+                        <span class="text-[10px] font-black text-indigo-600 block uppercase tracking-wider mb-0.5" id="engBoxLabel">영어 정답</span>
+                        <div class="text-lg sm:text-xl font-black text-indigo-900 break-keep leading-tight" id="answerEngText">I was talking on the phone.</div>
+                    </div>
+                    
+                </div>
+                
+                <!-- 하단 터치 가이드 -->
+                <div class="w-full bg-slate-100 border border-slate-200 rounded-xl py-2 px-3 shrink-0 flex items-center justify-center">
+                    <div class="text-indigo-600 font-black text-xs sm:text-sm animate-pulse" id="cardTouchHint">👆 카드를 터치하여 [영어 정답] 확인</div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // 100개 필수 동사 리스트 수록 완료
+        const verbDataset = [
+            { eng: "talk on the phone", kor: "전화통화 하다", ing: "talking on the phone", isSelfVerb: false },
+            { eng: "watch Shorts", kor: "쇼츠를 보다", ing: "watching Shorts", isSelfVerb: false },
+            { eng: "work", kor: "일하다", ing: "working", isSelfVerb: false },
+            { eng: "work late", kor: "야근하다", ing: "working late", isSelfVerb: false },
+            { eng: "drive", kor: "운전하다", ing: "driving", isSelfVerb: false },
+            { eng: "eat dinner", kor: "저녁을 먹다", ing: "eating dinner", isSelfVerb: false },
+            { eng: "take a shower", kor: "샤워하다", ing: "taking a shower", isSelfVerb: false },
+            { eng: "sleep", kor: "자다", ing: "sleeping", isSelfVerb: false },
+            { eng: "study English", kor: "영어 공부하다", ing: "studying English", isSelfVerb: false },
+            { eng: "listen to music", kor: "음악을 듣다", ing: "listening to music", isSelfVerb: false },
+            { eng: "clean the room", kor: "방 청소하다", ing: "cleaning the room", isSelfVerb: false },
+            { eng: "drink coffee", kor: "커피를 마시다", ing: "drinking coffee", isSelfVerb: false },
+            { eng: "watch Netflix", kor: "넷플릭스를 보다", ing: "watching Netflix", isSelfVerb: false },
+            { eng: "go to work", kor: "출근하다", ing: "going to work", isSelfVerb: false },
+            { eng: "go home", kor: "집에 가다", ing: "going home", isSelfVerb: false },
+            { eng: "write an email", kor: "이메일을 쓰다", ing: "writing an email", isSelfVerb: false },
+            { eng: "wash hands", kor: "손을 씻다", ing: "washing hands", isSelfVerb: true, myIng: "washing my hands", yourIng: "washing your hands", hisIng: "washing his hands", herIng: "washing her hands", ourIng: "washing our hands", theirIng: "washing their hands" },
+            { eng: "text a friend", kor: "친구에게 문자하다", ing: "texting friends", isSelfVerb: true, myIng: "texting my friend", yourIng: "texting your friend", hisIng: "texting his friend", herIng: "texting her friend", ourIng: "texting our friends", theirIng: "texting their friends" },
+            { eng: "read a book", kor: "책을 읽다", ing: "reading a book", isSelfVerb: false },
+            { eng: "wait for a bus", kor: "버스를 기다리다", ing: "waiting for a bus", isSelfVerb: false },
+            { eng: "cook lunch", kor: "점심을 요리하다", ing: "cooking lunch", isSelfVerb: false },
+            { eng: "lose weight", kor: "살을 빼다", ing: "losing weight", isSelfVerb: false },
+            { eng: "learn to drive", kor: "운전을 배우다", ing: "learning to drive", isSelfVerb: false },
+            { eng: "hang out with friends", kor: "친구들과 놀다", ing: "hanging out with friends", isSelfVerb: true, myIng: "hanging out with my friends", yourIng: "hanging out with your friends", hisIng: "hanging out with his friends", herIng: "hanging out with her friends", ourIng: "hanging out with our friends", theirIng: "hanging out with their friends" },
+            { eng: "look for a job", kor: "일자리를 구하다", ing: "looking for a job", isSelfVerb: false },
+            { eng: "save money", kor: "돈을 모으다", ing: "saving money", isSelfVerb: false },
+            { eng: "get some rest", kor: "휴식을 취하다", ing: "getting some rest", isSelfVerb: false },
+            { eng: "lie in bed", kor: "침대에 눕다", ing: "lying in bed", isSelfVerb: false },
+            { eng: "see someone", kor: "누군가를 만나다(썸타다)", ing: "seeing someone", isSelfVerb: false },
+            { eng: "work out", kor: "운동하다", ing: "working out", isSelfVerb: false },
+            { eng: "put on makeup", kor: "화장하다", ing: "putting on makeup", isSelfVerb: false },
+            { eng: "drink alcohol", kor: "술 마시다", ing: "drinking alcohol", isSelfVerb: false },
+            { eng: "smoke", kor: "담배 피우다", ing: "smoking", isSelfVerb: false },
+            { eng: "wash the dishes", kor: "설거지하다", ing: "washing the dishes", isSelfVerb: false },
+            { eng: "do the laundry", kor: "빨래하다", ing: "doing the laundry", isSelfVerb: false },
+            { eng: "do the housework", kor: "집안일 하다", ing: "doing the housework", isSelfVerb: false },
+            { eng: "jog", kor: "조깅하다", ing: "jogging", isSelfVerb: false },
+            { eng: "take photos", kor: "사진을 찍다", ing: "taking photos", isSelfVerb: false },
+            { eng: "prepare a meeting", kor: "회의를 준비하다", ing: "preparing a meeting", isSelfVerb: false },
+            { eng: "wait for a friend", kor: "친구를 기다리다", ing: "waiting for friends", isSelfVerb: true, myIng: "waiting for my friend", yourIng: "waiting for your friend", hisIng: "waiting for his friend", herIng: "waiting for her friend", ourIng: "waiting for our friends", theirIng: "waiting for their friends" },
+            { eng: "buy groceries", kor: "장보다", ing: "buying groceries", isSelfVerb: false },
+            { eng: "walk the dog", kor: "강아지 산책시키다", ing: "walking the dog", isSelfVerb: false },
+            { eng: "charge the phone", kor: "핸드폰을 충전하다", ing: "charging phones", isSelfVerb: true, myIng: "charging my phone", yourIng: "charging your phone", hisIng: "charging his phone", herIng: "charging her phone", ourIng: "charging our phones", theirIng: "charging their phones" },
+            { eng: "make a reservation", kor: "예약하다", ing: "making a reservation", isSelfVerb: false },
+            { eng: "pack a bag", kor: "짐을 싸다", ing: "packing bags", isSelfVerb: true, myIng: "packing my bag", yourIng: "packing your bag", hisIng: "packing his bag", herIng: "packing her bag", ourIng: "packing our bags", theirIng: "packing their bags" },
+            { eng: "take a taxi", kor: "택시를 타다", ing: "taking a taxi", isSelfVerb: false },
+            { eng: "wait in line", kor: "줄을 서다", ing: "waiting in line", isSelfVerb: false },
+            { eng: "dry hair", kor: "머리를 말리다", ing: "drying hair", isSelfVerb: true, myIng: "drying my hair", yourIng: "drying your hair", hisIng: "drying his hair", herIng: "drying her hair", ourIng: "drying our hair", theirIng: "drying their hair" },
+            { eng: "stretch", kor: "스트레칭하다", ing: "stretching", isSelfVerb: false },
+            { eng: "browse the internet", kor: "인터넷 서핑을 하다", ing: "browsing the internet", isSelfVerb: false },
+            { eng: "listen to a podcast", kor: "팟캐스트를 듣다", ing: "listening to a podcast", isSelfVerb: false },
+            { eng: "check emails", kor: "이메일을 확인하다", ing: "checking emails", isSelfVerb: true, myIng: "checking my emails", yourIng: "checking your emails", hisIng: "checking his emails", herIng: "checking her emails", ourIng: "checking our emails", theirIng: "checking their emails" },
+            { eng: "take notes", kor: "메모하다", ing: "taking notes", isSelfVerb: false },
+            { eng: "fix the computer", kor: "컴퓨터를 고치다", ing: "fixing the computer", isSelfVerb: false },
+            { eng: "order food", kor: "음식을 주문하다", ing: "ordering food", isSelfVerb: false },
+            { eng: "pay the bill", kor: "계산하다", ing: "paying the bill", isSelfVerb: false },
+            { eng: "look for keys", kor: "열쇠를 찾다", ing: "looking for keys", isSelfVerb: true, myIng: "looking for my keys", yourIng: "looking for your keys", hisIng: "looking for his keys", herIng: "looking for her keys", ourIng: "looking for our keys", theirIng: "looking for their keys" },
+            { eng: "change clothes", kor: "옷을 갈아입다", ing: "changing clothes", isSelfVerb: true, myIng: "changing my clothes", yourIng: "changing your clothes", hisIng: "changing his clothes", herIng: "changing her clothes", ourIng: "changing our clothes", theirIng: "changing their clothes" },
+            { eng: "shave", kor: "면도하다", ing: "shaving", isSelfVerb: false },
+            { eng: "brush teeth", kor: "양치하다", ing: "brushing teeth", isSelfVerb: true, myIng: "brushing my teeth", yourIng: "brushing your teeth", hisIng: "brushing his teeth", herIng: "brushing her teeth", ourIng: "brushing our teeth", theirIng: "brushing their teeth" },
+            { eng: "bake bread", kor: "빵을 굽다", ing: "baking bread", isSelfVerb: false },
+            { eng: "water plants", kor: "식물에 물을 주다", ing: "watering the plants", isSelfVerb: false },
+            { eng: "take out the trash", kor: "쓰레기를 버리다", ing: "taking out the trash", isSelfVerb: false },
+            { eng: "feed the cat", kor: "고양이 밥을 주다", ing: "feeding the cat", isSelfVerb: false },
+            { eng: "play the guitar", kor: "기타를 치다", ing: "playing the guitar", isSelfVerb: false },
+            { eng: "sing a song", kor: "노래를 부르다", ing: "singing a song", isSelfVerb: false },
+            { eng: "dance", kor: "춤추다", ing: "dancing", isSelfVerb: false },
+            { eng: "draw a picture", kor: "그림을 그리다", ing: "drawing a picture", isSelfVerb: false },
+            { eng: "talk to the boss", kor: "상사와 이야기하다", ing: "talking to the boss", isSelfVerb: true, myIng: "talking to my boss", yourIng: "talking to your boss", hisIng: "talking to his boss", herIng: "talking to her boss", ourIng: "talking to our boss", theirIng: "talking to their boss" },
+            { eng: "attend a meeting", kor: "회의에 참석하다", ing: "attending a meeting", isSelfVerb: false },
+            { eng: "print documents", kor: "서류를 프린트하다", ing: "printing documents", isSelfVerb: false },
+            { eng: "study Japanese", kor: "일본어 공부하다", ing: "studying Japanese", isSelfVerb: false },
+            { eng: "practice speaking", kor: "말하기 연습하다", ing: "practicing speaking", isSelfVerb: false },
+            { eng: "ride a bike", kor: "자전거를 타다", ing: "riding a bike", isSelfVerb: false },
+            { eng: "swim", kor: "수영하다", ing: "swimming", isSelfVerb: false },
+            { eng: "play tennis", kor: "테니스를 치다", ing: "playing tennis", isSelfVerb: false },
+            { eng: "climb a mountain", kor: "등산하다", ing: "climbing a mountain", isSelfVerb: false },
+            { eng: "shop for clothes", kor: "옷 쇼핑을 하다", ing: "shopping for clothes", isSelfVerb: false },
+            { eng: "try on shoes", kor: "신발을 신어보다", ing: "trying on shoes", isSelfVerb: false },
+            { eng: "wrap a gift", kor: "선물을 포장하다", ing: "wrapping a gift", isSelfVerb: false },
+            { eng: "send a package", kor: "택배를 보내다", ing: "sending a package", isSelfVerb: false },
+            { eng: "wash the car", kor: "세차하다", ing: "washing the car", isSelfVerb: false },
+            { eng: "wait for a delivery", kor: "택배를 기다리다", ing: "waiting for a delivery", isSelfVerb: false },
+            { eng: "take medicine", kor: "약 먹다", ing: "taking medicine", isSelfVerb: false },
+            { eng: "apply lotion", kor: "로션을 바르다", ing: "applying lotion", isSelfVerb: false },
+            { eng: "clip nails", kor: "손톱을 깎다", ing: "clipping nails", isSelfVerb: true, myIng: "clipping my nails", yourIng: "clipping your nails", hisIng: "clipping his nails", herIng: "clipping her nails", ourIng: "clipping our nails", theirIng: "clipping their nails" },
+            { eng: "boil water", kor: "물을 끓이다", ing: "boiling water", isSelfVerb: false },
+            { eng: "chop onions", kor: "양파를 다지다", ing: "chopping onions", isSelfVerb: false },
+            { eng: "fry an egg", kor: "계란 프라이를 하다", ing: "frying an egg", isSelfVerb: false },
+            { eng: "clean the mirror", kor: "거울을 닦다", ing: "cleaning the mirror", isSelfVerb: false },
+            { eng: "make the bed", kor: "이불을 정돈하다", ing: "making the bed", isSelfVerb: false },
+            { eng: "fold the clothes", kor: "옷을 개다", ing: "folding the clothes", isSelfVerb: false },
+            { eng: "organize the desk", kor: "책상을 정리하다", ing: "organizing the desk", isSelfVerb: false },
+            { eng: "search for a restaurant", kor: "맛집을 검색하다", ing: "searching for a restaurant", isSelfVerb: false },
+            { eng: "book a flight", kor: "비행기를 예약하다", ing: "booking a flight", isSelfVerb: false },
+            { eng: "charge the battery", kor: "배터리를 충전하다", ing: "charging the battery", isSelfVerb: false },
+            { eng: "download a file", kor: "파일을 다운로드하다", ing: "downloading a file", isSelfVerb: false },
+            { eng: "edit a photo", kor: "사진을 편집하다", ing: "editing a photo", isSelfVerb: false },
+            { eng: "upload a video", kor: "영상을 업로드하다", ing: "uploading a video", isSelfVerb: false }
+        ];
+
+        const subjects = [
+            { eng: "I", kor: "나", wasWere: "was", wasnNot: "wasn't" },
+            { eng: "You", kor: "너", wasWere: "were", wasnNot: "weren't" },
+            { eng: "He", kor: "걔(남자)", wasWere: "was", wasnNot: "wasn't" },
+            { eng: "She", kor: "걔(여자)", wasWere: "was", wasnNot: "wasn't" },
+            { eng: "We", kor: "우리", wasWere: "were", wasnNot: "weren't" },
+            { eng: "They", kor: "그들", wasWere: "were", wasnNot: "weren't" }
+        ];
+
+        let trainMode = 'statement'; 
+        let cardPool = [];
+        let currentIndex = 0;
+        let cardStep = 0; 
+        let currentBannerIdx = 0;
+        let activeCardMode = 'statement'; 
+        let currentSubject = {};
+        
+        let timeLimit = 4000;
+        let timerInterval = null;
+        let startTime = 0;
+        let isTimedOut = false;
+
+        document.addEventListener('DOMContentLoaded', () => { 
+            injectBanners(); 
+            setInterval(rotateBanners, 4000); 
+        });
+
+        function injectBanners() { 
+            const template = document.getElementById('banner-template'); 
+            const area = document.getElementById('main-banner-area'); 
+            if (area) area.appendChild(template.content.cloneNode(true)); 
+        }
+
+        function rotateBanners() {
+            const bannerMsgs = [
+                { icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" }, 
+                { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }
+            ];
+            currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length; 
+            const msg = bannerMsgs[currentBannerIdx];
+            document.querySelectorAll('.promo-banner').forEach(banner => {
+                const inner = banner.querySelector('.banner-inner'); 
+                if(!inner) return;
+                inner.style.opacity = 0; 
+                inner.style.transform = "translateY(3px)";
+                setTimeout(() => { 
+                    banner.querySelector('.banner-icon').innerText = msg.icon; 
+                    banner.querySelector('.banner-title').innerText = msg.text; 
+                    inner.style.opacity = 1; 
+                    inner.style.transform = "translateY(0)"; 
+                }, 500);
+            });
+        }
+
+        function switchTrainMode(mode) {
+            trainMode = mode;
+            const buttons = {
+                statement: document.getElementById('modeStatementBtn'),
+                question: document.getElementById('modeQuestionBtn'),
+                negative: document.getElementById('modeNegativeBtn'),
+                negQuestion: document.getElementById('modeNegQuestionBtn'),
+                mix: document.getElementById('modeMixBtn')
+            };
+
+            Object.values(buttons).forEach(btn => {
+                btn.className = btn === buttons.mix 
+                    ? "w-full py-3.5 rounded-xl font-black text-xs sm:text-sm bg-slate-950 text-slate-400 border-2 border-slate-800 active:scale-95 transition-all text-center"
+                    : "py-3.5 rounded-xl font-black text-xs sm:text-sm bg-slate-950 text-slate-400 border-2 border-slate-800 active:scale-95 transition-all text-center";
+            });
+
+            const activeBtn = buttons[mode];
+            if (mode === 'mix') {
+                activeBtn.className = "w-full py-3.5 rounded-xl font-black text-xs sm:text-sm bg-indigo-600 text-white border-2 border-indigo-400 shadow-lg active:scale-95 transition-all text-center";
+            } else {
+                activeBtn.className = "py-3.5 rounded-xl font-black text-xs sm:text-sm bg-indigo-600 text-white border-2 border-indigo-400 shadow-lg active:scale-95 transition-all text-center";
+            }
+        }
+
+        function startApp() {
+            const introSelect = document.getElementById('introTimeSelect');
+            timeLimit = parseInt(introSelect.value);
+
+            document.getElementById('introScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+
+            if (timeLimit === 0) {
+                document.getElementById('timerContainer').classList.add('hidden');
+            } else {
+                document.getElementById('timerContainer').classList.remove('hidden');
+            }
+
+            cardPool = [...verbDataset];
+            cardPool.sort(() => Math.random() - 0.5);
+            
+            currentIndex = 0;
+            showCard();
+        }
+
+        function getIngWithSubject(item, subjectEng) {
+            if (!item.isSelfVerb) return item.ing;
+            switch(subjectEng) {
+                case 'I': return item.myIng || item.ing;
+                case 'You': return item.yourIng || item.ing;
+                case 'He': return item.hisIng || item.ing;
+                case 'She': return item.herIng || item.ing;
+                case 'We': return item.ourIng || item.ing;
+                case 'They': return item.theirIng || item.ing;
+                default: return item.ing;
+            }
+        }
+
+        // 한국인 감성에 맞춰 자연스럽게 한국어 문장을 기계식 조립이 아닌 규칙 기반으로 조립
+        function makeCleanKorean(item, mode, subject) {
+            let base = item.kor.trim();
+            let sub = subject.kor;
+            
+            // 특정 가공이 필요한 예외 동사들의 맞춤형 맵핑
+            if (item.eng === "talk on the phone") base = "전화통화";
+            if (item.eng === "watch Shorts") base = "쇼츠";
+            if (item.eng === "wash hands") base = "손";
+            if (item.eng === "text a friend") base = "친구에게 문자";
+            if (item.eng === "walk the dog") base = "강아지 산책";
+            if (item.eng === "charge the phone") base = "핸드폰 충전";
+            if (item.eng === "pack a bag") base = "짐";
+            if (item.eng === "dry hair") base = "머리";
+            if (item.eng === "check emails") base = "이메일 확인";
+            if (item.eng === "look for keys") base = "열쇠";
+            if (item.eng === "change clothes") base = "옷";
+            if (item.eng === "brush teeth") base = "양치";
+            if (item.eng === "water plants") base = "화분에 물";
+            if (item.eng === "clip nails") base = "손톱";
+            if (item.eng === "talk to the boss") base = "상사하고 이야기";
+            if (item.eng === "charge the battery") base = "배터리 충전";
+
+            // 명사목적어 분리 가공 처리된 특수 동사들의 조립 규칙
+            const isSpecialNoun = ["talk on the phone", "watch Shorts", "wash hands", "text a friend", "walk the dog", "charge the phone", "pack a bag", "dry hair", "check emails", "look for keys", "change clothes", "brush teeth", "water plants", "clip nails", "talk to the boss", "charge the battery"].includes(item.eng);
+
+            if (isSpecialNoun) {
+                if (mode === 'statement') return `${sub} ${base}하고 있었어.`;
+                if (mode === 'question') return `${sub} ${base}하고 있었니?`;
+                if (mode === 'negative') return `${sub} ${base} 안 하고 있었어.`;
+                if (mode === 'negQuestion') return `${sub} ${base} 안 하고 있었니?`;
+            }
+
+            // 일반 동사 마감 처리 규칙 (하다 동사 vs 일반 동사)
+            const isYada = base.endsWith("하다");
+            let stem = isYada ? base.slice(0, -2) : base.slice(0, -1);
+
+            if (mode === 'statement') {
+                return isYada ? `${sub} ${stem}하고 있었어.` : `${sub} ${stem}고 있었어.`;
+            } else if (mode === 'question') {
+                return isYada ? `${sub} ${stem}하고 있었니?` : `${sub} ${stem}고 있었니?`;
+            } else if (mode === 'negative') {
+                return isYada ? `${sub} ${stem} 안 하고 있었어.` : `${sub} 안 ${stem}고 있었어.`;
+            } else if (mode === 'negQuestion') {
+                return isYada ? `${sub} ${stem} 안 하고 있었니?` : `${sub} 안 ${stem}고 있었니?`;
+            }
+            return base;
+        }
+
+        function showCard() {
+            if (currentIndex >= cardPool.length) {
+                cardPool.sort(() => Math.random() - 0.5);
+                currentIndex = 0;
+            } else if (currentIndex < 0) {
+                currentIndex = cardPool.length - 1;
+            }
+
+            cardStep = 0;
+            isTimedOut = false;
+            document.getElementById('progress').innerText = `${currentIndex + 1} / ${cardPool.length}`;
+
+            currentSubject = subjects[Math.floor(Math.random() * subjects.length)];
+
+            if (trainMode === 'mix') {
+                const modes = ['statement', 'question', 'negative', 'negQuestion'];
+                activeCardMode = modes[Math.floor(Math.random() * modes.length)];
+            } else {
+                activeCardMode = trainMode;
+            }
+
+            const item = cardPool[currentIndex];
+            document.getElementById('verbEngBaseHint').innerText = `(동사 힌트: ${item.eng})`;
+
+            // 완벽하게 다듬어진 한국어 결합 엔진 호출
+            const korQuestion = makeCleanKorean(item, activeCardMode, currentSubject);
+            
+            // 영어 정답 실시간 조합
+            const activeIng = getIngWithSubject(item, currentSubject.eng);
+            let engAns = "";
+
+            if (activeCardMode === 'statement') {
+                engAns = `${currentSubject.eng} ${currentSubject.wasWere} ${activeIng}.`;
+            } else if (activeCardMode === 'question') {
+                const upperWasWere = currentSubject.wasWere.charAt(0).toUpperCase() + currentSubject.wasWere.slice(1);
+                engAns = `${upperWasWere} ${currentSubject.eng.toLowerCase() === 'i' ? 'I' : currentSubject.eng.toLowerCase()} ${activeIng}?`;
+            } else if (activeCardMode === 'negative') {
+                engAns = `${currentSubject.eng} ${currentSubject.wasnNot} ${activeIng}.`;
+            } else if (activeCardMode === 'negQuestion') {
+                const upperWasnNot = currentSubject.wasnNot.charAt(0).toUpperCase() + currentSubject.wasnNot.slice(1);
+                engAns = `${upperWasnNot} ${currentSubject.eng.toLowerCase() === 'i' ? 'I' : currentSubject.eng.toLowerCase()} ${activeIng}?`;
+            }
+
+            document.getElementById('verbKorQuestionText').innerText = korQuestion;
+            document.getElementById('answerEngText').innerText = engAns;
+
+            updateStepUI();
+
+            if (timeLimit > 0) {
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            const timerBar = document.getElementById('timerBar');
+            timerBar.className = "h-full bg-blue-500 transition-none";
+            timerBar.style.width = "100%";
+
+            startTime = Date.now();
+            
+            timerInterval = setInterval(() => {
+                if (timeLimit === 0) return;
+                const elapsedTime = Date.now() - startTime;
+                const remainingRatio = Math.max(0, (timeLimit - elapsedTime) / timeLimit) * 100;
+                
+                timerBar.style.width = `${remainingRatio}%`;
+
+                if (remainingRatio < 30) {
+                    timerBar.className = "h-full bg-rose-500";
+                } else if (remainingRatio < 60) {
+                    timerBar.className = "h-full bg-amber-500";
+                }
+
+                if (elapsedTime >= timeLimit) {
+                    clearInterval(timerInterval);
+                    timerBar.style.width = "0%";
+                    isTimedOut = true;
+                    document.getElementById('stepGuideText').innerText = "⏰ 시간 초과! 정답을 확인하세요.";
+                    document.getElementById('stepHeaderTag').className = "w-full bg-rose-50 border border-rose-100 rounded-2xl py-2 px-3 flex items-center justify-center gap-2 shrink-0 h-10 animate-pulse";
+                    document.getElementById('stepBadge').className = "bg-rose-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider";
+                    document.getElementById('stepBadge').innerText = "TIME OUT";
+                }
+            }, 25);
+        }
+
+        function updateStepUI() {
+            const stepBadge = document.getElementById('stepBadge');
+            const stepGuideText = document.getElementById('stepGuideText');
+            const stepHeaderTag = document.getElementById('stepHeaderTag');
+            const engBox = document.getElementById('answerEngBox');
+            const touchHint = document.getElementById('cardTouchHint');
+            const engBoxLabel = document.getElementById('engBoxLabel');
+
+            const modeLabels = {
+                statement: "영어 정답 (긍정문)",
+                question: "영어 정답 (의문문)",
+                negative: "영어 정답 (부정문)",
+                negQuestion: "영어 정답 (부정 의문문)"
+            };
+            engBoxLabel.innerText = modeLabels[activeCardMode] || "영어 정답";
+
+            if (cardStep === 0) {
+                if (!isTimedOut) {
+                    stepHeaderTag.className = "w-full bg-indigo-50 border border-indigo-100 rounded-2xl py-2 px-3 flex items-center justify-center gap-2 shrink-0 h-10";
+                    stepBadge.className = "bg-amber-500 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider";
+                    stepBadge.innerText = "QUESTION";
+                    stepGuideText.innerText = "위 한글 문장을 소리내어 영작하세요!";
+                }
+                
+                engBox.className = "w-full bg-indigo-50 border-2 border-indigo-300 rounded-2xl py-2.5 px-3 h-[80px] flex flex-col items-center justify-center transition-all opacity-0 invisible";
+                touchHint.innerText = "👆 카드를 터치하여 [영어 정답] 확인";
+            } else if (cardStep === 1) {
+                stepHeaderTag.className = "w-full bg-indigo-50 border border-indigo-100 rounded-2xl py-2 px-3 flex items-center justify-center gap-2 shrink-0 h-10";
+                stepBadge.className = "bg-emerald-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider";
+                stepBadge.innerText = "ANSWER";
+                stepGuideText.innerText = "정답 확인 완료! 터치하여 다음 카드로!";
+                
+                engBox.className = "w-full bg-indigo-50 border-2 border-indigo-300 rounded-2xl py-2.5 px-3 h-[80px] flex flex-col items-center justify-center transition-all opacity-100 visible";
+                touchHint.innerText = "✅ 확인 완료! 한번 더 터치하면 다음 카드로 넘어갑니다 ➡️";
+            }
+        }
+
+        function handleCardClick() {
+            if (cardStep === 0) {
+                clearInterval(timerInterval); 
+                cardStep = 1;
+            } else {
+                nextCard();
+                return;
+            }
+            updateStepUI();
+        }
+
+        function prevCard() {
+            clearInterval(timerInterval);
+            currentIndex--;
+            showCard();
+        }
+
+        function nextCard() {
+            clearInterval(timerInterval);
+            currentIndex++;
+            showCard();
+        }
+
+        function goToIntro() {
+            clearInterval(timerInterval);
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('introScreen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
