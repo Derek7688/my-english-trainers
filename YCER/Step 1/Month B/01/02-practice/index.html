@@ -31,7 +31,7 @@
 
             <div class="mb-6 px-2 text-left">
                 <label class="text-slate-300 font-bold text-sm block mb-2" for="introTimeSelect">⏱️ 목표 스피킹 제한 시간 설정</label>
-                <select id="introTimeSelect" class="w-full p-4 rounded-2xl border-2 border-slate-800 font-bold text-slate-200 bg-slate-955 bg-slate-955 bg-slate-950 outline-none cursor-pointer text-base">
+                <select id="introTimeSelect" class="w-full p-4 rounded-2xl border-2 border-slate-800 font-bold text-slate-200 bg-slate-950 outline-none cursor-pointer text-base">
                     <option value="0">⏱️ 시간 제한 없음 (개별 복습용)</option>
                     <option value="2000">2초 (동시 통역사 레벨)</option>
                     <option value="3000">3초 (직장인 추천 에이스)</option>
@@ -85,7 +85,7 @@
         <div id="resultScreen" class="hidden bg-slate-900 p-8 rounded-[2.5rem] shadow-2xl w-full border border-slate-700 text-left">
             <div class="text-xl font-black text-center mb-1 text-white">🎉 훈련 종료 성적표</div>
             <div id="scoreRatioSummary" class="font-bold text-slate-400 mb-1 text-center text-sm">성공률: 0 / 0 (0%)</div>
-            <div id="totalTimeSummary" class="font-black text-blue-400 mb-6 text-center text-base tracking-tight">⏱ Im 총 소요 시간: 0초</div>
+            <div id="totalTimeSummary" class="font-black text-blue-400 mb-6 text-center text-base tracking-tight">⏱ 총 소요 시간: 0초</div>
             
             <div class="max-h-[220px] overflow-y-auto mb-6 pr-1 space-y-3" id="resultList"></div>
             
@@ -97,7 +97,7 @@
     </div>
 
     <script>
-        // 🛠️ 선생님이 직접 긍정문 최종 검수 완료한 49문항 + 대칭 의문문 49문항 마스터팩 이식 완료
+        // 🛠️ 카테고리 누락 문제를 완벽히 교정한 마스터 데이터셋
         const masterDataset = {
             statement: [
                 // 1) 습관 (routine)
@@ -166,66 +166,66 @@
             question: [
                 // 1) 습관? (routine)
                 { category: "습관?", kor: "너 {강남에서 일해}?", eng: "Do you work in Gangnam?" },
-                { category: "너 주로 {강남에서 놀아}?", eng: "Do you usually hang out in Gangnam?" },
-                { category: "너 {지하철 타고 다녀}?", eng: "Do you take the subway?" },
-                { category: "너 {11시에 자}?", eng: "Do you go to bed at 11?" },
-                { category: "너 {7시에 일어나}?", eng: "Do you wake up at 7?" },
-                { category: "너 {매일 쇼츠 봐}?", eng: "Do you watch Shorts every day?" },
-                { category: "너 {쉴 땐 유튜브 봐}?", eng: "Do you watch Youtube in your free time?" },
+                { category: "습관?", kor: "너 주로 {강남에서 놀아}?", eng: "Do you usually hang out in Gangnam?" },
+                { category: "습관?", kor: "너 {지하철 타고 다녀}?", eng: "Do you take the subway?" },
+                { category: "습관?", kor: "너 {11시에 자}?", eng: "Do you go to bed at 11?" },
+                { category: "습관?", kor: "너 {7시에 일어나}?", eng: "Do you wake up at 7?" },
+                { category: "습관?", kor: "너 {매일 쇼츠 봐}?", eng: "Do you watch Shorts every day?" },
+                { category: "습관?", kor: "너 {쉴 땐 유튜브 봐}?", eng: "Do you watch Youtube in your free time?" },
                 // 2) 상태? (status)
                 { category: "상태?", kor: "너 지금 {피곤해}?", eng: "Are you tired now?" },
-                { category: "너 요즘 {기분 좋아}?", eng: "Are you happy these days?" },
-                { category: "너 지금 {놀랐어}?", eng: "Are you surprised now?" },
-                { category: "너 요즘 {심심해}?", eng: "Are you bored these days?" },
-                { category: "너 지금 {귀찮아}?", eng: "Are you lazy now?" },
-                { category: "너 요즘 {바빠}?", eng: "Are you busy these days?" },
-                { category: "너 지금 {집이야}?", eng: "Are you at home now?" },
-                { category: "너 지금 {잠실이야}?", eng: "Are you in Jamsil now?" },
-                { category: "너 지금 {혼자야}?", eng: "Are you alone now?" },
-                { category: "너 지금 {화장실이야}?", eng: "Are you in the restroom now?" },
-                { category: "너 지금 {강남역이야}?", eng: "Are you at Gangnam Station now?" },
-                { category: "너 지금 {카페야}?", eng: "Are you at a cafe now?" },
-                { category: "너 지금 {회사야}?", eng: "Are you at work right now?" },
-                { category: "너 지금 {마트야}?", eng: "Are you at the mart now?" },
-                { category: "너 지금 {사무실이야}?", eng: "Are you in the office now?" },
-                { category: "너 지금 {지하철역이야}?", eng: "Are you at the subway station now?" },
-                { category: "너 지금 {버스 정류장이야}?", eng: "Are you at the bus stop now?" },
-                { category: "너 지금 {은행이야}?", eng: "Are you at the bank now?" },
-                { category: "너 지금 {서점이야}?", eng: "Are you at the bookstore now?" },
+                { category: "상태?", kor: "너 요즘 {기분 좋아}?", eng: "Are you happy these days?" },
+                { category: "상태?", kor: "너 지금 {놀랐어}?", eng: "Are you surprised now?" },
+                { category: "상태?", kor: "너 요즘 {심심해}?", eng: "Are you bored these days?" },
+                { category: "상태?", kor: "너 지금 {귀찮아}?", eng: "Are you lazy now?" },
+                { category: "상태?", kor: "너 요즘 {바빠}?", eng: "Are you busy these days?" },
+                { category: "상태?", kor: "너 지금 {집이야}?", eng: "Are you at home now?" },
+                { category: "상태?", kor: "너 지금 {잠실이야}?", eng: "Are you in Jamsil now?" },
+                { category: "상태?", kor: "너 지금 {혼자야}?", eng: "Are you alone now?" },
+                { category: "상태?", kor: "너 지금 {화장실이야}?", eng: "Are you in the restroom now?" },
+                { category: "상태?", kor: "너 지금 {강남역이야}?", eng: "Are you at Gangnam Station now?" },
+                { category: "상태?", kor: "너 지금 {카페야}?", eng: "Are you at a cafe now?" },
+                { category: "상태?", kor: "너 지금 {회사야}?", eng: "Are you at work right now?" },
+                { category: "상태?", kor: "너 지금 {마트야}?", eng: "Are you at the mart now?" },
+                { category: "상태?", kor: "너 지금 {사무실이야}?", eng: "Are you in the office now?" },
+                { category: "상태?", kor: "너 지금 {지하철역이야}?", eng: "Are you at the subway station now?" },
+                { category: "상태?", kor: "너 지금 {버스 정류장이야}?", eng: "Are you at the bus stop now?" },
+                { category: "상태?", kor: "너 지금 {은행이야}?", eng: "Are you at the bank now?" },
+                { category: "상태?", kor: "너 지금 {서점이야}?", eng: "Are you at the bookstore now?" },
                 // 3) 진행? (live)
                 { category: "진행?", kor: "너 {친구랑 놀고 있는 중이니}?", eng: "Are you hanging out with your friends?" },
-                { category: "너 요즘 {일자리를 찾고 있니}?", eng: "Are you looking for a job these days?" },
-                { category: "너 {영화 보는 중이니}?", eng: "Are you watching a movie?" },
-                { category: "너 {돈을 모으고 있는 중이니}?", eng: "Are you saving money?" },
-                { category: "너 {친구를 기다리고 있니}?", eng: "Are you waiting for your friend?" },
-                { category: "너 지금 {저녁을 먹고 있니}?", eng: "Are you eating dinner now?" },
-                { category: "너 지금 {일하는 중이니}?", eng: "Are you working now?" },
-                { category: "너 지금 {야근하고 있니}?", eng: "Are you working late now?" },
-                { category: "너 지금 {쉬는 중이니}?", eng: "Are you getting some rest now?" },
-                { category: "너 {침대에 누워 있니}?", eng: "Are you lying in bed?" },
-                { category: "너 요즘 {누구 만나고 있니}?", eng: "Are you seeing someone these days?" },
-                { category: "너 지금 {쇼츠를 보고 있니}?", eng: "Are you watching Shorts now?" },
-                { category: "너 요즘 {운동 하고 있니}?", eng: "Are you working out these days?" },
-                { category: "너 지금 {저녁 만들고 있니}?", eng: "Are you making dinner now?" },
-                { category: "너 지금 {영어 공부하는 중이니}?", eng: "Are you studying English now?" },
-                { category: "너 {전화 통화하는 중이니}?", eng: "Are you talking on the phone?" },
-                { category: "너 {음악 듣고 있는 중이니}?", eng: "Are you listening to music?" },
-                { category: "너 {방 청소하는 중이니}?", eng: "Are you cleaning the room?" },
-                { category: "너 {친구랑 커피 마시는 중이니}?", eng: "Are you drinking coffee with your friend?" },
-                { category: "너 지금 {넷플릭스 보고 있니}?", eng: "Are you watching Netflix now?" },
-                { category: "너 {화장하고 있니}?", eng: "Are you putting on makeup?" },
-                { category: "너 지금 {집에 가고 있니}?", eng: "Are you going home now?" },
-                { category: "너 지금 {이메일 쓰는 중이니}?", eng: "Are you writing an email now?" },
-                { category: "너 {손 씻는 중이니}?", eng: "Are you washing your hands?" },
-                { category: "너 {운전 중이니}?", eng: "Are you driving?" },
-                { category: "너 지금 {술 마시고 있니}?", eng: "Are you drinking now?" },
-                { category: "너 지금 {담배 피고 있니}?", eng: "Are you smoking now?" },
-                { category: "너 지금 {기다리는 중이니}?", eng: "Are you waiting now?" },
-                { category: "너 {설거지하고 있니}?", eng: "Are you washing the dishes now?" },
-                { category: "너 {빨래하고 있니}?", eng: "Are you doing the laundry?" },
-                { category: "너 {집안일 하고 있니}?", eng: "Are you doing the housework?" },
-                { category: "너 요즘 {아침 일찍 일어나고 있니}?", eng: "Are you waking up early these days?" },
-                { category: "너 요즘 {조깅하고 있니}?", eng: "Are you jogging these days?" }
+                { category: "진행?", kor: "너 요즘 {일자리를 찾고 있니}?", eng: "Are you looking for a job these days?" },
+                { category: "진행?", kor: "너 {영화 보는 중이니}?", eng: "Are you watching a movie?" },
+                { category: "진행?", kor: "너 {돈을 모으고 있는 중이니}?", eng: "Are you saving money?" },
+                { category: "진행?", kor: "너 {친구를 기다리고 있니}?", eng: "Are you waiting for your friend?" },
+                { category: "진행?", kor: "너 지금 {저녁을 먹고 있니}?", eng: "Are you eating dinner now?" },
+                { category: "진행?", kor: "너 지금 {일하는 중이니}?", eng: "Are you working now?" },
+                { category: "진행?", kor: "너 지금 {야근하고 있니}?", eng: "Are you working late now?" },
+                { category: "진행?", kor: "너 지금 {쉬는 중이니}?", eng: "Are you getting some rest now?" },
+                { category: "진행?", kor: "너 {침대에 누워 있니}?", eng: "Are you lying in bed?" },
+                { category: "진행?", kor: "너 요즘 {누구 만나고 있니}?", eng: "Are you seeing someone these days?" },
+                { category: "진행?", kor: "너 지금 {쇼츠를 보고 있니}?", eng: "Are you watching Shorts now?" },
+                { category: "진행?", kor: "너 요즘 {운동 하고 있니}?", eng: "Are you working out these days?" },
+                { category: "진행?", kor: "너 지금 {저녁 만들고 있니}?", eng: "Are you making dinner now?" },
+                { category: "진행?", kor: "너 지금 {영어 공부하는 중이니}?", eng: "Are you studying English now?" },
+                { category: "진행?", kor: "너 {전화 통화하는 중이니}?", eng: "Are you talking on the phone?" },
+                { category: "진행?", kor: "너 {음악 듣고 있는 중이니}?", eng: "Are you listening to music?" },
+                { category: "진행?", kor: "너 {방 청소하는 중이니}?", eng: "Are you cleaning the room?" },
+                { category: "진행?", kor: "너 {친구랑 커피 마시는 중이니}?", eng: "Are you drinking coffee with your friend?" },
+                { category: "진행?", kor: "너 지금 {넷플릭스 보고 있니}?", eng: "Are you watching Netflix now?" },
+                { category: "진행?", kor: "너 {화장하고 있니}?", eng: "Are you putting on makeup?" },
+                { category: "진행?", kor: "너 지금 {집에 가고 있니}?", eng: "Are you going home now?" },
+                { category: "진행?", kor: "너 지금 {이메일 쓰는 중이니}?", eng: "Are you writing an email now?" },
+                { category: "진행?", kor: "너 {손 씻는 중이니}?", eng: "Are you washing your hands?" },
+                { category: "진행?", kor: "너 {운전 중이니}?", eng: "Are you driving?" },
+                { category: "진행?", kor: "너 지금 {술 마시고 있니}?", eng: "Are you drinking now?" },
+                { category: "진행?", kor: "너 지금 {담배 피고 있니}?", eng: "Are you smoking now?" },
+                { category: "진행?", kor: "너 지금 {기다리는 중이니}?", eng: "Are you waiting now?" },
+                { category: "진행?", kor: "너 {설거지하고 있니}?", eng: "Are you washing the dishes now?" },
+                { category: "진행?", kor: "너 {빨래하고 있니}?", eng: "Are you doing the laundry?" },
+                { category: "진행?", kor: "너 {집안일 하고 있니}?", eng: "Are you doing the housework?" },
+                { category: "진행?", kor: "너 요즘 {아침 일찍 일어나고 있니}?", eng: "Are you waking up early these days?" },
+                { category: "진행?", kor: "너 요즘 {조깅하고 있니}?", eng: "Are you jogging these days?" }
             ]
         };
 
@@ -250,9 +250,9 @@
             
             Object.keys(buttons).forEach(key => {
                 if(key === mode) {
-                    buttons[key].className = "py-2.5 rounded-lg font-bold text-sm transition-all bg-blue-600 text-white";
+                    buttons[key].className = "py-2.5 rounded-lg font-bold text-xs sm:text-sm transition-all bg-blue-600 text-white";
                 } else {
-                    buttons[key].className = "py-2.5 rounded-lg font-bold text-sm transition-all text-slate-400 hover:text-white";
+                    buttons[key].className = "py-2.5 rounded-lg font-bold text-xs sm:text-sm transition-all text-slate-400 hover:text-white";
                 }
             });
 
@@ -443,7 +443,17 @@
         }
 
         function goToIntro() {
+            // 1. 실행 중인 타이머 확실하게 멈추기
             clearInterval(timerInterval);
+            timerInterval = null;
+
+            // 2. 퀴즈 내부 임시 데이터 초기화 (이전 문제가 잠깐 보이는 현상 방지)
+            document.getElementById('korText').innerText = "가져오는 중...";
+            document.getElementById('engText').innerText = "English...";
+            document.getElementById('engText').classList.add('opacity-0');
+            document.getElementById('progress').innerText = "0 / 0";
+
+            // 3. 화면 전환
             document.getElementById('quizScreen').classList.add('hidden');
             document.getElementById('resultScreen').classList.add('hidden');
             document.getElementById('introScreen').classList.remove('hidden');
