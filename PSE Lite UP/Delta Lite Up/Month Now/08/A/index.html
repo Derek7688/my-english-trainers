@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>⚡ Delta Lite Up Now! - 8강 Practice</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght=400;700;900&display=swap');
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        body { background-color: #020617; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 1rem 1rem 2rem 1rem; }
+        
+        .container { width: 100%; max-width: 420px; margin: 0 auto; }
+        
+        /* 1. 인트로 */
+        .intro-card { background-color: #0f172a; padding: 2.5rem 1.5rem; border-radius: 2rem; border: 1px solid #1e293b; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); margin-top: 2rem; }
+        .tag { background-color: #1e1b4b; color: #a5b4fc; padding: 0.35rem 1rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em; border: 1px solid #312e81; margin-bottom: 1rem; }
+        .title { font-size: 2.25rem; font-weight: 900; margin-bottom: 2rem; letter-spacing: -0.025em; }
+        
+        .btn-primary { width: 100%; background: linear-gradient(to right, #4f46e5, #3b82f6); color: #ffffff; padding: 1.25rem; border-radius: 1rem; font-size: 1.25rem; font-weight: 900; border: 1px solid rgba(165, 180, 252, 0.3); cursor: pointer; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.4); transition: transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .btn-primary:active { transform: scale(0.96); }
+
+        /* 2. 헤더 */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; padding: 0 0.5rem; width: 100%; height: 40px; }
+        .icon-btn { background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0.5rem; border-radius: 9999px; }
+        .progress { color: #94a3b8; font-weight: 900; font-size: 0.875rem; letter-spacing: 0.1em; text-align: center; flex: 1; }
+        
+        /* 3. 메인 학습 카드 (고정 높이 설정으로 화면 이동 차단) */
+        .main-card { 
+            background-color: #ffffff; 
+            padding: 1.25rem; 
+            border-radius: 2rem; 
+            border: 4px solid #6366f1; 
+            text-align: center; 
+            color: #0f172a; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            height: 520px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 0.875rem;
+        }
+        .card-tag { background-color: #eef2ff; border: 1px solid #e0e7ff; color: #312e81; font-weight: 700; font-size: 0.8rem; padding: 0.4rem; border-radius: 0.75rem; flex-shrink: 0; }
+        
+        /* 인터랙티브 스텝 박스 */
+        .step-box {
+            background-color: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 1.25rem;
+            padding: 1rem;
+            cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s;
+            text-align: center;
+            height: 200px; /* 박스 높이 고정으로 흔들림 방지 */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .step-box:active { transform: scale(0.99); }
+        .step-box.solved { border-color: #6366f1; background-color: #f0f3ff; }
+        
+        .step-label {
+            font-size: 0.75rem;
+            font-weight: 900;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        .kor-title {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: #0f172a;
+            word-break: keep-all;
+            line-height: 1.2;
+        }
+        .hint-text {
+            font-size: 0.75rem;
+            color: #6366f1;
+            font-weight: 700;
+        }
+        
+        /* 정답 영역 고정 */
+        .eng-answer-container {
+            width: 100%;
+            height: 2.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-top: 1px dashed #cbd5e1;
+        }
+        .eng-answer {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: #4f46e5;
+            word-break: keep-all;
+            line-height: 1.2;
+        }
+
+        /* ✨ Step 2 해금 애니메이션 (슬라이드 & 페이드인) */
+        @keyframes slideDownFade {
+            0% {
+                opacity: 0;
+                transform: translateY(-12px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .unlock-anim {
+            animation: slideDownFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* 하단 이동 버튼 */
+        .nav-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-top: 1rem; width: 100%; }
+        .btn-nav-prev { background-color: #1e293b; color: white; padding: 1rem; border-radius: 1rem; font-weight: 900; font-size: 1rem; border: 1px solid #334155; cursor: pointer; }
+        .btn-nav-next { background-color: #4f46e5; color: white; padding: 1rem; border-radius: 1rem; font-weight: 900; font-size: 1rem; border: 1px solid rgba(165, 180, 252, 0.3); cursor: pointer; }
+
+        /* 모달 */
+        .modal-overlay { position: fixed; inset: 0; background-color: rgba(2, 6, 23, 0.85); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+        .modal-card { background-color: #0f172a; border: 2px solid rgba(99, 102, 241, 0.5); padding: 1.75rem 1.25rem; border-radius: 2rem; width: 100%; max-width: 360px; text-align: center; }
+        .modal-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+        .modal-title { font-size: 1.5rem; font-weight: 900; color: white; margin-bottom: 0.75rem; }
+        .modal-body { background-color: rgba(2, 6, 23, 0.9); border: 1px solid #1e293b; padding: 1rem; border-radius: 1rem; text-align: left; margin-bottom: 1.25rem; font-size: 0.85rem; line-height: 1.5; }
+        .btn-secondary { width: 100%; background-color: #1e293b; color: #cbd5e1; padding: 0.75rem; border-radius: 1rem; font-weight: 700; border: none; cursor: pointer; margin-top: 0.5rem; }
+        
+        .hidden { display: none !important; }
+        .invisible { visibility: hidden !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- 1. 인트로 스크린 -->
+        <div id="introScreen" class="intro-card">
+            <span class="tag">Delta Lite Up Now!</span>
+            <h1 class="title">8강 Practice</h1>
+            <button class="btn-primary" onclick="startApp()">
+                <span>훈련 시작하기</span>
+                <span style="font-size: 1.5rem;">🚀</span>
+            </button>
+        </div>
+
+        <!-- 2. 메인 훈련 스크린 -->
+        <div id="appScreen" class="hidden">
+            
+            <!-- 상단 헤더 -->
+            <div class="header">
+                <button class="icon-btn" onclick="goToIntro()" title="시작으로">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 001 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                </button>
+                <div class="progress" id="mainProgress">1 / 15</div>
+            </div>
+
+            <!-- 메인 학습 카드 -->
+            <div class="main-card">
+                <div class="card-tag">📌 8강: 평서문 ➡️ 주어 의문문 단계별 해금 훈련</div>
+                
+                <!-- Step 1: 기본 평서문 -->
+                <div class="step-box" id="step1Box" onclick="clickStep1()">
+                    <div class="step-label">Step 1. 기본 평서문</div>
+                    <div class="kor-title" id="statementKor">우리는 일하고 있어.</div>
+                    <div class="hint-text" id="step1Hint">👉 터치하여 영어 확인 👁️</div>
+                    <div class="eng-answer-container">
+                        <div class="eng-answer invisible" id="statementAnswer">We are working.</div>
+                    </div>
+                </div>
+
+                <!-- Step 2: 주어 질문 의문문 (기본 상태: 숨김) -->
+                <div class="step-box hidden" id="step2Box" onclick="clickStep2()">
+                    <div class="step-label" style="color: #4f46e5;">Step 2. 주어 묻는 의문문</div>
+                    <div class="kor-title" id="questionKor">누가 일 하고 있어?</div>
+                    <div class="hint-text" id="step2Hint">👉 터치하여 영어 확인 👁️</div>
+                    <div class="eng-answer-container">
+                        <div class="eng-answer invisible" id="questionAnswer">Who is working?</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 하단 이동 버튼 -->
+            <div class="nav-grid">
+                <button class="btn-nav-prev" onclick="prevQuestion()">⬅️ 이전 문제</button>
+                <button class="btn-nav-next" onclick="nextQuestion()">다음 문제 ➡️</button>
+            </div>
+
+        </div>
+
+        <!-- 3. 엔딩 모달 -->
+        <div id="endingModal" class="modal-overlay hidden">
+            <div class="modal-card">
+                <div class="modal-icon">🏆</div>
+                <span class="tag" style="margin-bottom: 0.5rem;">Completion!</span>
+                <h2 class="modal-title">완독을 축하합니다! 🎉</h2>
+                
+                <div class="modal-body">
+                    <p style="color: #f59e0b; font-weight: 900; margin-bottom: 0.5rem;">👏 진짜 대단해요!</p>
+                    <p style="color: #e2e8f0; margin-bottom: 0.75rem;">오늘 준비된 8강의 15개 문장을 모두 완벽하게 훈련하셨습니다!</p>
+                    <p style="color: #a5b4fc; font-weight: 700; border-top: 1px solid #1e293b; padding-top: 0.5rem;">
+                        💡 한국어 문장을 보자마자 영어가 입에서 튀어나올 때까지 반복해보세요! 💪
+                    </p>
+                </div>
+
+                <button class="btn-primary" onclick="restartWithShuffle()">
+                    <span>🔄 다시 셔플해서 도전하기</span>
+                </button>
+                <button class="btn-secondary" onclick="goToIntroFromModal()">
+                    <span>🏠 처음 화면으로</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const masterDatabase = [
+            {
+                statementKor: "걔(남자)는 지금 요리하고 있어.",
+                statementEng: "He is cooking now.",
+                questionKor: "누가 지금 요리하고 있어?",
+                questionEng: "Who is cooking now?"
+            },
+            {
+                statementKor: "우리는 일하고 있어.",
+                statementEng: "We are working.",
+                questionKor: "누가 일 하고 있어?",
+                questionEng: "Who is working?"
+            },
+            {
+                statementKor: "제가 여기 담당자에요.",
+                statementEng: "I’m in charge here.",
+                questionKor: "누가 여기 담당자인가요?",
+                questionEng: "Who is in charge here?"
+            },
+            {
+                statementKor: "난 수원 출신이야.",
+                statementEng: "I’m from 수원.",
+                questionKor: "누가 수원 출신이야?",
+                questionEng: "Who is from 수원?"
+            },
+            {
+                statementKor: "우린 매운 음식 안 좋아해.",
+                statementEng: "We don’t like spicy food.",
+                questionKor: "매운 거 안 좋아하는 사람?",
+                questionEng: "Who doesn’t like spicy food?"
+            },
+            {
+                statementKor: "난 커피 마시고 싶어.",
+                statementEng: "I want to drink coffee.",
+                questionKor: "커피 마시고 싶은 사람?",
+                questionEng: "Who wants to drink coffee?"
+            },
+            {
+                statementKor: "걔(여자)가 날 기다리고 있어.",
+                statementEng: "She is waiting for me.",
+                questionKor: "누가 날 기다리고 있어?",
+                questionEng: "Who is waiting for me?"
+            },
+            {
+                statementKor: "우리는 아직 준비 안 됐어.",
+                statementEng: "We aren’t ready yet.",
+                questionKor: "누가 아직 준비 안 됐어?",
+                questionEng: "Who isn’t ready yet?"
+            },
+            {
+                statementKor: "난 회사에 있어.",
+                statementEng: "I’m at work.",
+                questionKor: "회사에 누구 있어?",
+                questionEng: "Who is at work?"
+            },
+            {
+                statementKor: "나 지금 말하는 중이야.",
+                statementEng: "I’m talking now.",
+                questionKor: "지금 누가 말하는 거야?",
+                questionEng: "Who is talking now?"
+            },
+            {
+                statementKor: "이건 중요해.",
+                statementEng: "This is important.",
+                questionKor: "뭐가 중요해?",
+                questionEng: "What is important?"
+            },
+            {
+                statementKor: "여긴 파스타가 맛있어.",
+                statementEng: "The pasta is good here.",
+                questionKor: "여긴 뭐가 맛있어?",
+                questionEng: "What is good here?"
+            },
+            {
+                statementKor: "그건 내 거야.",
+                statementEng: "That is mine.",
+                questionKor: "뭐가 내 거야?",
+                questionEng: "What is mine?"
+            },
+            {
+                statementKor: "다음은 이거야.",
+                statementEng: "That is next.",
+                questionKor: "다음은 뭐야?",
+                questionEng: "What is next?"
+            },
+            {
+                statementKor: "그건 끝났어.",
+                statementEng: "That is done.",
+                questionKor: "뭐가 끝났어?",
+                questionEng: "What is done?"
+            }
+        ];
+
+        let activeDatabase = [];
+        let currentIndex = 0;
+        let isStep1Solved = false;
+
+        function startApp() {
+            document.getElementById('introScreen').classList.add('hidden');
+            document.getElementById('endingModal').classList.add('hidden');
+            document.getElementById('appScreen').classList.remove('hidden');
+            
+            shuffleData();
+            currentIndex = 0;
+            loadCard();
+        }
+
+        function shuffleData() {
+            activeDatabase = [...masterDatabase];
+            for (let i = activeDatabase.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [activeDatabase[i], activeDatabase[j]] = [activeDatabase[j], activeDatabase[i]];
+            }
+        }
+
+        function loadCard() {
+            document.getElementById('mainProgress').innerText = `${currentIndex + 1} / ${activeDatabase.length}`;
+            
+            const item = activeDatabase[currentIndex];
+            
+            // 데이터 매핑
+            document.getElementById('statementKor').innerText = item.statementKor;
+            document.getElementById('statementAnswer').innerText = item.statementEng;
+            
+            document.getElementById('questionKor').innerText = item.questionKor;
+            document.getElementById('questionAnswer').innerText = item.questionEng;
+            
+            // Step 1 초기화
+            isStep1Solved = false;
+            document.getElementById('step1Box').classList.remove('solved');
+            document.getElementById('step1Hint').innerText = "👉 터치하여 영어 확인 👁️";
+            document.getElementById('statementAnswer').classList.add('invisible');
+
+            // Step 2 가리기 및 애니메이션 클래스 리셋
+            const step2 = document.getElementById('step2Box');
+            step2.classList.add('hidden');
+            step2.classList.remove('unlock-anim', 'solved');
+            document.getElementById('step2Hint').innerText = "👉 터치하여 영어 확인 👁️";
+            document.getElementById('questionAnswer').classList.add('invisible');
+        }
+
+        function clickStep1() {
+            if (!isStep1Solved) {
+                isStep1Solved = true;
+                document.getElementById('statementAnswer').classList.remove('invisible');
+                document.getElementById('step1Box').classList.add('solved');
+                document.getElementById('step1Hint').innerText = "✅ 정답 확인 완료!";
+                
+                // Step 2 해금 (부드러운 모션과 함께 등장)
+                const step2 = document.getElementById('step2Box');
+                step2.classList.remove('hidden');
+                // reflow를 강제로 발생시켜 애니메이션 재실행 보장
+                void step2.offsetWidth; 
+                step2.classList.add('unlock-anim');
+            }
+        }
+
+        function clickStep2() {
+            const answerEl = document.getElementById('questionAnswer');
+            if (answerEl.classList.contains('invisible')) {
+                answerEl.classList.remove('invisible');
+                document.getElementById('step2Box').classList.add('solved');
+                document.getElementById('step2Hint').innerText = "✅ 정답 확인 완료!";
+            }
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex >= activeDatabase.length) {
+                showEndingModal();
+                return;
+            }
+            loadCard();
+        }
+
+        function prevQuestion() {
+            currentIndex--;
+            if (currentIndex < 0) {
+                currentIndex = activeDatabase.length - 1;
+            }
+            loadCard();
+        }
+
+        function showEndingModal() {
+            document.getElementById('endingModal').classList.remove('hidden');
+        }
+
+        function restartWithShuffle() {
+            document.getElementById('endingModal').classList.add('hidden');
+            shuffleData();
+            currentIndex = 0;
+            loadCard();
+        }
+
+        function goToIntroFromModal() {
+            document.getElementById('endingModal').classList.add('hidden');
+            goToIntro();
+        }
+
+        function goToIntro() {
+            document.getElementById('appScreen').classList.add('hidden');
+            document.getElementById('introScreen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
