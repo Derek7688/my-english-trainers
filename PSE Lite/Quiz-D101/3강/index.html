@@ -157,7 +157,7 @@
 </div>
 
 <script>
-    // 날씨, 성격과 감정, 맛과 식감, 상태와 특성 4가지 카테고리로 완벽 리매핑 완료
+    // 날씨, 성격과 감정, 맛과 식감, 상태와 특성 4가지 카테고리로 완벽 리매핑 완료 및 오류 수정(240개)
     const allClaims = [
         // 1. 날씨 (1~20)
         { "kr": "쌀쌀해.", "en": "It's chilly.", "cat": "날씨" },
@@ -222,7 +222,7 @@
         { "kr": "걔들 이기적이지 않니?", "en": "Aren't they selfish?", "cat": "성격과 감정" },
         { "kr": "나 엄격해.", "en": "I'm strict.", "cat": "성격과 감정" },
         { "kr": "너 솔직하니?", "en": "Are you honest?", "cat": "성격과 감정" },
-        { "kr": "걔(남자) 똑똑하지 않아.", "en": "He isn't kind.", "cat": "성격과 감정" },
+        { "kr": "걔(남자) 친절하지 않아.", "en": "He isn't kind.", "cat": "성격과 감정" },
         { "kr": "걔(여자) 똑똑하지 않니?", "en": "Isn't she clever?", "cat": "상태와 특성" },
 
         // 4. 상태와 특성 - 외모/매력 포함 (61~80)
@@ -353,7 +353,7 @@
         { "kr": "걔(여자) 고집 세지 않아.", "en": "She isn't stubborn.", "cat": "성격과 감정" },
         { "kr": "우리 우유부단하지 않니?", "en": "Aren't we indecisive?", "cat": "성격과 감정" },
         { "kr": "걔들 순진해.", "en": "They're naive.", "cat": "성격과 감정" },
-        { "kr": "나 친절하니?", "en": "Are you kind?", "cat": "성격과 감정" },
+        { "kr": "나 친절하니?", "en": "Am I kind?", "cat": "성격과 감정" },
         { "kr": "너 친절하지 않아.", "en": "You aren't friendly.", "cat": "성격과 감정" },
         { "kr": "걔(남자) 마음이 따뜻하지 않니?", "en": "Isn't he warm-hearted?", "cat": "성격과 감정" },
         { "kr": "걔(여자) 냉정해.", "en": "She's cold-hearted.", "cat": "성격과 감정" },
@@ -365,8 +365,8 @@
         { "kr": "걔(여자) 이기적이지 않아.", "en": "She isn't selfish.", "cat": "성격과 감정" },
         { "kr": "우리 엄격하지 않니?", "en": "Aren't we strict?", "cat": "성격과 감정" },
         { "kr": "걔들 솔직해.", "en": "They're honest.", "cat": "성격과 감정" },
-        { "kr": "나 똑똑하니?", "en": "Are you smart?", "cat": "성격과 감정" },
-        { "kr": "너 똑똑하지 않아.", "en": "You aren't clever?", "cat": "성격과 감정" },
+        { "kr": "나 똑똑하니?", "en": "Am I smart?", "cat": "성격과 감정" },
+        { "kr": "너 똑똑하지 않아.", "en": "You aren't clever.", "cat": "성격과 감정" },
 
         { "kr": "너 잘생겼어.", "en": "You're good-looking.", "cat": "상태와 특성" },
         { "kr": "걔(남자) 매력적이니?", "en": "Is he attractive?", "cat": "상태와 특성" },
@@ -405,19 +405,19 @@
         { "kr": "걔들 안 바쁘니?", "en": "Aren't they busy?", "cat": "상태와 특성" },
         { "kr": "나 안 한가해.", "en": "I'm not free.", "cat": "상태와 특성" },
         { "kr": "너 결혼했니?", "en": "Are you married?", "cat": "상태와 특성" },
-        { "kr": "걔(남자) 솔로 아니니?", "en": "Aren't he single?", "cat": "상태와 특성" },
+        { "kr": "걔(남자) 솔로 아니니?", "en": "Isn't he single?", "cat": "상태와 특성" },
         { "kr": "걔(여자) 바쁘지 않아.", "en": "She isn't busy.", "cat": "상태와 특성" },
         { "kr": "우리 한가하니?", "en": "Are we free?", "cat": "상태와 특성" },
         { "kr": "걔들 솔로 아니니?", "en": "Aren't they single?", "cat": "상태와 특성" },
 
-        { "kr": "전 한가해요.", "en": "I'd like to be free.", "cat": "상태와 특성" }, 
+        { "kr": "전 한가해지고 싶어요.", "en": "I'd like to be free.", "cat": "상태와 특성" }, 
         { "kr": "한가하고 싶으신가요?", "en": "Would you like to be free?", "cat": "상태와 특성" },
         { "kr": "나 배불러.", "en": "I'm full.", "cat": "상태와 특성" },
         { "kr": "너 배부르니?", "en": "Are you full?", "cat": "상태와 특성" },
         { "kr": "나 배 안 불러.", "en": "I'm not full.", "cat": "상태와 특성" },
         { "kr": "너 안 배부르니?", "en": "Aren't you full?", "cat": "상태와 특성" },
         { "kr": "우리 배불러.", "en": "We're full.", "cat": "상태와 특성" },
-        { "kr": "걔들 배부르대?", "en": "Are they full?", "cat": "상태와 특성" },
+        { "kr": "걔들 배부르니?", "en": "Are they full?", "cat": "상태와 특성" },
         { "kr": "나 지루해.", "en": "I'm bored.", "cat": "성격과 감정" },
         { "kr": "너 지루하니?", "en": "Are you bored?", "cat": "성격과 감정" }
     ];
