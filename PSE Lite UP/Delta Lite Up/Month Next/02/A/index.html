@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>⚡ Delta Lite Up Next! - Practice</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght=400;700;900&display=swap');
+        
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Pretendard', sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
+            touch-action: manipulation;
+            word-break: keep-all;
+            overflow-wrap: break-word;
+        }
+        body { 
+            background-color: #020617; 
+            color: #ffffff; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: flex-start; 
+            padding: 1rem 1rem 2rem 1rem; 
+        }
+        
+        .container { width: 100%; max-width: 420px; margin: 0 auto; }
+        
+        /* 1. 인트로 */
+        .intro-card { background-color: #0f172a; padding: 2.5rem 1.5rem; border-radius: 2rem; border: 1px solid #1e293b; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); margin-top: 2rem; }
+        .tag { background-color: #1e1b4b; color: #a5b4fc; padding: 0.35rem 1rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; display: inline-block; text-transform: uppercase; letter-spacing: 0.1em; border: 1px solid #312e81; margin-bottom: 1rem; }
+        .title { font-size: 2.25rem; font-weight: 900; margin-bottom: 2rem; letter-spacing: -0.025em; }
+        
+        .btn-primary { width: 100%; background: linear-gradient(to right, #4f46e5, #3b82f6); color: #ffffff; padding: 1.25rem; border-radius: 1rem; font-size: 1.25rem; font-weight: 900; border: 1px solid rgba(165, 180, 252, 0.3); cursor: pointer; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.4); transition: transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .btn-primary:active { transform: scale(0.96); }
+
+        /* 2. 헤더 */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; padding: 0 0.5rem; width: 100%; height: 40px; }
+        .icon-btn { background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0.5rem; border-radius: 9999px; }
+        .progress { color: #94a3b8; font-weight: 900; font-size: 0.875rem; letter-spacing: 0.1em; text-align: center; flex: 1; }
+        
+        .toggle-box { display: flex; align-items: center; gap: 0.5rem; background-color: #0f172a; border: 1px solid #1e293b; padding: 0.35rem 0.75rem; border-radius: 9999px; }
+        .toggle-label { font-size: 0.75rem; font-weight: 700; color: #cbd5e1; }
+        .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #1e293b; transition: .3s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #4f46e5; }
+        input:checked + .slider:before { transform: translateX(16px); }
+
+        /* 3. 메인 학습 카드 */
+        .main-card { 
+            background-color: #ffffff; 
+            padding: 1.25rem; 
+            border-radius: 2rem; 
+            border: 4px solid #6366f1; 
+            text-align: center; 
+            color: #0f172a; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            min-height: 520px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        .card-tag { background-color: #eef2ff; border: 1px solid #e0e7ff; color: #312e81; font-weight: 700; font-size: 0.8rem; padding: 0.4rem; border-radius: 0.75rem; margin-bottom: 0.75rem; }
+        
+        .verb-section { border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem; margin-bottom: 0.75rem; min-height: 75px; display: flex; flex-direction: column; justify-content: center; }
+        .verb-eng { font-size: 1.75rem; font-weight: 900; color: #0f172a; line-height: 1.25; }
+        .verb-kor { font-size: 1rem; font-weight: 700; color: #4f46e5; margin-top: 0.25rem; }
+
+        /* 시즈닝 영역 */
+        .seasoning-box { 
+            background-color: #f8fafc; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 1rem; 
+            padding: 0.875rem; 
+            text-align: left; 
+            margin-bottom: 0.75rem;
+            min-height: 180px; 
+            display: flex;
+            flex-direction: column;
+        }
+        .seasoning-title { font-size: 0.75rem; font-weight: 900; color: #94a3b8; text-align: center; margin-bottom: 0.625rem; letter-spacing: 0.05em; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; align-content: start; }
+        .grid-item { background-color: #ffffff; padding: 0.625rem 0.35rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 68px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .item-eng { color: #4f46e5; font-weight: 900; font-size: 0.85rem; line-height: 1.25; }
+        .item-kor { color: #475569; font-weight: 700; font-size: 0.75rem; margin-top: 0.25rem; line-height: 1.25; }
+
+        /* 예시 문장 도전 */
+        .example-wrapper { margin-top: auto; }
+        .btn-example { width: 100%; background: linear-gradient(to right, #f59e0b, #ea580c); color: #ffffff; padding: 0.875rem 1rem; border-radius: 0.75rem; font-weight: 900; font-size: 0.95rem; border: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .example-list { margin-top: 0.625rem; display: flex; flex-direction: column; gap: 0.5rem; text-align: left; }
+        .example-card { background-color: #fffbeb; border: 1px solid #fde68a; padding: 0.75rem; border-radius: 0.75rem; cursor: pointer; }
+        .example-q { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; font-size: 0.85rem; font-weight: 700; color: #1e293b; line-height: 1.4; text-wrap: balance; }
+        .example-hint { font-size: 0.7rem; color: #d97706; font-weight: 900; white-space: nowrap; flex-shrink: 0; }
+        .example-a { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #fef3c7; font-size: 0.95rem; font-weight: 900; color: #312e81; line-height: 1.35; }
+
+        /* 하단 이동 버튼 */
+        .nav-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-top: 1rem; width: 100%; }
+        .btn-nav-prev { background-color: #1e293b; color: white; padding: 1rem; border-radius: 1rem; font-weight: 900; font-size: 1rem; border: 1px solid #334155; cursor: pointer; }
+        .btn-nav-next { background-color: #4f46e5; color: white; padding: 1rem; border-radius: 1rem; font-weight: 900; font-size: 1rem; border: 1px solid rgba(165, 180, 252, 0.3); cursor: pointer; }
+
+        /* 모달 */
+        .modal-overlay { position: fixed; inset: 0; background-color: rgba(2, 6, 23, 0.85); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+        .modal-card { background-color: #0f172a; border: 2px solid rgba(99, 102, 241, 0.5); padding: 1.75rem 1.25rem; border-radius: 2rem; width: 100%; max-width: 360px; text-align: center; }
+        .modal-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+        .modal-title { font-size: 1.5rem; font-weight: 900; color: white; margin-bottom: 0.75rem; }
+        .modal-body { background-color: rgba(2, 6, 23, 0.9); border: 1px solid #1e293b; padding: 1rem; border-radius: 1rem; text-align: left; margin-bottom: 1.25rem; font-size: 0.85rem; line-height: 1.5; }
+        .btn-secondary { width: 100%; background-color: #1e293b; color: #cbd5e1; padding: 0.75rem; border-radius: 1rem; font-weight: 700; border: none; cursor: pointer; margin-top: 0.5rem; }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- 1. 인트로 스크린 -->
+        <div id="introScreen" class="intro-card">
+            <span class="tag">Delta Lite Up Next!</span>
+            <h1 class="title">Practice</h1>
+            <button class="btn-primary" onclick="startApp()">
+                <span>훈련 시작하기</span>
+                <span style="font-size: 1.5rem;">🚀</span>
+            </button>
+        </div>
+
+        <!-- 2. 메인 훈련 스크린 -->
+        <div id="appScreen" class="hidden">
+            
+            <!-- 상단 헤더 -->
+            <div class="header">
+                <button class="icon-btn" onclick="goToIntro()" title="시작으로">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 001 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                </button>
+                <div class="progress" id="mainProgress">1 / 10</div>
+                <div class="toggle-box">
+                    <span class="toggle-label">한글</span>
+                    <label class="switch">
+                        <input type="checkbox" id="korToggleInput" checked onchange="toggleKorMeaning(this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 메인 학습 카드 -->
+            <div class="main-card">
+                <div class="card-tag">📌 핵심 표현 및 문장 시즈닝 결합</div>
+                
+                <div class="verb-section">
+                    <div class="verb-eng" id="mainVerbEng">I’m going to stay home.</div>
+                    <div class="verb-kor kor-text" id="mainVerbKor">난 집에 있을 거야.</div>
+                </div>
+
+                <div class="seasoning-box">
+                    <div class="seasoning-title">🫙 시즈닝 도구</div>
+                    <div class="grid" id="elementGrid"></div>
+                </div>
+
+                <div class="example-wrapper">
+                    <button class="btn-example" onclick="toggleExampleSection()">
+                        <span>🔥 시즈닝 문장 도전!</span>
+                        <span id="exampleToggleIcon">🔽 펼치기</span>
+                    </button>
+                    <div id="exampleListContainer" class="example-list hidden"></div>
+                </div>
+            </div>
+
+            <!-- 하단 이동 버튼 -->
+            <div class="nav-grid">
+                <button class="btn-nav-prev" onclick="prevVerb()">⬅️ 이전 패턴</button>
+                <button class="btn-nav-next" onclick="nextVerb()">다음 패턴 ➡️</button>
+            </div>
+
+        </div>
+
+        <!-- 3. 엔딩 모달 -->
+        <div id="endingModal" class="modal-overlay hidden">
+            <div class="modal-card">
+                <div class="modal-icon">🏆</div>
+                <span class="tag" style="margin-bottom: 0.5rem;">Completion!</span>
+                <h2 class="modal-title">완독을 축하합니다! 🎉</h2>
+                
+                <div class="modal-body">
+                    <p style="color: #f59e0b; font-weight: 900; margin-bottom: 0.5rem;">👏 진짜 대단해요!</p>
+                    <p style="color: #e2e8f0; margin-bottom: 0.75rem;">오늘 준비된 10개의 핵심 표현과 시즈닝 패턴을 완벽하게 마무리하셨습니다!</p>
+                    <p style="color: #a5b4fc; font-weight: 700; border-top: 1px solid #1e293b; padding-top: 0.5rem;">
+                        💡 한 번의 연습으로는 부족해요! 언어는 틈날 때마다 반복해서 입으로 뱉어야 내 것이 됩니다. 💪
+                    </p>
+                </div>
+
+                <button class="btn-primary" onclick="restartWithShuffle()">
+                    <span>🔄 다시 셔플해서 도전하기</span>
+                </button>
+                <button class="btn-secondary" onclick="goToIntroFromModal()">
+                    <span>🏠 처음 화면으로</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const masterVerbDatabase = [
+            {
+                eng: "I’m going to stay home.", kor: "난 집에 있을 거야.",
+                elements: [
+                    { kor: "오늘 밤에", eng: "tonight" },
+                    { kor: "하루종일", eng: "all day" },
+                    { kor: "늦게까지 놀다", eng: "stay out late" }
+                ],
+                examples: [
+                    { kor: "오늘 밤에 집에 있을 거야.", eng: "I’m going to stay home tonight." },
+                    { kor: "하루종일 집에 있을 거야.", eng: "I’m going to stay home all day." },
+                    { kor: "늦게까지 놀 거야.", eng: "I’m going to stay out late." }
+                ]
+            },
+            {
+                eng: "I’m going to go on a diet.", kor: "나 다이어트 할 거야.",
+                elements: [
+                    { kor: "다음 주부터", eng: "next week" },
+                    { kor: "산책 가다", eng: "go for a walk" },
+                    { kor: "소풍 가다", eng: "go for a picnic" }
+                ],
+                examples: [
+                    { kor: "다음 주부터 다이어트 할 거야.", eng: "I’m going to go on a diet next week." },
+                    { kor: "산책 갈 거야.", eng: "I’m going to go for a walk." },
+                    { kor: "소풍 갈 거야.", eng: "I’m going to go for a picnic." }
+                ]
+            },
+            {
+                eng: "I’m going to move.", kor: "나 이사할 거야.",
+                elements: [
+                    { kor: "서울로", eng: "to Seoul" },
+                    { kor: "분가하다, 독립하다", eng: "move out" },
+                    { kor: "이직하다", eng: "move to another company" }
+                ],
+                examples: [
+                    { kor: "서울로 이사할 거야.", eng: "I’m going to move to Seoul." },
+                    { kor: "나 독립(분가)할 거야.", eng: "I’m going to move out." },
+                    { kor: "다른 회사로 이직할 거야.", eng: "I’m going to move to another company." }
+                ]
+            },
+            {
+                eng: "I’m going to quit my job.", kor: "난 일 그만둘 거야.",
+                elements: [
+                    { kor: "올해에", eng: "this year" },
+                    { kor: "곧", eng: "soon" },
+                    { kor: "담배를 끊다", eng: "quit smoking" }
+                ],
+                examples: [
+                    { kor: "올해에 일 그만둘 거야.", eng: "I’m going to quit my job this year." },
+                    { kor: "곧 일 그만둘 거야.", eng: "I’m going to quit my job soon." },
+                    { kor: "담배 끊을 거야.", eng: "I’m going to quit smoking." }
+                ]
+            },
+            {
+                eng: "I’m going to buy a new cellphone.", kor: "난 새 핸드폰 살 거야.",
+                elements: [
+                    { kor: "SUV", eng: "an SUV" },
+                    { kor: "노트북", eng: "a laptop" },
+                    { kor: "집", eng: "a house" }
+                ],
+                examples: [
+                    { kor: "SUV 살 거야.", eng: "I’m going to buy an SUV." },
+                    { kor: "노트북 살 거야.", eng: "I’m going to buy a laptop." },
+                    { kor: "집 살 거야.", eng: "I’m going to buy a house." }
+                ]
+            },
+            {
+                eng: "I’m going to take a day off.", kor: "나 하루 쉴 거야.",
+                elements: [
+                    { kor: "이틀 쉬다", eng: "take 2 days off" },
+                    { kor: "휴가 가다", eng: "take a vacation" },
+                    { kor: "잠깐 쉬다", eng: "take a break" }
+                ],
+                examples: [
+                    { kor: "이틀 쉴 거야.", eng: "I’m going to take 2 days off." },
+                    { kor: "휴가 갈 거야.", eng: "I’m going to take a vacation." },
+                    { kor: "잠깐 쉴 거야.", eng: "I’m going to take a break." }
+                ]
+            },
+            {
+                eng: "It’s going to cost a lot of money.", kor: "돈 많이 들 거야. / 비용이 꽤 들 거야.",
+                elements: [
+                    { kor: "100달러 정도", eng: "about 100 dollars" },
+                    { kor: "돈이 더 많이", eng: "more money" },
+                    { kor: "돈이 추가로", eng: "extra" }
+                ],
+                examples: [
+                    { kor: "100달러 정도 들 거야.", eng: "It’s going to cost about 100 dollars." },
+                    { kor: "돈이 더 많이 들 거야.", eng: "It’s going to cost more money." },
+                    { kor: "추가 비용이 들 거야.", eng: "It’s going to cost extra." }
+                ]
+            },
+            {
+                eng: "I’m going to travel abroad.", kor: "나 해외 여행 갈 거야.",
+                elements: [
+                    { kor: "4일 동안", eng: "for 4 days" },
+                    { kor: "일본으로", eng: "to Japan" },
+                    { kor: "혼자서", eng: "alone" }
+                ],
+                examples: [
+                    { kor: "4일 동안 여행할 거야.", eng: "I’m going to travel for 4 days." },
+                    { kor: "일본으로 여행 갈 거야.", eng: "I’m going to travel to Japan." },
+                    { kor: "혼자 여행 갈 거야.", eng: "I’m going to travel alone." }
+                ]
+            },
+            {
+                eng: "You’re going to be late.", kor: "너 그러다 늦겠다.",
+                elements: [
+                    { kor: "큰일 나다", eng: "be in trouble" },
+                    { kor: "실망하다", eng: "be disappointed" },
+                    { kor: "다치다, 상처 받다", eng: "be hurt" }
+                ],
+                examples: [
+                    { kor: "너 큰일 날 거야 (곤란해질 거야).", eng: "You’re going to be in trouble." },
+                    { kor: "너 실망할 거야.", eng: "You’re going to be disappointed." },
+                    { kor: "너 다칠 거야 (상처받을 거야).", eng: "You’re going to be hurt." }
+                ]
+            },
+            {
+                eng: "I’m going to meet my friends.", kor: "나 친구들 만날 거야.",
+                elements: [
+                    { kor: "저녁 먹으러", eng: "for dinner" },
+                    { kor: "동네에서", eng: "in the neighborhood" },
+                    { kor: "오랜만에", eng: "for the first time in a long time" }
+                ],
+                examples: [
+                    { kor: "저녁 먹으러 친구들 만날 거야.", eng: "I’m going to meet my friends for dinner." },
+                    { kor: "동네에서 친구들 만날 거야.", eng: "I’m going to meet my friends in the neighborhood." },
+                    { kor: "오랜만에 친구들 만날 거야.", eng: "I’m going to meet my friends for the first time in a long time." }
+                ]
+            }
+        ];
+
+        let activeVerbDatabase = [];
+        let currentVerbIndex = 0;
+        let isKorMeaningOn = true;
+        let isExampleExpanded = false;
+
+        function startApp() {
+            document.getElementById('introScreen').classList.add('hidden');
+            document.getElementById('endingModal').classList.add('hidden');
+            document.getElementById('appScreen').classList.remove('hidden');
+            
+            shuffleVerbs();
+            currentVerbIndex = 0;
+            loadVerbCard();
+        }
+
+        function shuffleVerbs() {
+            activeVerbDatabase = [...masterVerbDatabase];
+            for (let i = activeVerbDatabase.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [activeVerbDatabase[i], activeVerbDatabase[j]] = [activeVerbDatabase[j], activeVerbDatabase[i]];
+            }
+        }
+
+        function loadVerbCard() {
+            document.getElementById('mainProgress').innerText = `${currentVerbIndex + 1} / ${activeVerbDatabase.length}`;
+            
+            const item = activeVerbDatabase[currentVerbIndex];
+            document.getElementById('mainVerbEng').innerText = item.eng;
+            document.getElementById('mainVerbKor').innerText = item.kor;
+            
+            const grid = document.getElementById('elementGrid');
+            grid.innerHTML = "";
+
+            item.elements.forEach((elem) => {
+                const cardHtml = `
+                    <div class="grid-item">
+                        <span class="item-eng">${elem.eng}</span>
+                        <span class="item-kor kor-text">${elem.kor}</span>
+                    </div>
+                `;
+                grid.innerHTML += cardHtml;
+            });
+
+            renderExampleList(item.examples);
+
+            isExampleExpanded = false;
+            document.getElementById('exampleListContainer').classList.add('hidden');
+            document.getElementById('exampleToggleIcon').innerText = "🔽 펼치기";
+
+            applyKorMeaningVisibility();
+        }
+
+        function renderExampleList(examples) {
+            const container = document.getElementById('exampleListContainer');
+            container.innerHTML = "";
+
+            examples.forEach((ex, idx) => {
+                const exHtml = `
+                    <div class="example-card" onclick="revealExampleAnswer(this)">
+                        <div class="example-q">
+                            <span>Q${idx + 1}. ${ex.kor}</span>
+                            <span class="example-hint">터치하여 정답 👁️</span>
+                        </div>
+                        <div class="example-a hidden">
+                            👉 ${ex.eng}
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += exHtml;
+            });
+        }
+
+        function revealExampleAnswer(el) {
+            const ansBox = el.querySelector('.example-a');
+            if (ansBox) {
+                ansBox.classList.toggle('hidden');
+            }
+        }
+
+        function toggleExampleSection() {
+            isExampleExpanded = !isExampleExpanded;
+            const container = document.getElementById('exampleListContainer');
+            const icon = document.getElementById('exampleToggleIcon');
+
+            if (isExampleExpanded) {
+                container.classList.remove('hidden');
+                icon.innerText = "🔼 접기";
+            } else {
+                container.classList.add('hidden');
+                icon.innerText = "🔽 펼치기";
+            }
+        }
+
+        function nextVerb() {
+            currentVerbIndex++;
+            if (currentVerbIndex >= activeVerbDatabase.length) {
+                showEndingModal();
+                return;
+            }
+            loadVerbCard();
+        }
+
+        function prevVerb() {
+            currentVerbIndex--;
+            if (currentVerbIndex < 0) {
+                currentVerbIndex = activeVerbDatabase.length - 1;
+            }
+            loadVerbCard();
+        }
+
+        function showEndingModal() {
+            document.getElementById('endingModal').classList.remove('hidden');
+        }
+
+        function restartWithShuffle() {
+            document.getElementById('endingModal').classList.add('hidden');
+            shuffleVerbs();
+            currentVerbIndex = 0;
+            loadVerbCard();
+        }
+
+        function goToIntroFromModal() {
+            document.getElementById('endingModal').classList.add('hidden');
+            goToIntro();
+        }
+
+        function goToIntro() {
+            document.getElementById('appScreen').classList.add('hidden');
+            document.getElementById('introScreen').classList.remove('hidden');
+        }
+
+        function toggleKorMeaning(isChecked) {
+            isKorMeaningOn = isChecked;
+            applyKorMeaningVisibility();
+        }
+
+        function applyKorMeaningVisibility() {
+            const korElements = document.querySelectorAll('.kor-text');
+            korElements.forEach(el => {
+                if (isKorMeaningOn) {
+                    el.style.display = 'block';
+                } else {
+                    el.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
