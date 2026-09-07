@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>⚡ Delta Lite Up Next! - 8강 예문 Drilling!</title>
+    <title>⚡ Delta Lite Up Past! - 8강 예문 Drilling!</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700;900&display=swap');
@@ -40,8 +41,8 @@
 
     <!-- [1] 설정 화면 -->
     <div id="setup-screen" class="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-sm w-full border border-slate-100 my-auto text-center">
-        <span class="bg-orange-100 text-orange-600 px-4 py-1 rounded-full text-xs font-bold mb-3 inline-block uppercase tracking-widest">Delta Lite Up Next!</span>
-        <h1 class="text-2xl font-black text-slate-800 mb-1">Month Next</h1>
+        <span class="bg-orange-100 text-orange-600 px-4 py-1 rounded-full text-xs font-bold mb-3 inline-block uppercase tracking-widest">Delta Lite Up Past!</span>
+        <h1 class="text-2xl font-black text-slate-800 mb-1">Month Past</h1>
         <p id="setup-lesson-title" class="text-blue-600 font-bold text-lg italic mb-6 text-center w-full">8강 예문 Drilling!</p>
         
         <div id="setup-banner-area"></div>
@@ -118,18 +119,18 @@
     </div>
 
     <script>
-        // 💡 8강 What / Who 주어 질문 의문문 (미래 시제) 10개 핵심 데이터베이스
+        // 💡 8강 What / Who 주어 질문 의문문 (과거 시제) 10개 핵심 데이터베이스
         const rawData = [
-            { num: "1", kr: "누가 날 도와줄래?", en: "Who will help me?" },
-            { num: "2", kr: "누가 여기에 있을 거야?", en: "Who is going to stay here?" },
-            { num: "3", kr: "누가 내일 널 데리러 가?", en: "Who is picking you up tomorrow?" },
-            { num: "4", kr: "뭐가 안 매울까?", en: "What won’t be spicy?" },
-            { num: "5", kr: "누가 운전할래?", en: "Who will drive?" },
-            { num: "6", kr: "무슨 일이 벌어질까?", en: "What’s going to happen?" },
-            { num: "7", kr: "누가 준비할 거야?", en: "Who is going to prepare for it?" },
-            { num: "8", kr: "누가 이번 달에 그만둬?", en: "Who is quitting this month?" },
-            { num: "9", kr: "누가 뽑힐까?", en: "Who will be hired?" },
-            { num: "10", kr: "미래엔 뭐가 중요할까?", en: "What will be important in the future?" }
+            { num: "1", kr: "누가 아직 저녁 안 먹었어?", en: "Who didn’t have dinner yet?" },
+            { num: "2", kr: "누가 너한테 전화했어?", en: "Who called you?" },
+            { num: "3", kr: "누가 이거 샀어?", en: "Who bought this?" },
+            { num: "4", kr: "누가 실수했어?", en: "Who made a mistake?" },
+            { num: "5", kr: "거긴 뭐가 맛있었어?", en: "What was good there?" },
+            { num: "6", kr: "누가 일을 안 하고 있었어?", en: "Who wasn’t working?" },
+            { num: "7", kr: "누가 이걸 보고 싶다고 했어?", en: "Who wanted to watch this?" },
+            { num: "8", kr: "누가 지각했어?", en: "Who was late?" },
+            { num: "9", kr: "뭐가 문제였어?", en: "What was the problem?" },
+            { num: "10", kr: "이거 누가 여기다가 뒀어?", en: "Who put this here?" }
         ];
 
         let studySequence = [], currentIdx = 0, isRevealed = false, selectedChunkSize = 5;
