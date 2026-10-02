@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Delta 사다리 - Day 19 자료</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; touch-action: manipulation; }
+        .auto-active { background-color: #f97316 !important; color: white !important; border-color: #f97316 !important; }
+        .card-container { min-height: 380px; display: flex; flex-direction: column; justify-content: center; }
+        .banner-inner { transition: all 0.5s ease; }
+        #progress-container { cursor: pointer; touch-action: none; }
+        #prev-item-box { transition: all 0.5s ease; min-height: 48px; }
+        .mode-btn-active { background-color: #0f172a !important; color: white !important; border-color: #0f172a !important; }
+        
+        /* ⏱ 자동 게이지 바 실시간 애니메이션 */
+        #timer-gauge-bar {
+            transition: width 50ms linear;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col items-center justify-start p-4">
+
+    <!-- 배너 템플릿 -->
+    <template id="banner-template">
+        <div class="promo-banner bg-white border border-blue-50 p-4 rounded-[2.2rem] mb-6 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+             onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+            <div class="banner-inner flex items-center gap-4">
+                <div class="banner-icon w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+                <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center text-left">
+                    <h3 class="banner-title font-black text-slate-800 text-[14px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                    <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- [1] 설정 화면 -->
+    <div id="setup-screen" class="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-sm w-full border border-slate-100 my-auto text-center">
+        <span class="bg-orange-100 text-orange-600 px-4 py-1 rounded-full text-xs font-bold mb-3 inline-block uppercase tracking-widest">Delta 사다리</span>
+        <h1 class="text-2xl font-black text-slate-800 mb-1">Day 19 자료</h1>
+        <p id="setup-lesson-title" class="text-blue-600 font-bold text-lg italic mb-6 text-center w-full">의무/충고 표현 Drilling! (총 60문장)</p>
+        
+        <div id="setup-banner-area"></div>
+
+        <!-- 모드 선택 영역 -->
+        <div class="mb-6 px-1">
+            <p class="text-slate-700 font-bold text-sm mb-3 text-left">학습 모드 선택</p>
+            <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-2xl">
+                <button type="button" id="tab-ladder" onclick="selectPlayMode('ladder')" class="py-3 rounded-xl font-black text-xs transition-all mode-btn-active shadow-sm">
+                    🪜 사다리 모드
+                </button>
+                <button type="button" id="tab-random" onclick="selectPlayMode('random')" class="py-3 rounded-xl font-bold text-xs text-slate-500 transition-all hover:text-slate-900">
+                    🎲 랜덤 출제 모드
+                </button>
+            </div>
+            <p id="mode-desc" class="text-[11px] font-semibold text-slate-400 mt-2 text-left px-1">설정한 단위만큼 누적해서 촘촘히 훈련합니다.</p>
+        </div>
+
+        <!-- 누적 반복 단위 (사다리 모드 전용) -->
+        <div id="chunk-setting-box" class="mb-8 px-2 text-left transition-all">
+            <div class="flex justify-between items-center mb-3">
+                <p class="text-slate-700 font-bold text-sm">누적 반복 단위</p>
+                <div class="bg-blue-600 text-white px-3 py-1 rounded-lg font-black text-xl" id="chunk-value">4</div>
+            </div>
+            <input type="range" id="chunk-slider" min="1" max="8" value="4" oninput="updateChunkDisplay(this.value)" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+        </div>
+
+        <div class="mb-6">
+            <button id="auto-mode-btn" onclick="toggleAutoMode()" class="w-full py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-600 flex items-center justify-center gap-2 transition-all hover:bg-slate-50">
+                <span id="auto-icon">⚪</span> 자동 재생 OFF
+            </button>
+        </div>
+        <button onclick="startStudy()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold text-lg shadow-xl active:scale-95 transition-all">연습 시작하기</button>
+    </div>
+
+    <!-- [2] 학습 화면 -->
+    <div id="study-screen" class="hidden w-full max-w-lg text-slate-900 mx-auto">
+        <div class="flex justify-between items-center mb-4 px-2">
+            <button onclick="location.reload()" class="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 001 1v4a1 1 0 001 1m-6 0h6" /></svg>
+            </button>
+            <div id="active-lesson-name" class="text-slate-400 font-black text-xs tracking-widest uppercase text-center flex-1">Day 19 자료</div>
+            <div class="w-10"></div>
+        </div>
+
+        <!-- 직전 학습 문장 표시 영역 -->
+        <div id="prev-item-box" class="w-full px-8 mb-2 flex flex-col items-center justify-center text-center opacity-0">
+            <p id="prev-kr" class="text-xs font-bold text-slate-400 truncate w-full"></p>
+            <p id="prev-en" class="text-xs font-black text-blue-300 truncate w-full"></p>
+        </div>
+
+        <div class="bg-white p-10 rounded-[3rem] shadow-2xl card-container text-center mb-6 border border-slate-50 relative overflow-hidden">
+            <!-- ⏳ 자동 타이머 게이지 바 -->
+            <div id="timer-gauge-container" class="absolute top-0 left-0 right-0 h-1.5 bg-slate-100 hidden overflow-hidden">
+                <div id="timer-gauge-bar" class="h-full bg-orange-500 w-full"></div>
+            </div>
+
+            <div class="absolute top-6 left-8 right-8 flex justify-between items-center">
+                <span id="sentence-number" class="bg-slate-100 text-slate-400 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter">No.1.(1)</span>
+                <div class="flex items-center gap-2">
+                    <span id="badge-playmode" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 uppercase tracking-tighter">사다리</span>
+                    <button onclick="switchModeInGame()" id="mode-switch-btn" class="text-slate-300 font-bold text-[10px] underline decoration-slate-100 hover:text-blue-400 transition-colors">자동 모드 전환</button>
+                    <div id="mode-status" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-slate-50 text-slate-300 uppercase tracking-tighter transition-all">수동</div>
+                </div>
+            </div>
+            <div id="kr-box" class="text-2xl font-bold text-slate-800 leading-relaxed mb-8 break-keep px-2"></div>
+            <div id="en-box" class="invisible opacity-0 translate-y-4 transition-all duration-500 w-full text-center">
+                <div class="h-[1px] bg-slate-100 w-16 mx-auto mb-8"></div>
+                <p id="en-text" class="text-2xl font-black text-blue-600 leading-tight break-keep px-4"></p>
+            </div>
+            <div id="finish-ui" class="hidden absolute inset-0 bg-white z-50 flex flex-col items-center justify-center p-6 text-center rounded-[3rem]">
+                <p class="text-4xl mb-4">🎉</p>
+                <h2 class="text-2xl font-black mb-2 text-slate-800">연습 완료!</h2>
+                <div id="finish-banner-area" class="w-full"></div>
+                <button id="cal-confirm-btn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg mb-2">복습 알림 예약하기</button>
+                <button onclick="location.reload()" class="text-slate-400 text-sm font-bold py-2">그냥 종료하기</button>
+            </div>
+        </div>
+
+        <div id="study-banner-area"></div>
+
+        <div id="control-panel" class="flex flex-col gap-3 mb-6">
+            <div class="flex gap-2">
+                <button onclick="prevStep()" id="prev-btn" class="w-16 bg-white border-2 border-slate-100 text-slate-300 py-5 rounded-[1.8rem] font-black text-xl active:scale-95 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <button onclick="handleAction()" id="main-btn" class="flex-1 bg-slate-900 text-white py-5 rounded-[1.8rem] font-black text-lg shadow-2xl active:scale-95 transition-all">정답 확인</button>
+            </div>
+        </div>
+
+        <div id="progress-container" class="h-4 flex items-center w-full mb-2">
+            <div class="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden pointer-events-none">
+                <div id="progress-bar" class="h-full bg-orange-500 transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+        <p id="progress-text" class="text-center text-slate-400 text-[9px] font-bold uppercase tracking-widest pb-6 pointer-events-none">Step 1 / 00</p>
+    </div>
+
+    <script>
+        const rawData = [
+            // 1
+            { num: "1.(1)", kr: "나는 내일 일찍 일어나야 돼.", en: "I have to wake up early tomorrow." },
+            { num: "1.(2)", kr: "너 내일 일찍 일어나야 돼?", en: "Do you have to wake up early tomorrow?" },
+            { num: "1.(3)", kr: "나는 내일 일찍 안 일어나도 돼.", en: "I don't have to wake up early tomorrow." },
+            { num: "1.(4)", kr: "너 내일 일찍 안 일어나도 돼?", en: "Don't you have to wake up early tomorrow?" },
+            { num: "1.(5)", kr: "너 보통 얼마나 일찍 일어나야 돼?", en: "How early do you usually have to wake up?" },
+            { num: "1.(6)", kr: "너 내일 몇 시에 일어나야 돼?", en: "What time do you have to wake up tomorrow?" },
+
+            // 2
+            { num: "2.(1)", kr: "나는 내일 학교 가야 돼.", en: "I have to go to school tomorrow." },
+            { num: "2.(2)", kr: "너 내일 학교 가야 돼?", en: "Do you have to go to school tomorrow?" },
+            { num: "2.(3)", kr: "나는 내일 학교 안 가도 돼.", en: "I don't have to go to school tomorrow." },
+            { num: "2.(4)", kr: "너 내일 학교 안 가도 돼?", en: "Don't you have to go to school tomorrow?" },
+            { num: "2.(5)", kr: "너 내일 어디 가야 돼?", en: "Where do you have to go tomorrow?" },
+            { num: "2.(6)", kr: "너 내일 왜 학교 안 가도 돼?", en: "Why don't you have to go to school tomorrow?" },
+
+            // 3
+            { num: "3.(1)", kr: "너, 그 치킨 꼭 먹어봐야 돼.", en: "You have to try the chicken." },
+            { num: "3.(2)", kr: "Steve는 아침 안 먹어도 돼?", en: "Doesn't Steve have to have breakfast?" },
+            { num: "3.(3)", kr: "걔네들, 항상 수업 전에 화장실 써야 해.", en: "They always have to use the restroom before class." },
+            { num: "3.(4)", kr: "너, 왜 시험공부를 안 해도 돼?", en: "Why don't you have to study for the test?" },
+            { num: "3.(5)", kr: "우리, 언제 그 일정에 대해 이야기해야 돼?", en: "When do we have to talk about the schedule?" },
+            { num: "3.(6)", kr: "Alpha들은 PSE에서 영어로 이야기해야 돼.", en: "The Alphas have to speak English at PSE." },
+            { num: "3.(7)", kr: "우리, 토요일에 일 안 해도 돼.", en: "We don't have to work on Saturday." },
+            { num: "3.(8)", kr: "애들, 지금 안 자러 가도 돼?", en: "Don't the children have to go to bed now?" },
+            { num: "3.(9)", kr: "너, 보통 몇 시에 나가야 돼?", en: "What time do you usually have to leave?" },
+            { num: "3.(10)", kr: "내가 파티에 무엇을 가져와야 해?", en: "What do I have to bring to the party?" },
+
+            // 4
+            { num: "4.(1)", kr: "걔(여자)는 자기 방을 청소해야 돼.", en: "She needs to clean her room." },
+            { num: "4.(2)", kr: "걔(여자) 자기 방 청소해야 돼?", en: "Does she need to clean her room?" },
+            { num: "4.(3)", kr: "걔(여자)는 자기 방 청소 안 해도 돼.", en: "She doesn't need to clean her room." },
+            { num: "4.(4)", kr: "걔(여자) 자기 방 청소 안 해도 돼?", en: "Doesn't she need to clean her room?" },
+            { num: "4.(5)", kr: "누가 일주일에 두 번 방을 청소해야 돼?", en: "Who needs to clean their room twice a week?" },
+            { num: "4.(6)", kr: "걔(여자)는 무엇을 청소해야 돼?", en: "What does she need to clean?" },
+
+            // 5
+            { num: "5.(1)", kr: "Delta들은 그 문장들을 연습해야 돼.", en: "The Deltas need to practice the sentences." },
+            { num: "5.(2)", kr: "Delta들은 그 문장들을 연습해야 돼?", en: "Do the Deltas need to practice the sentences?" },
+            { num: "5.(3)", kr: "Delta들은 그 문장들을 연습 안 해도 돼.", en: "The Deltas don't need to practice the sentences." },
+            { num: "5.(4)", kr: "Delta들은 그 문장들을 연습 안 해도 돼?", en: "Don't the Deltas need to practice the sentences?" },
+            { num: "5.(5)", kr: "Delta들은 그 문장들을 어떻게 연습해야 돼?", en: "How do the Deltas need to practice the sentences?" },
+            { num: "5.(6)", kr: "Delta들은 무엇을 해야 돼?", en: "What do the Deltas need to do?" },
+
+            // 6
+            { num: "6.(1)", kr: "우리, 선물 사야 돼?", en: "Do we need to buy a present?" },
+            { num: "6.(2)", kr: "누가 자기 휴대폰을 충전해야 돼?", en: "Who needs to charge their phone?" },
+            { num: "6.(3)", kr: "모든 사람들은 PSE에서 영어를 배워야 돼.", en: "Everyone needs to learn English at PSE." },
+            { num: "6.(4)", kr: "당연히, 너는 살 뺄 필요 없지.", en: "Of course, you don't need to lose weight." },
+            { num: "6.(5)", kr: "나, 마트에서 뭐 사야 되지?", en: "What do I need to buy at the grocery store?" },
+            { num: "6.(6)", kr: "나, 2주에 한 번 머리 잘라야 돼.", en: "I need to get a haircut once every two weeks." },
+            { num: "6.(7)", kr: "우리, 어느 숙제를 끝내야 돼?", en: "Which assignment do we need to finish?" },
+            { num: "6.(8)", kr: "너, 가끔 이메일 확인해야 돼.", en: "You sometimes need to check your email." },
+            { num: "6.(9)", kr: "내가 언제 모든 사람들의 돈을 걷어야 돼?", en: "When do I need to collect everyone's money?" },
+            { num: "6.(10)", kr: "너, 샤워해야 되지 않아?", en: "Don't you need to take a shower?" },
+
+            // 7
+            { num: "7.(1)", kr: "Delta들은 그 문장들을 천천히 반복하는 게 좋아.", en: "The Deltas should repeat the sentences slowly." },
+            { num: "7.(2)", kr: "Delta들은 그 문장들을 천천히 반복하는 게 좋을까?", en: "Should the Deltas repeat the sentences slowly?" },
+            { num: "7.(3)", kr: "Delta들은 그 문장들을 천천히 반복하면 안 돼.", en: "The Deltas shouldn't repeat the sentences slowly." },
+            { num: "7.(4)", kr: "Delta들은 그 문장들을 천천히 반복하는 게 좋지 않을까?", en: "Shouldn't the Deltas repeat the sentences slowly?" },
+            { num: "7.(5)", kr: "Delta들은 그 문장들을 얼마나 천천히 반복해야 해?", en: "How slowly should the Deltas repeat the sentences?" },
+            { num: "7.(6)", kr: "누가 그 문장들을 천천히 반복하는 게 좋아?", en: "Who should repeat the sentences slowly?" },
+
+            // 8
+            { num: "8.(1)", kr: "걔네들, 그 문제에 대해 이야기하는 게 좋아.", en: "They should talk about the problem." },
+            { num: "8.(2)", kr: "걔네 그 문제에 대해 이야기하는 게 좋을까?", en: "Should they talk about the problem?" },
+            { num: "8.(3)", kr: "걔네들, 그 문제에 대해 이야기하지 않는 게 좋아.", en: "They shouldn't talk about the problem." },
+            { num: "8.(4)", kr: "걔네 그 문제에 대해 이야기하는 게 좋지 않아?", en: "Shouldn't they talk about the problem?" },
+            { num: "8.(5)", kr: "걔네 언제 그 문제에 대해 이야기하는 게 좋아?", en: "When should they talk about the problem?" },
+            { num: "8.(6)", kr: "걔네 얼마나 빨리 그 문제에 대해 이야기해야 해?", en: "How quickly should they talk about the problem?" },
+
+            // 9
+            { num: "9.(1)", kr: "너, 식사 후에 양치하는 게 좋아.", en: "You should brush your teeth after meals." },
+            { num: "9.(2)", kr: "학생들은 자기 수업자료를 매일 복습하는 게 좋아.", en: "The students should review their materials every day." },
+            { num: "9.(3)", kr: "내가 너한테 언제 전화하는 게 좋을까?", en: "When should I call you?" },
+            { num: "9.(4)", kr: "너, 내일 우산 챙겨오는 게 좋아.", en: "You should bring an umbrella tomorrow." },
+            { num: "9.(5)", kr: "걔(여자), 일 그만두면 안 돼.", en: "She shouldn't quit her job." },
+            { num: "9.(6)", kr: "나, 항상 컴퓨터를 끄는 게 좋을까?", en: "Should I always turn off the computer?" },
+            { num: "9.(7)", kr: "걔(남자), 걔네들을 파티에 초대하면 안 돼.", en: "He shouldn't invite them to the party." },
+            { num: "9.(8)", kr: "나, 아침에 물을 얼마나 많이 마시는 게 좋아?", en: "How much water should I drink in the morning?" },
+            { num: "9.(9)", kr: "너, 절대 Steve 믿으면 안 돼.", en: "You should never believe Steve." },
+            { num: "9.(10)", kr: "내가 수업 끝나고 너를 기다리는 게 좋을까?", en: "Should I wait for you after class?" }
+        ];
+
+        let playMode = 'ladder'; // 'ladder' | 'random'
+        let studySequence = [], currentIdx = 0, isRevealed = false, selectedChunkSize = 4;
+        let isAutoMode = false;
+        
+        // ⏱ 자동 타이머 제어 변수
+        let autoGaugeTimer = null;
+        const KR_THINK_TIME = 4500; // 문제 생각 시간 (4.5초)
+        const EN_CONFIRM_TIME = 3000; // 정답 확인 시간 (3.0초)
+
+        const bannerMsgs = [
+            { icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" },
+            { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }
+        ];
+        let currentBannerIdx = 0;
+
+        function injectBanners() {
+            const template = document.getElementById('banner-template').content;
+            ['setup-banner-area', 'study-banner-area', 'finish-banner-area'].forEach(id => {
+                const area = document.getElementById(id);
+                if (area) area.appendChild(template.cloneNode(true));
+            });
+        }
+
+        function rotateBanners() {
+            currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+            const msg = bannerMsgs[currentBannerIdx];
+            document.querySelectorAll('.promo-banner').forEach(banner => {
+                const inner = banner.querySelector('.banner-inner');
+                if(!inner) return;
+                inner.style.opacity = 0;
+                inner.style.transform = "translateY(3px)";
+                setTimeout(() => {
+                    banner.querySelector('.banner-icon').innerText = msg.icon;
+                    banner.querySelector('.banner-title').innerText = msg.text;
+                    inner.style.opacity = 1;
+                    inner.style.transform = "translateY(0)";
+                }, 500);
+            });
+        }
+
+        function selectPlayMode(mode) {
+            playMode = mode;
+            const ladderTab = document.getElementById('tab-ladder');
+            const randomTab = document.getElementById('tab-random');
+            const chunkBox = document.getElementById('chunk-setting-box');
+            const modeDesc = document.getElementById('mode-desc');
+
+            if (mode === 'ladder') {
+                ladderTab.className = "py-3 rounded-xl font-black text-xs transition-all mode-btn-active shadow-sm";
+                randomTab.className = "py-3 rounded-xl font-bold text-xs text-slate-500 transition-all hover:text-slate-900";
+                chunkBox.classList.remove('hidden');
+                modeDesc.innerText = "설정한 단위만큼 누적해서 촘촘히 훈련합니다.";
+            } else {
+                randomTab.className = "py-3 rounded-xl font-black text-xs transition-all mode-btn-active shadow-sm";
+                ladderTab.className = "py-3 rounded-xl font-bold text-xs text-slate-500 transition-all hover:text-slate-900";
+                chunkBox.classList.add('hidden');
+                modeDesc.innerText = `${rawData.length}개 문항이 중복 없이 모두 끝날 때까지 무작위로 출제됩니다.`;
+            }
+        }
+
+        function updateChunkDisplay(val) {
+            selectedChunkSize = parseInt(val);
+            document.getElementById('chunk-value').innerText = val;
+        }
+
+        function toggleAutoMode() {
+            isAutoMode = !isAutoMode;
+            const btn = document.getElementById('auto-mode-btn');
+            btn.innerHTML = isAutoMode ? `<span>🟠</span> 자동 재생 ON` : `<span>⚪</span> 자동 재생 OFF`;
+            btn.className = `w-full py-4 rounded-2xl border-2 font-bold flex items-center justify-center gap-2 transition-all ${isAutoMode ? 'auto-active' : 'border-slate-100 text-slate-600'}`;
+        }
+
+        function switchModeInGame() {
+            isAutoMode = !isAutoMode;
+            updateInGameModeUI();
+            if(isAutoMode) {
+                runAutoGauge(isRevealed ? EN_CONFIRM_TIME : KR_THINK_TIME);
+            } else {
+                stopAutoGauge();
+            }
+        }
+
+        function updateInGameModeUI() {
+            const status = document.getElementById('mode-status');
+            const switchBtn = document.getElementById('mode-switch-btn');
+            if(isAutoMode) {
+                status.innerText = "자동";
+                status.className = "text-[9px] font-black px-2 py-0.5 rounded-full bg-orange-100 text-orange-600 uppercase tracking-tighter";
+                switchBtn.innerText = "수동 전환";
+            } else {
+                status.innerText = "수동";
+                status.className = "text-[9px] font-black px-2 py-0.5 rounded-full bg-slate-50 text-slate-300 uppercase tracking-tighter";
+                switchBtn.innerText = "자동 전환";
+            }
+        }
+
+        // ⏱ 타이머 게이지 바 시작 함수
+        function runAutoGauge(duration) {
+            stopAutoGauge();
+            if (!isAutoMode) return;
+
+            const container = document.getElementById('timer-gauge-container');
+            const bar = document.getElementById('timer-gauge-bar');
+            container.classList.remove('hidden');
+
+            bar.style.transition = 'none';
+            bar.style.width = '100%';
+
+            const startTime = Date.now();
+            const tickInterval = 50;
+
+            requestAnimationFrame(() => {
+                bar.style.transition = `width ${tickInterval}ms linear`;
+            });
+
+            autoGaugeTimer = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const remaining = Math.max(0, duration - elapsed);
+                const percent = (remaining / duration) * 100;
+                bar.style.width = `${percent}%`;
+
+                if (remaining <= 0) {
+                    stopAutoGauge();
+                    handleAction();
+                }
+            }, tickInterval);
+        }
+
+        // ⏱ 타이머 게이지 바 중단 함수
+        function stopAutoGauge() {
+            if (autoGaugeTimer) {
+                clearInterval(autoGaugeTimer);
+                autoGaugeTimer = null;
+            }
+            const container = document.getElementById('timer-gauge-container');
+            const bar = document.getElementById('timer-gauge-bar');
+            if (container) container.classList.add('hidden');
+            if (bar) bar.style.width = '100%';
+        }
+
+        function shuffleArray(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function startStudy() {
+            studySequence = [];
+            
+            if (playMode === 'ladder') {
+                for (let i = 0; i < rawData.length; i += selectedChunkSize) {
+                    let end = Math.min(i + selectedChunkSize - 1, rawData.length - 1);
+                    for (let j = i; j <= end; j++) {
+                        for (let k = i; k <= j; k++) studySequence.push({ data: rawData[k] });
+                    }
+                    if (end > i) {
+                        for (let j = end; j >= i; j--) {
+                            for (let k = end; k >= j; k--) studySequence.push({ data: rawData[k] });
+                        }
+                    }
+                }
+            } else {
+                const shuffled = shuffleArray(rawData);
+                studySequence = shuffled.map(item => ({ data: item }));
+            }
+
+            document.getElementById('badge-playmode').innerText = playMode === 'ladder' ? '사다리' : '랜덤';
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('study-screen').classList.remove('hidden');
+            initProgressControl();
+            updateInGameModeUI();
+            render();
+        }
+
+        function render() {
+            stopAutoGauge();
+            const item = studySequence[currentIdx];
+            
+            const prevBox = document.getElementById('prev-item-box');
+            if (currentIdx > 0) {
+                const prevItem = studySequence[currentIdx - 1];
+                document.getElementById('prev-kr').innerText = "Last: " + prevItem.data.kr;
+                document.getElementById('prev-en').innerText = prevItem.data.en;
+                prevBox.classList.remove('opacity-0');
+                prevBox.classList.add('opacity-40');
+            } else {
+                prevBox.classList.remove('opacity-40');
+                prevBox.classList.add('opacity-0');
+            }
+
+            document.getElementById('sentence-number').innerText = `No.${item.data.num}`;
+            document.getElementById('kr-box').innerText = item.data.kr;
+            document.getElementById('en-text').innerText = item.data.en;
+            document.getElementById('progress-text').innerText = `Step ${currentIdx + 1} / ${studySequence.length}`;
+            document.getElementById('progress-bar').style.width = `${((currentIdx) / (studySequence.length - 1)) * 100}%`;
+            document.getElementById('en-box').classList.add('invisible', 'opacity-0');
+            document.getElementById('main-btn').innerText = "정답 확인";
+            isRevealed = false;
+            
+            const prevBtn = document.getElementById('prev-btn');
+            if (currentIdx > 0) {
+                prevBtn.classList.remove('text-slate-300', 'pointer-events-none');
+                prevBtn.classList.add('text-slate-600');
+            } else {
+                prevBtn.classList.add('text-slate-300', 'pointer-events-none');
+                prevBtn.classList.remove('text-slate-600');
+            }
+
+            if (isAutoMode) runAutoGauge(KR_THINK_TIME);
+        }
+
+        function handleAction() {
+            stopAutoGauge();
+            if (!isRevealed) {
+                document.getElementById('en-box').classList.remove('invisible', 'opacity-0');
+                document.getElementById('main-btn').innerText = "다음 단계";
+                isRevealed = true;
+                if (isAutoMode) runAutoGauge(EN_CONFIRM_TIME);
+            } else {
+                currentIdx++;
+                if (currentIdx < studySequence.length) render();
+                else finishStudy();
+            }
+        }
+
+        function prevStep() { if (currentIdx > 0) { currentIdx--; render(); } }
+
+        function initProgressControl() {
+            const container = document.getElementById('progress-container');
+            const seek = (e) => {
+                const rect = container.getBoundingClientRect();
+                const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                let percent = x / rect.width;
+                percent = Math.max(0, Math.min(1, percent));
+                const newIdx = Math.round(percent * (studySequence.length - 1));
+                if (newIdx !== currentIdx) {
+                    currentIdx = newIdx;
+                    render();
+                }
+            };
+            container.addEventListener('mousedown', (e) => {
+                seek(e);
+                const onMouseMove = (moveEvent) => seek(moveEvent);
+                const onMouseUp = () => {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                };
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            });
+            container.addEventListener('touchstart', (e) => {
+                seek(e);
+                const onTouchMove = (moveEvent) => {
+                    moveEvent.preventDefault();
+                    seek(moveEvent);
+                };
+                const onTouchEnd = () => {
+                    document.removeEventListener('touchmove', onTouchMove);
+                    document.removeEventListener('touchend', onTouchEnd);
+                };
+                document.addEventListener('touchmove', onTouchMove, { passive: false });
+                document.addEventListener('touchend', onTouchEnd);
+            });
+        }
+
+        function finishStudy() {
+            stopAutoGauge();
+            document.getElementById('finish-ui').classList.remove('hidden');
+            document.getElementById('prev-item-box').classList.add('hidden');
+            document.getElementById('study-banner-area').style.display = 'none';
+            document.getElementById('control-panel').style.display = 'none';
+            
+            const btn = document.getElementById('cal-confirm-btn');
+            btn.onclick = function() {
+                const days = prompt("며칠 뒤에 복습 알림을 예약할까요? (1~30)", "1");
+                if (!days) return;
+                const targetDate = new Date();
+                targetDate.setDate(targetDate.getDate() + parseInt(days));
+                const dateStr = targetDate.toISOString().replace(/-|:|\.\d+/g, '').slice(0, 8);
+                const modeName = playMode === 'ladder' ? '사다리 모드' : '랜덤 모드';
+                const title = encodeURIComponent(`[복습] Delta Day 19 (${modeName})`);
+                const details = encodeURIComponent(`셀프 드릴링 복습하기!\n\n🔗 주소: ${window.location.href}`);
+                location.href = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&dates=${dateStr}T090000/${dateStr}T100000`;
+            };
+        }
+
+        window.onload = () => {
+            injectBanners();
+            setInterval(rotateBanners, 4000);
+        };
+    </script>
+</body>
+</html>
