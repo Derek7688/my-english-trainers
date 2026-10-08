@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GM2 사다리 - Day 13 자료</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700;900&display=swap');
+        body { 
+            font-family: 'Pretendard', sans-serif; 
+            touch-action: manipulation; 
+        }
+        .auto-active { 
+            background-color: #f97316 !important; 
+            color: white !important; 
+            border-color: #f97316 !important; 
+        }
+        .card-container { 
+            min-height: 430px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+        }
+        .banner-inner { transition: all 0.5s ease; }
+        #progress-container { cursor: pointer; touch-action: none; }
+        #prev-item-box { transition: all 0.5s ease; min-height: 48px; }
+        .mode-btn-active { 
+            background-color: #0f172a !important; 
+            color: white !important; 
+            border-color: #0f172a !important; 
+        }
+        
+        /* ⏱ 자동 게이지 바 */
+        #timer-gauge-bar {
+            transition: width 50ms linear;
+        }
+
+        /* 🔤 자연스러운 줄바꿈 타이포그래피 규칙 */
+        .natural-wrap {
+            word-break: keep-all;
+            overflow-wrap: break-word;
+            text-wrap: balance;
+            line-height: 1.55;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col items-center justify-start p-4">
+
+    <!-- 배너 템플릿 -->
+    <template id="banner-template">
+        <div class="promo-banner bg-white border border-blue-50 p-4 rounded-[2.2rem] mb-6 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" 
+             onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849', '_blank')">
+            <div class="banner-inner flex items-center gap-4">
+                <div class="banner-icon w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+                <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center text-left">
+                    <h3 class="banner-title font-black text-slate-800 text-[14px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+                    <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- [1] 설정 화면 -->
+    <div id="setup-screen" class="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-sm w-full border border-slate-100 my-auto text-center">
+        <span class="bg-indigo-100 text-indigo-600 px-4 py-1 rounded-full text-xs font-bold mb-3 inline-block uppercase tracking-widest">GM2 사다리</span>
+        <h1 class="text-2xl font-black text-slate-800 mb-1">Day 13 자료</h1>
+        <p id="setup-lesson-title" class="text-blue-600 font-bold text-lg italic mb-6 text-center w-full">실전 문형 Drilling! (총 53세트)</p>
+        
+        <div id="setup-banner-area"></div>
+
+        <!-- 모드 선택 영역 -->
+        <div class="mb-6 px-1">
+            <p class="text-slate-700 font-bold text-sm mb-3 text-left">학습 모드 선택</p>
+            <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-2xl">
+                <button type="button" id="tab-ladder" onclick="selectPlayMode('ladder')" class="py-3 rounded-xl font-black text-xs transition-all mode-btn-active shadow-sm">
+                    🪜 사다리 모드
+                </button>
+                <button type="button" id="tab-random" onclick="selectPlayMode('random')" class="py-3 rounded-xl font-bold text-xs text-slate-500 transition-all hover:text-slate-900">
+                    🎲 랜덤 출제 모드
+                </button>
+            </div>
+            <p id="mode-desc" class="text-[11px] font-semibold text-slate-400 mt-2 text-left px-1">설정한 단위만큼 누적해서 촘촘히 훈련합니다.</p>
+        </div>
+
+        <!-- 누적 반복 단위 (사다리 모드 전용) -->
+        <div id="chunk-setting-box" class="mb-8 px-2 text-left transition-all">
+            <div class="flex justify-between items-center mb-3">
+                <p class="text-slate-700 font-bold text-sm">누적 반복 단위</p>
+                <div class="bg-blue-600 text-white px-3 py-1 rounded-lg font-black text-xl" id="chunk-value">4</div>
+            </div>
+            <input type="range" id="chunk-slider" min="1" max="8" value="4" oninput="updateChunkDisplay(this.value)" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+        </div>
+
+        <div class="mb-6">
+            <button id="auto-mode-btn" onclick="toggleAutoMode()" class="w-full py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-600 flex items-center justify-center gap-2 transition-all hover:bg-slate-50">
+                <span id="auto-icon">⚪</span> 자동 재생 OFF
+            </button>
+        </div>
+        <button onclick="startStudy()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold text-lg shadow-xl active:scale-95 transition-all">연습 시작하기</button>
+    </div>
+
+    <!-- [2] 학습 화면 -->
+    <div id="study-screen" class="hidden w-full max-w-lg text-slate-900 mx-auto">
+        <div class="flex justify-between items-center mb-4 px-2">
+            <button onclick="location.reload()" class="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 001 1v4a1 1 0 001 1m-6 0h6" /></svg>
+            </button>
+            <div id="active-lesson-name" class="text-slate-400 font-black text-xs tracking-widest uppercase text-center flex-1">GM2 Day 13 자료</div>
+            <div class="w-10"></div>
+        </div>
+
+        <!-- 직전 학습 문장 표시 영역 -->
+        <div id="prev-item-box" class="w-full px-8 mb-2 flex flex-col items-center justify-center text-center opacity-0">
+            <p id="prev-kr" class="text-xs font-bold text-slate-400 truncate w-full"></p>
+            <p id="prev-en" class="text-xs font-black text-blue-300 truncate w-full"></p>
+        </div>
+
+        <div class="bg-white p-6 md:p-10 rounded-[3rem] shadow-2xl card-container text-center mb-6 border border-slate-50 relative overflow-hidden">
+            <!-- ⏳ 자동 타이머 게이지 바 -->
+            <div id="timer-gauge-container" class="absolute top-0 left-0 right-0 h-1.5 bg-slate-100 hidden overflow-hidden">
+                <div id="timer-gauge-bar" class="h-full bg-orange-500 w-full"></div>
+            </div>
+
+            <div class="absolute top-6 left-8 right-8 flex justify-between items-center">
+                <div class="flex items-center gap-1.5">
+                    <span id="sentence-number" class="bg-slate-100 text-slate-500 px-3 py-1 rounded-lg text-[11px] font-black uppercase tracking-tighter">No.1-1</span>
+                    <span id="speaker-badge" class="bg-indigo-600 text-white px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight">문장</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="badge-playmode" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 uppercase tracking-tighter">사다리</span>
+                    <button onclick="switchModeInGame()" id="mode-switch-btn" class="text-slate-300 font-bold text-[10px] underline decoration-slate-100 hover:text-blue-400 transition-colors">자동 모드 전환</button>
+                    <div id="mode-status" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-slate-50 text-slate-300 uppercase tracking-tighter transition-all">수동</div>
+                </div>
+            </div>
+
+            <!-- 대화 맥락 영역 -->
+            <div id="context-box" class="hidden mt-6 mb-5 p-4 bg-slate-50 border border-slate-100 rounded-2xl text-left transition-all space-y-2">
+            </div>
+
+            <!-- 현재 문제 한국어 -->
+            <div class="flex items-start justify-center gap-2.5 mb-5 px-1 mt-6">
+                <span id="role-tag" class="w-7 h-7 shrink-0 rounded-full bg-slate-900 text-white font-black text-xs flex items-center justify-center shadow-sm mt-0.5">A</span>
+                <div id="kr-box" class="text-xl md:text-2xl font-black text-slate-800 natural-wrap text-center flex-1"></div>
+            </div>
+
+            <!-- 현재 문제 영어 정답 -->
+            <div id="en-box" class="invisible opacity-0 translate-y-3 transition-all duration-300 w-full text-center">
+                <div class="h-[1px] bg-slate-100 w-16 mx-auto mb-5"></div>
+                <div id="en-text" class="text-xl md:text-2xl font-black text-blue-600 natural-wrap text-center px-2"></div>
+            </div>
+
+            <div id="finish-ui" class="hidden absolute inset-0 bg-white z-50 flex flex-col items-center justify-center p-6 text-center rounded-[3rem]">
+                <p class="text-4xl mb-4">🎉</p>
+                <h2 class="text-2xl font-black mb-2 text-slate-800">연습 완료!</h2>
+                <div id="finish-banner-area" class="w-full"></div>
+                <button id="cal-confirm-btn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg mb-2">복습 알림 예약하기</button>
+                <button onclick="location.reload()" class="text-slate-400 text-sm font-bold py-2">그냥 종료하기</button>
+            </div>
+        </div>
+
+        <div id="study-banner-area"></div>
+
+        <div id="control-panel" class="flex flex-col gap-3 mb-6">
+            <div class="flex gap-2">
+                <button onclick="prevStep()" id="prev-btn" class="w-16 bg-white border-2 border-slate-100 text-slate-300 py-5 rounded-[1.8rem] font-black text-xl active:scale-95 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <button onclick="handleAction()" id="main-btn" class="flex-1 bg-slate-900 text-white py-5 rounded-[1.8rem] font-black text-lg shadow-2xl active:scale-95 transition-all">정답 확인</button>
+            </div>
+        </div>
+
+        <div id="progress-container" class="h-4 flex items-center w-full mb-2">
+            <div class="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden pointer-events-none">
+                <div id="progress-bar" class="h-full bg-orange-500 transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+        <p id="progress-text" class="text-center text-slate-400 text-[9px] font-bold uppercase tracking-widest pb-6 pointer-events-none">Step 1 / 00</p>
+    </div>
+
+    <script>
+        const rawData = [
+            // 1번 확장 세트 (1-1 ~ 1-7)
+            { num: "1-1", isDialogue: false, kr: "<span class='text-xs font-bold text-indigo-500 block mb-1'>[평서문]</span>걔(여자)가 나를 공항으로 데려다줄 거야.", en: "She’s going to take me to the airport." },
+            { num: "1-2", isDialogue: false, kr: "<span class='text-xs font-bold text-indigo-500 block mb-1'>[의문문]</span>걔(여자)가 너를 공항으로 데려다줄 거래?", en: "Is she going to take you to the airport?" },
+            { num: "1-3", isDialogue: false, kr: "<span class='text-xs font-bold text-indigo-500 block mb-1'>[부정문]</span>걔(여자)가 나를 공항으로 데려다주지 않을 거야.", en: "She isn’t going to take me to the airport." },
+            { num: "1-4", isDialogue: false, kr: "<span class='text-xs font-bold text-indigo-500 block mb-1'>[부정의문문]</span>걔(여자)가 너 공항에 안 데려다준대?", en: "Isn’t she going to take you to the airport?" },
+            { num: "1-5", isDialogue: false, kr: "누가 널 공항으로 데려다줄 거야?", en: "Who’s going to take you to the airport?" },
+            { num: "1-6", isDialogue: false, kr: "걔(여자)가 널 언제 공항에 데려다줄 거야?", en: "When is she going to take you to the airport?" },
+            { num: "1-7", isDialogue: false, kr: "걔(여자)가 널 어디로 데려다줄 거야?", en: "Where is she going to take you?" },
+
+            // 2번 확장 세트 (2-1 ~ 2-5)
+            { num: "2-1", isDialogue: false, kr: "<span class='text-xs font-bold text-indigo-500 block mb-1'>[평서문]</span>난 숙제 한 시간 걸렸어.", en: "The homework took me an hour." },
+            { num: "2-2", isDialogue: false, kr: "<span class='text-xs font-bold text-indigo-500 block mb-1'>[의문문]</span>너 숙제 한 시간 걸렸어?", en: "Did the homework take you an hour?" },
+            { num: "2-3", isDialogue: false, kr: "<span class='text-xs font-bold text-indigo-500 block mb-1'>[부정문]</span>난 숙제 한 시간 안 걸렸어.", en: "The homework didn’t take me an hour." },
+            { num: "2-4", isDialogue: false, kr: "<span class='text-xs font-bold text-indigo-500 block mb-1'>[부정의문문]</span>너 숙제 한 시간 안 걸렸어?", en: "Didn’t the homework take you an hour?" },
+            { num: "2-5", isDialogue: false, kr: "너 숙제 얼마나 오래 걸렸어?", en: "How long did the homework take you?" },
+
+            // 3번 확장 세트 (3-1 ~ 3-5)
+            { num: "3-1", isDialogue: false, kr: "<span class='text-xs font-bold text-indigo-500 block mb-1'>[평서문]</span>나 PSE 도착하는 데에 50분 걸려.", en: "It takes me 50 minutes to get to PSE." },
+            { num: "3-2", isDialogue: false, kr: "<span class='text-xs font-bold text-indigo-500 block mb-1'>[의문문]</span>너 PSE 도착하는 데에 50분 걸려?", en: "Does it take you 50 minutes to get to PSE?" },
+            { num: "3-3", isDialogue: false, kr: "<span class='text-xs font-bold text-indigo-500 block mb-1'>[부정문]</span>나 PSE 도착하는 데에 50분 안 걸려.", en: "It doesn’t take me 50 minutes to get to PSE." },
+            { num: "3-4", isDialogue: false, kr: "<span class='text-xs font-bold text-indigo-500 block mb-1'>[부정의문문]</span>너 PSE 도착하는 데에 50분 안 걸려?", en: "Doesn’t it take you 50 minutes to get to PSE?" },
+            { num: "3-5", isDialogue: false, kr: "너 PSE 도착하는 데에 얼마나 걸려?", en: "How long does it take you to get to PSE?" },
+
+            // 4번 확장 세트 (4-1 ~ 4-5)
+            { num: "4-1", isDialogue: false, kr: "<span class='text-xs font-bold text-indigo-500 block mb-1'>[평서문]</span>여자한테 데이트 신청하는 건 용기가 필요해.", en: "It takes courage to ask out a girl." },
+            { num: "4-2", isDialogue: false, kr: "<span class='text-xs font-bold text-indigo-500 block mb-1'>[의문문]</span>여자한테 데이트 신청하는 건 용기가 필요해?", en: "Does it take courage to ask out a girl?" },
+            { num: "4-3", isDialogue: false, kr: "<span class='text-xs font-bold text-indigo-500 block mb-1'>[부정문]</span>여자한테 데이트 신청하는 건 용기가 필요한 게 아니야.", en: "It doesn’t take courage to ask out a girl." },
+            { num: "4-4", isDialogue: false, kr: "<span class='text-xs font-bold text-indigo-500 block mb-1'>[부정의문문]</span>여자한테 데이트 신청하는 건 용기가 필요한 거 아니야?", en: "Doesn’t it take courage to ask out a girl?" },
+            { num: "4-5", isDialogue: false, kr: "여자한테 데이트 신청하려면 뭐가 필요해?", en: "What does it take to ask out a girl?" },
+
+            // 5 ~ 6 (단일 문장)
+            { num: "5", isDialogue: false, kr: "실은 장모님을 공항에 데려다 드려야 돼.", en: "The thing is I have to take my mother-in-law to the airport." },
+            { num: "6", isDialogue: false, kr: "나 약국에 데려다줄래? 나 체한 것 같아.", en: "Could you take me to the pharmacy? I think I have indigestion." },
+
+            // 7 ~ 9 (대화형)
+            {
+                num: "7", isDialogue: true,
+                turns: [
+                    { role: "A", kr: "너 어디 있었어?", en: "Where were you?" },
+                    { role: "B", kr: "내 군대 친구가 손목에 금 갔어. 걔를 병원에 데려다 줘야 했어.", en: "My army buddy fractured his wrist. I had to take him to the hospital." }
+                ]
+            },
+            {
+                num: "8", isDialogue: true,
+                turns: [
+                    { role: "A", kr: "날 집에 데려다줄 순 없겠지?", en: "You couldn't take me home, could you?" },
+                    { role: "B", kr: "너 또 취했지?<br>너 진짜로 술 줄이는 게 좋을 것 같다.", en: "You're drunk again, aren't you?<br>I think you really should cut down on drinking." }
+                ]
+            },
+            {
+                num: "9", isDialogue: true,
+                turns: [
+                    { role: "A", kr: "내가 남자친구를 걔 생일에 어디로 데려가는 게 좋을까?", en: "Where should I take my boyfriend for his birthday?" },
+                    { role: "B", kr: "온천에 데려가는 거 어때? 재밌을 것 같은데!", en: "How about taking him to a hot spring? I think it’ll be fun!" }
+                ]
+            },
+
+            // 10 ~ 31 (단일 문장)
+            { num: "10", isDialogue: false, kr: "나 숙제 2시간 걸렸어.", en: "The homework took me 2 hours." },
+            { num: "11", isDialogue: false, kr: "이 과제 너한테 1시간 반 정도 걸릴 거 같아.", en: "I think this assignment will take you around an hour and a half." },
+            { num: "12", isDialogue: false, kr: "강의가 걔(남자)한테 1시간 걸리진 않을 것 같아.", en: "I don't think the lecture will take him an hour." },
+            { num: "13", isDialogue: false, kr: "너, 발표 얼마나 오래 걸릴 거야?", en: "How long will the presentation take you?" },
+            { num: "14", isDialogue: false, kr: "우리한테 프로젝트가 그렇게 오래 걸린 건 다 네 탓이야!", en: "It's all your fault (that) the project took us [that / so] long!" },
+            { num: "15", isDialogue: false, kr: "뭐가 그렇게 오래 걸렸어? / 왜 그렇게 오래 걸렸어?", en: "What took you [so long / that long / such a long time]?" },
+            { num: "16", isDialogue: false, kr: "넌 (그게) 왜 그렇게 오래 걸렸어?", en: "Why did it take you [so long / that long / such a long time]?" },
+            { num: "17", isDialogue: false, kr: "네 졸업논문 너한테 얼마나 오래 걸렸어?", en: "How long did your graduation thesis take you?" },
+            { num: "18", isDialogue: false, kr: "너 왜 잠드는 데 그렇게 오래 걸려?", en: "Why does it take you [so long / that long / such a long time] to fall asleep?" },
+            { num: "19", isDialogue: false, kr: "너 대학교 졸업하는 게 왜 그렇게 오래 걸렸어?", en: "Why did it take you [so long / that long / such a long time] to graduate from university?" },
+            { num: "20", isDialogue: false, kr: "너 준비하는 게 왜 그렇게 오래 걸리고 있어?", en: "Why is it taking you [so long / that long / such a long time] to get ready?" },
+            { num: "21", isDialogue: false, kr: "난 빨래 개는 거 오래 안 걸려.", en: "It doesn’t take me [a long time / long] to fold the laundry." },
+            { num: "22", isDialogue: false, kr: "너 화장 지우는 데에 오래 걸리니?", en: "Does it take you [a long time / long] to take off your makeup?" },
+            { num: "23", isDialogue: false, kr: "난 아침에 준비하는데 한 시간 반 정도 걸려.", en: "It takes me around an hour and a half to get ready in the morning." },
+            { num: "24", isDialogue: false, kr: "걔(남자)는 취직하는데 1년 정도 걸렸어.", en: "It took him around a year to get a job." },
+            { num: "25", isDialogue: false, kr: "실은 나 여기 오는 데 30분밖에 안 걸렸어.", en: "The thing is it only took me half an hour to get here." },
+            { num: "26", isDialogue: false, kr: "너 볼일 보는 게 왜 그렇게 오래 걸려?", en: "Why does it take you [so long / that long / such a long time] to do your business?" },
+            { num: "27", isDialogue: false, kr: "넌 여자친구 만드는 게 왜 그렇게 오래 걸리고 있어?", en: "Why is it taking you [so long / that long / such a long time] to get a girlfriend?" },
+            { num: "28", isDialogue: false, kr: "너 여기 오는 게 왜 이렇게 오래 걸렸어?", en: "Why did it take you [so long / this long / such a long time] to get here?" },
+            { num: "29", isDialogue: false, kr: "언어를 배우는 건 끈기가 들어. (필요해)", en: "It takes determination to learn a language." },
+            { num: "30", isDialogue: false, kr: "애완동물을 키우려면 인내심이 들어. (필요해)", en: "It takes patience to raise a pet." },
+            { num: "31", isDialogue: false, kr: "난 너한테 좋은 선물을 찾는 데 많은 노력이 들었어.", en: "It took me a lot of effort to find you a great gift." },
+
+            // 32번 (3단 핑퐁 대화: A -> B -> A)
+            {
+                num: "32", isDialogue: true,
+                turns: [
+                    { role: "A", kr: "갈 시간인 것 같아.", en: "I think it's time to leave." },
+                    { role: "B", kr: "거기 가는 데 얼마나 오래 걸릴 거야?", en: "How long will it take to get there?" },
+                    { role: "A", kr: "아마 2시간 반쯤 걸릴 거야.", en: "It'll probably take around 2 and a half hours." }
+                ]
+            },
+
+            // 33 ~ 35 (대화형)
+            {
+                num: "33", isDialogue: true,
+                turns: [
+                    { role: "A", kr: "네 여자친구는 화장하는 데 얼마나 걸려?", en: "How long does it take your girlfriend to put on makeup?" },
+                    { role: "B", kr: "화장하는데 20분 정도 걸려.", en: "It takes her around 20 minutes to put on makeup." }
+                ]
+            },
+            {
+                num: "34", isDialogue: true,
+                turns: [
+                    { role: "A", kr: "너 왜 유학 안 가기로 결정했어?", en: "Why did you decide not to study abroad?" },
+                    { role: "B", kr: "유학하는 게 시간하고 돈이 많이 들어서.", en: "It’s because it takes a lot of time and money to study abroad." }
+                ]
+            },
+            {
+                num: "35", isDialogue: true,
+                turns: [
+                    { role: "A", kr: "나 탄수화물을 줄일까 고민 중이야.<br>뱃살을 없애고 싶어.", en: "I'm thinking about cutting down on carbs.<br>I want to get rid of my spare tire." },
+                    { role: "B", kr: "쉽진 않을 거야, 근데 넌 분명 할 수 있어. 힘내!", en: "It won't be easy, but I'm sure you can do it. Hang in there!" }
+                ]
+            }
+        ];
+
+        let playMode = 'ladder'; // 'ladder' | 'random'
+        let studySequence = [], currentIdx = 0, selectedChunkSize = 4;
+        let isAutoMode = false;
+        
+        // subStep 관리:
+        // 단일 문장: 0 (문제) -> 1 (정답 확인)
+        // 대화문: turnIdx = Math.floor(subStep / 2), stepInTurn = subStep % 2 (0: 문제, 1: 정답)
+        let subStep = 0;
+
+        let autoGaugeTimer = null;
+        const THINK_TIME = 4500;
+        const CONFIRM_TIME = 2800;
+
+        const bannerMsgs = [
+            { icon: "🔥", text: "하루 1분 투자! 실전 패턴 Pop!" },
+            { icon: "🎬", text: "미드 보면서 실전 영어 패턴도 Pop!" }
+        ];
+        let currentBannerIdx = 0;
+
+        function injectBanners() {
+            const template = document.getElementById('banner-template').content;
+            ['setup-banner-area', 'study-banner-area', 'finish-banner-area'].forEach(id => {
+                const area = document.getElementById(id);
+                if (area) area.appendChild(template.cloneNode(true));
+            });
+        }
+
+        function rotateBanners() {
+            currentBannerIdx = (currentBannerIdx + 1) % bannerMsgs.length;
+            const msg = bannerMsgs[currentBannerIdx];
+            document.querySelectorAll('.promo-banner').forEach(banner => {
+                const inner = banner.querySelector('.banner-inner');
+                if(!inner) return;
+                inner.style.opacity = 0;
+                inner.style.transform = "translateY(3px)";
+                setTimeout(() => {
+                    banner.querySelector('.banner-icon').innerText = msg.icon;
+                    banner.querySelector('.banner-title').innerText = msg.text;
+                    inner.style.opacity = 1;
+                    inner.style.transform = "translateY(0)";
+                }, 500);
+            });
+        }
+
+        function selectPlayMode(mode) {
+            playMode = mode;
+            const ladderTab = document.getElementById('tab-ladder');
+            const randomTab = document.getElementById('tab-random');
+            const chunkBox = document.getElementById('chunk-setting-box');
+            const modeDesc = document.getElementById('mode-desc');
+
+            if (mode === 'ladder') {
+                ladderTab.className = "py-3 rounded-xl font-black text-xs transition-all mode-btn-active shadow-sm";
+                randomTab.className = "py-3 rounded-xl font-bold text-xs text-slate-500 transition-all hover:text-slate-900";
+                chunkBox.classList.remove('hidden');
+                modeDesc.innerText = "설정한 단위만큼 누적해서 촘촘히 훈련합니다.";
+            } else {
+                randomTab.className = "py-3 rounded-xl font-black text-xs transition-all mode-btn-active shadow-sm";
+                ladderTab.className = "py-3 rounded-xl font-bold text-xs text-slate-500 transition-all hover:text-slate-900";
+                chunkBox.classList.add('hidden');
+                modeDesc.innerText = `${rawData.length}개 세트가 중복 없이 모두 끝날 때까지 무작위로 출제됩니다.`;
+            }
+        }
+
+        function updateChunkDisplay(val) {
+            selectedChunkSize = parseInt(val);
+            document.getElementById('chunk-value').innerText = val;
+        }
+
+        function toggleAutoMode() {
+            isAutoMode = !isAutoMode;
+            const btn = document.getElementById('auto-mode-btn');
+            btn.innerHTML = isAutoMode ? `<span>🟠</span> 자동 재생 ON` : `<span>⚪</span> 자동 재생 OFF`;
+            btn.className = `w-full py-4 rounded-2xl border-2 font-bold flex items-center justify-center gap-2 transition-all ${isAutoMode ? 'auto-active' : 'border-slate-100 text-slate-600'}`;
+        }
+
+        function switchModeInGame() {
+            isAutoMode = !isAutoMode;
+            updateInGameModeUI();
+            if(isAutoMode) {
+                const isAnswerShowing = (subStep % 2 === 1);
+                runAutoGauge(isAnswerShowing ? CONFIRM_TIME : THINK_TIME);
+            } else {
+                stopAutoGauge();
+            }
+        }
+
+        function updateInGameModeUI() {
+            const status = document.getElementById('mode-status');
+            const switchBtn = document.getElementById('mode-switch-btn');
+            if(isAutoMode) {
+                status.innerText = "자동";
+                status.className = "text-[9px] font-black px-2 py-0.5 rounded-full bg-orange-100 text-orange-600 uppercase tracking-tighter";
+                switchBtn.innerText = "수동 전환";
+            } else {
+                status.innerText = "수동";
+                status.className = "text-[9px] font-black px-2 py-0.5 rounded-full bg-slate-50 text-slate-300 uppercase tracking-tighter";
+                switchBtn.innerText = "자동 전환";
+            }
+        }
+
+        function runAutoGauge(duration) {
+            stopAutoGauge();
+            if (!isAutoMode) return;
+
+            const container = document.getElementById('timer-gauge-container');
+            const bar = document.getElementById('timer-gauge-bar');
+            container.classList.remove('hidden');
+
+            bar.style.transition = 'none';
+            bar.style.width = '100%';
+
+            const startTime = Date.now();
+            const tickInterval = 50;
+
+            requestAnimationFrame(() => {
+                bar.style.transition = `width ${tickInterval}ms linear`;
+            });
+
+            autoGaugeTimer = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const remaining = Math.max(0, duration - elapsed);
+                const percent = (remaining / duration) * 100;
+                bar.style.width = `${percent}%`;
+
+                if (remaining <= 0) {
+                    stopAutoGauge();
+                    handleAction();
+                }
+            }, tickInterval);
+        }
+
+        function stopAutoGauge() {
+            if (autoGaugeTimer) {
+                clearInterval(autoGaugeTimer);
+                autoGaugeTimer = null;
+            }
+            const container = document.getElementById('timer-gauge-container');
+            const bar = document.getElementById('timer-gauge-bar');
+            if (container) container.classList.add('hidden');
+            if (bar) bar.style.width = '100%';
+        }
+
+        function shuffleArray(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function startStudy() {
+            studySequence = [];
+            
+            if (playMode === 'ladder') {
+                for (let i = 0; i < rawData.length; i += selectedChunkSize) {
+                    let end = Math.min(i + selectedChunkSize - 1, rawData.length - 1);
+                    for (let j = i; j <= end; j++) {
+                        for (let k = i; k <= j; k++) studySequence.push({ data: rawData[k] });
+                    }
+                    if (end > i) {
+                        for (let j = end; j >= i; j--) {
+                            for (let k = end; k >= j; k--) studySequence.push({ data: rawData[k] });
+                        }
+                    }
+                }
+            } else {
+                const shuffled = shuffleArray(rawData);
+                studySequence = shuffled.map(item => ({ data: item }));
+            }
+
+            currentIdx = 0;
+            subStep = 0;
+            document.getElementById('badge-playmode').innerText = playMode === 'ladder' ? '사다리' : '랜덤';
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('study-screen').classList.remove('hidden');
+            initProgressControl();
+            updateInGameModeUI();
+            render();
+        }
+
+        function render() {
+            stopAutoGauge();
+            const item = studySequence[currentIdx].data;
+            
+            // 직전 학습한 문제 요약
+            const prevBox = document.getElementById('prev-item-box');
+            if (currentIdx > 0) {
+                const prevItem = studySequence[currentIdx - 1].data;
+                if (prevItem.isDialogue) {
+                    const lastTurn = prevItem.turns[prevItem.turns.length - 1];
+                    document.getElementById('prev-kr').innerText = `Last: [${lastTurn.role}] ${lastTurn.kr.replace(/<[^>]*>/g, ' ')}`;
+                    document.getElementById('prev-en').innerText = `[${lastTurn.role}] ${lastTurn.en.replace(/<[^>]*>/g, ' ')}`;
+                } else {
+                    document.getElementById('prev-kr').innerText = `Last: ${prevItem.kr.replace(/<[^>]*>/g, ' ')}`;
+                    document.getElementById('prev-en').innerText = prevItem.en.replace(/<[^>]*>/g, ' ');
+                }
+                prevBox.classList.remove('opacity-0');
+                prevBox.classList.add('opacity-40');
+            } else {
+                prevBox.classList.remove('opacity-40');
+                prevBox.classList.add('opacity-0');
+            }
+
+            document.getElementById('sentence-number').innerText = `No.${item.num}`;
+            document.getElementById('progress-text').innerText = `Set ${currentIdx + 1} / ${studySequence.length}`;
+            document.getElementById('progress-bar').style.width = `${((currentIdx) / (studySequence.length - 1)) * 100}%`;
+
+            const prevBtn = document.getElementById('prev-btn');
+            if (currentIdx > 0 || subStep > 0) {
+                prevBtn.classList.remove('text-slate-300', 'pointer-events-none');
+                prevBtn.classList.add('text-slate-600');
+            } else {
+                prevBtn.classList.add('text-slate-300', 'pointer-events-none');
+                prevBtn.classList.remove('text-slate-600');
+            }
+
+            const speakerBadge = document.getElementById('speaker-badge');
+            const roleTag = document.getElementById('role-tag');
+            const krBox = document.getElementById('kr-box');
+            const enBox = document.getElementById('en-box');
+            const enText = document.getElementById('en-text');
+            const contextBox = document.getElementById('context-box');
+            const mainBtn = document.getElementById('main-btn');
+
+            if (item.isDialogue) {
+                const turns = item.turns;
+                const turnIdx = Math.floor(subStep / 2);
+                const isAnswer = (subStep % 2 === 1);
+                const currentTurn = turns[turnIdx];
+
+                roleTag.classList.remove('hidden');
+                roleTag.innerText = currentTurn.role;
+
+                if (currentTurn.role === 'A') {
+                    roleTag.className = "w-7 h-7 shrink-0 rounded-full bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-sm mt-0.5";
+                    speakerBadge.innerText = `A 대화 (${turnIdx + 1}/${turns.length})`;
+                    speakerBadge.className = "bg-blue-600 text-white px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight";
+                } else {
+                    roleTag.className = "w-7 h-7 shrink-0 rounded-full bg-orange-500 text-white font-black text-xs flex items-center justify-center shadow-sm mt-0.5";
+                    speakerBadge.innerText = `B 답변 (${turnIdx + 1}/${turns.length})`;
+                    speakerBadge.className = "bg-orange-500 text-white px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight";
+                }
+
+                // 이전 대화 맥락 쌓기
+                if (turnIdx > 0) {
+                    contextBox.innerHTML = turns.slice(0, turnIdx).map(t => {
+                        const isA = (t.role === 'A');
+                        return `<div>
+                            <p class="text-xs md:text-sm font-bold ${isA ? 'text-slate-500' : 'text-slate-600'} natural-wrap"><span class="font-black text-slate-400">${t.role}:</span> ${t.kr}</p>
+                            <p class="text-xs md:text-sm font-black ${isA ? 'text-blue-500' : 'text-orange-500'} natural-wrap"><span class="font-bold opacity-60">${t.role}:</span> ${t.en}</p>
+                        </div>`;
+                    }).join('');
+                    contextBox.classList.remove('hidden');
+                } else {
+                    contextBox.classList.add('hidden');
+                    contextBox.innerHTML = '';
+                }
+
+                krBox.innerHTML = currentTurn.kr;
+                enText.innerHTML = currentTurn.en;
+
+                if (!isAnswer) {
+                    enBox.classList.add('invisible', 'opacity-0');
+                    mainBtn.innerText = `${currentTurn.role} 정답 확인`;
+                    if (isAutoMode) runAutoGauge(THINK_TIME);
+                } else {
+                    enBox.classList.remove('invisible', 'opacity-0');
+                    const isLastTurn = (turnIdx === turns.length - 1);
+                    mainBtn.innerText = isLastTurn ? "다음 세트 →" : "다음 대화 풀기 →";
+                    if (isAutoMode) runAutoGauge(CONFIRM_TIME);
+                }
+            } else {
+                contextBox.classList.add('hidden');
+                roleTag.classList.add('hidden');
+                speakerBadge.innerText = "문장";
+                speakerBadge.className = "bg-indigo-600 text-white px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight";
+                
+                krBox.innerHTML = item.kr;
+                enText.innerHTML = item.en;
+
+                if (subStep === 0) {
+                    enBox.classList.add('invisible', 'opacity-0');
+                    mainBtn.innerText = "정답 확인";
+                    if (isAutoMode) runAutoGauge(THINK_TIME);
+                } else {
+                    enBox.classList.remove('invisible', 'opacity-0');
+                    mainBtn.innerText = "다음 세트 →";
+                    if (isAutoMode) runAutoGauge(CONFIRM_TIME);
+                }
+            }
+        }
+
+        function handleAction() {
+            stopAutoGauge();
+            const item = studySequence[currentIdx].data;
+
+            if (item.isDialogue) {
+                const totalSubSteps = item.turns.length * 2;
+                if (subStep < totalSubSteps - 1) {
+                    subStep++;
+                    render();
+                } else {
+                    currentIdx++;
+                    subStep = 0;
+                    if (currentIdx < studySequence.length) render();
+                    else finishStudy();
+                }
+            } else {
+                if (subStep === 0) {
+                    subStep = 1;
+                    render();
+                } else {
+                    currentIdx++;
+                    subStep = 0;
+                    if (currentIdx < studySequence.length) render();
+                    else finishStudy();
+                }
+            }
+        }
+
+        function prevStep() {
+            if (subStep > 0) {
+                subStep--;
+                render();
+            } else if (currentIdx > 0) {
+                currentIdx--;
+                const prevItem = studySequence[currentIdx].data;
+                subStep = prevItem.isDialogue ? (prevItem.turns.length * 2 - 1) : 1;
+                render();
+            }
+        }
+
+        function initProgressControl() {
+            const container = document.getElementById('progress-container');
+            const seek = (e) => {
+                const rect = container.getBoundingClientRect();
+                const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                let percent = x / rect.width;
+                percent = Math.max(0, Math.min(1, percent));
+                const newIdx = Math.round(percent * (studySequence.length - 1));
+                if (newIdx !== currentIdx) {
+                    currentIdx = newIdx;
+                    subStep = 0;
+                    render();
+                }
+            };
+            container.addEventListener('mousedown', (e) => {
+                seek(e);
+                const onMouseMove = (moveEvent) => seek(moveEvent);
+                const onMouseUp = () => {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                };
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            });
+            container.addEventListener('touchstart', (e) => {
+                seek(e);
+                const onTouchMove = (moveEvent) => {
+                    moveEvent.preventDefault();
+                    seek(moveEvent);
+                };
+                const onTouchEnd = () => {
+                    document.removeEventListener('touchmove', onTouchMove);
+                    document.removeEventListener('touchend', onTouchEnd);
+                };
+                document.addEventListener('touchmove', onTouchMove, { passive: false });
+                document.addEventListener('touchend', onTouchEnd);
+            });
+        }
+
+        function finishStudy() {
+            stopAutoGauge();
+            document.getElementById('finish-ui').classList.remove('hidden');
+            document.getElementById('prev-item-box').classList.add('hidden');
+            document.getElementById('study-banner-area').style.display = 'none';
+            document.getElementById('control-panel').style.display = 'none';
+            
+            const btn = document.getElementById('cal-confirm-btn');
+            btn.onclick = function() {
+                const days = prompt("며칠 뒤에 복습 알림을 예약할까요? (1~30)", "1");
+                if (!days) return;
+                const targetDate = new Date();
+                targetDate.setDate(targetDate.getDate() + parseInt(days));
+                const dateStr = targetDate.toISOString().replace(/-|:|\.\d+/g, '').slice(0, 8);
+                const modeName = playMode === 'ladder' ? '사다리 모드' : '랜덤 모드';
+                const title = encodeURIComponent(`[복습] GM2 Day 13 (${modeName})`);
+                const details = encodeURIComponent(`셀프 드릴링 복습하기!\n\n🔗 주소: ${window.location.href}`);
+                location.href = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&dates=${dateStr}T090000/${dateStr}T100000`;
+            };
+        }
+
+        window.onload = () => {
+            injectBanners();
+            setInterval(rotateBanners, 4000);
+        };
+    </script>
+</body>
+</html>
