@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PSE 스파르타 | be 동사 무한 드릴링</title>
+<style>
+:root{--ink:#17231e;--muted:#748078;--paper:#f5f5ef;--card:#fff;--green:#c8f169;--line:#e6e9df;--accent:#2c4939}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,Pretendard,"Noto Sans KR",system-ui,sans-serif;min-height:100vh}
+button{font:inherit;cursor:pointer;border:0}button:focus-visible{outline:3px solid #8bb63c;outline-offset:3px}
+.wrap{width:min(100%,760px);margin:auto;padding:24px 18px 42px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:26px}
+.brand{font-size:12px;letter-spacing:.18em;font-weight:900;color:var(--accent)}.pill{border:1px solid #dce1d5;border-radius:999px;padding:8px 12px;color:var(--muted);font-size:11px;font-weight:800}
+h1{font-size:clamp(30px,7vw,48px);line-height:1.08;letter-spacing:-.055em;margin:0;font-weight:950}.subtitle{color:var(--muted);font-size:14px;margin:12px 0 24px}
+.setup,.study{background:var(--card);border:1px solid var(--line);border-radius:28px;padding:clamp(20px,5vw,34px);box-shadow:0 14px 40px #293b2510}
+.section-label{font-size:11px;font-weight:900;letter-spacing:.12em;color:var(--muted);margin-bottom:12px}
+.segment{display:flex;gap:8px;background:#f0f2eb;padding:5px;border-radius:15px;margin-bottom:20px}.segment button{flex:1;padding:12px 8px;border-radius:11px;background:transparent;color:#69736a;font-size:13px;font-weight:800}.segment button.active{background:var(--accent);color:white;box-shadow:0 4px 10px #182b2020}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 0;border-top:1px solid var(--line);font-size:14px;font-weight:750}.switch{background:#e7eae2;color:#69736a;border-radius:999px;padding:8px 13px;font-size:12px;font-weight:900;min-width:72px}.switch.on{background:var(--green);color:#26351c}
+.primary{width:100%;background:var(--green);color:#20301a;border-radius:16px;padding:17px;font-size:16px;font-weight:950;margin-top:18px;box-shadow:0 7px 0 #a9d64e}.primary:active{transform:translateY(2px);box-shadow:0 5px 0 #a9d64e}
+.study{display:none;padding:0;overflow:hidden}.study-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}.back{background:#f1f3ec;border-radius:12px;padding:10px 12px;font-size:12px;font-weight:850}.count{font-size:12px;font-weight:900;color:var(--muted);font-variant-numeric:tabular-nums}
+.progress{height:12px;background:#eef0e9;position:relative;cursor:pointer;touch-action:none;padding:4px 0}
+.progress-track{height:4px;background:#e5e9df;border-radius:99px;position:relative;margin:0 14px}
+.bar{height:4px;background:#a5d642;width:0%;border-radius:99px;position:relative;transition:width .12s}
+.bar::after{content:"";position:absolute;right:-6px;top:-4px;width:12px;height:12px;background:#2c4939;border:2px solid #fff;border-radius:50%;box-shadow:0 1px 4px #0002}
+.progress-hit{position:absolute;inset:-10px -14px;cursor:ew-resize}
+.progress-meta{display:flex;justify-content:space-between;padding:8px 20px 0;color:#8a9487;font-size:11px;font-weight:850;font-variant-numeric:tabular-nums}
+.celebrate{position:fixed;inset:0;background:#17231ecc;z-index:50;display:none;align-items:center;justify-content:center;padding:20px}
+.celebrate.show{display:flex}.celebrate-card{background:#fffdf7;width:min(100%,420px);border-radius:28px;padding:34px 25px;text-align:center;box-shadow:0 24px 90px #0004;animation:pop .28s ease-out}
+.celebrate-icon{font-size:54px;margin-bottom:14px}.celebrate h2{font-size:29px;line-height:1.2;letter-spacing:-.04em;margin:0 0 12px;font-weight:950}.celebrate p{font-size:15px;line-height:1.7;color:#667064;margin:0 0 24px}
+@keyframes pop{from{transform:translateY(12px) scale(.96);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.question{padding:clamp(26px,7vw,54px) clamp(20px,6vw,46px) 26px;text-align:center;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.num{font-size:11px;font-weight:950;color:#849083;letter-spacing:.13em;margin-bottom:24px}.kr{font-size:clamp(27px,6vw,40px);line-height:1.45;font-weight:900;letter-spacing:-.04em;word-break:keep-all}
+.hint{margin-top:22px;background:#f1f5e9;border:1px solid #e0e9d0;border-radius:16px;padding:16px 20px;max-width:100%;width:min(100%,520px);font-size:clamp(22px,5.2vw,30px);font-weight:900;line-height:1.35;color:#344a25;word-break:break-word;min-height:92px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}.hint strong{font-size:11px;letter-spacing:.12em;display:block;color:#7a8e5b;margin-bottom:2px}
+.answer-slot{height:148px;min-height:148px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding:12px 20px;border-top:1px dashed #dfe4d8;overflow:hidden}.answer{border-top:0;padding:0;text-align:center;display:block;visibility:hidden;opacity:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .15s}.answer.show{visibility:visible;opacity:1}
+.answer{border-top:1px dashed #dfe4d8;padding:24px 20px 28px;text-align:center;display:none}.answer.show{display:block}.en{font-size:clamp(21px,5vw,29px);font-weight:900;line-height:1.45;word-break:keep-all;color:#2c4939}.answer-label{font-size:10px;letter-spacing:.12em;color:#98a195;font-weight:900;margin-bottom:8px}
+.controls{display:grid;grid-template-columns:58px 1fr 58px;gap:8px;padding:0 18px 18px}.control{border-radius:15px;min-height:54px;font-weight:900}.secondary{background:#f0f2eb;color:#3e4b40}.main-action{background:var(--accent);color:white}.control:disabled{opacity:.3;cursor:default}
+.footnote{text-align:center;color:#9aa196;font-size:11px;margin:18px 0 0}
+@media(min-width:600px){.wrap{padding-top:34px}.question{min-height:340px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top"><div class="brand">PSE / SPARTA</div><div class="pill">250 SENTENCE DRILL</div></div>
+  <h1>PSE 스파르타<br>be 동사 무한 드릴링</h1>
+  <p class="subtitle">한국어를 보고 영어로 말해 보세요. 정답은 원할 때 확인할 수 있습니다.</p>
+  <section class="setup" id="setup">
+    <div class="section-label">DRILL SETTINGS</div>
+    <div class="section-label">문제 출제 방식</div>
+    <div class="segment"><button id="ordered" class="active" onclick="setOrder('ordered')">순서대로</button><button id="random" onclick="setOrder('random')">랜덤</button></div>
+    <div class="toggle-row"><span>보어 힌트 표시</span><button id="hintToggle" class="switch on" onclick="toggleHint()">ON</button></div>
+    <p style="font-size:12px;color:var(--muted);line-height:1.7;margin:6px 0 0">보어 힌트는 한국어 문제와 함께 표시되며, 연습 중에도 언제든 켜고 끌 수 있습니다.</p>
+    <button class="primary" onclick="start()">250문장 연습 시작 →</button>
+  </section>
+  <section class="study" id="study">
+    <div class="study-head"><button class="back" onclick="goHome()">← 처음으로</button><div style="display:flex;align-items:center;gap:9px"><span style="font-size:11px;font-weight:850;color:#748078">HINT</span><button id="hintToggleStudy" class="switch on" onclick="toggleHint()">ON</button><div class="count" id="count">001 / 250</div></div></div>
+    <div class="progress" id="progress" role="slider" aria-label="문제 진행 위치" aria-valuemin="1" aria-valuemax="250" aria-valuenow="1" tabindex="0">
+      <div class="progress-track"><div class="bar" id="bar"></div><div class="progress-hit" id="progressHit"></div></div>
+    </div>
+    <div class="progress-meta"><span id="progressLabel">진행 1 / 250</span><span>막대를 움직여 문제 이동</span></div>
+    <div class="question">
+      <div class="num" id="num">SENTENCE 001</div>
+      <div class="kr" id="kr"></div>
+      <div class="hint" id="hint"><strong>HINT</strong><span id="hintText"></span></div>
+    </div>
+    <div class="answer-slot"><div class="answer" id="answer"><div class="answer-label">MODEL ANSWER</div><div class="en" id="en"></div></div></div>
+    <div class="controls" style="grid-template-columns:58px 1fr">
+      <button class="control secondary" id="prev" onclick="move(-1)" aria-label="이전 문제">← 이전</button>
+      <button class="control main-action" id="reveal" onclick="reveal()">정답 확인</button>
+    </div>
+  </section>
+  <p class="footnote">PSE SPARTA · SAY IT OUT LOUD</p>
+</main>
+<div class="celebrate" id="celebrate" role="dialog" aria-modal="true" aria-labelledby="celebrateTitle">
+  <div class="celebrate-card">
+    <div class="celebrate-icon">🎉🏆🎉</div>
+    <h2 id="celebrateTitle">정말 수고했어요!</h2>
+    <p id="celebrateMessage">250개 문장 연습을 모두 마쳤어요.<br>꾸준히 말한 만큼 영어가 쌓이고 있어요!</p>
+    <button class="primary" onclick="closeCelebration()">처음으로 돌아가기</button>
+  </div>
+</div>
+<script>
+const items = [{"num": 1, "kr": "난 걱정 돼.", "en": "I’m worried."}, {"num": 2, "kr": "너는 바빠.", "en": "You are busy."}, {"num": 3, "kr": "걔(여자)는 긴장했어.", "en": "She is nervous."}, {"num": 4, "kr": "걔(남자)는 자신감이 있어.", "en": "He is confident."}, {"num": 5, "kr": "우리는 준비됐어.", "en": "We are ready."}, {"num": 6, "kr": "걔네들은 시간이 돼.", "en": "They are available."}, {"num": 7, "kr": "깨끗해.", "en": "It is clean."}, {"num": 8, "kr": "이건 쓸모 있어.", "en": "This is useful."}, {"num": 9, "kr": "이것들은 중요해.", "en": "These are important."}, {"num": 10, "kr": "그건 맞아.", "en": "That is correct."}, {"num": 11, "kr": "저것들은 달라.", "en": "Those are different."}, {"num": 12, "kr": "난 안 피곤해.", "en": "I am not tired."}, {"num": 13, "kr": "너는 틀리지 않았어.", "en": "You aren’t wrong."}, {"num": 14, "kr": "걔(여자)는 화 안 났어.", "en": "She isn’t angry."}, {"num": 15, "kr": "걔(남자)는 부주의하지 않아.", "en": "He isn’t careless."}, {"num": 16, "kr": "우린 안 바빠.", "en": "We aren’t busy."}, {"num": 17, "kr": "걔네들은 안 시끄러워.", "en": "They aren’t noisy."}, {"num": 18, "kr": "고장 안 났어.", "en": "It isn’t broken."}, {"num": 19, "kr": "이것은 안 어려워.", "en": "This isn’t difficult."}, {"num": 20, "kr": "이것들은 유용하지 않아.", "en": "These aren’t useful."}, {"num": 21, "kr": "내가 맞아?", "en": "Am I right?"}, {"num": 22, "kr": "너 확실해?", "en": "Are you sure?"}, {"num": 23, "kr": "걔(여자)는 시간이 돼?", "en": "Is she available?"}, {"num": 24, "kr": "걔(남자)는 책임감이 있어?", "en": "Is he responsible?"}, {"num": 25, "kr": "우리 준비됐어?", "en": "Are we ready?"}, {"num": 26, "kr": "걔네들 바빠?", "en": "Are they busy?"}, {"num": 27, "kr": "안전해?", "en": "Is it safe?"}, {"num": 28, "kr": "이거 필요해?", "en": "Is this necessary?"}, {"num": 29, "kr": "이것들은 쓸모 있어?", "en": "Are these useful?"}, {"num": 30, "kr": "그것들이 맞아?", "en": "Are those correct?"}, {"num": 31, "kr": "내가 행복하지 않아?", "en": "Aren't I happy?"}, {"num": 32, "kr": "너 피곤하지 않아?", "en": "Aren't you tired?"}, {"num": 33, "kr": "걔(여자)는 친절하지 않아?", "en": "Isn't she kind?"}, {"num": 34, "kr": "걔(남자)는 정직하지 않아?", "en": "Isn't he honest?"}, {"num": 35, "kr": "우리 행복하지 않아?", "en": "Aren't we happy?"}, {"num": 36, "kr": "걔네들 준비 안 됐어?", "en": "Aren't they ready?"}, {"num": 37, "kr": "분명하지 않아?", "en": "Isn't it clear?"}, {"num": 38, "kr": "이거 안 중요해?", "en": "Isn't this important?"}, {"num": 39, "kr": "이것들은 깨끗하지 않아?", "en": "Aren't these clean?"}, {"num": 40, "kr": "저것들은 시간이 되지 않아?", "en": "Aren't those available?"}, {"num": 41, "kr": "나는 선생님이야.", "en": "I am a teacher."}, {"num": 42, "kr": "너는 말을 잘 들어주는 사람이야.", "en": "You are a good listener."}, {"num": 43, "kr": "걔(여자)는 간호사야.", "en": "She is a nurse."}, {"num": 44, "kr": "걔(남자)는 관리자야.", "en": "He is a manager."}, {"num": 45, "kr": "우리는 팀워크가 좋은 사람들이야.", "en": "We are team players."}, {"num": 46, "kr": "걔네들은 친구야.", "en": "They are friends."}, {"num": 47, "kr": "이게 문제야.", "en": "This is a problem."}, {"num": 48, "kr": "이것들은 해결책이야.", "en": "These are solutions."}, {"num": 49, "kr": "그건 좋은 생각이야.", "en": "That is a good idea."}, {"num": 50, "kr": "그것들은 중요한 서류야.", "en": "Those are important documents."}, {"num": 51, "kr": "나는 행복했어.", "en": "I was happy."}, {"num": 52, "kr": "너는 바빴어.", "en": "You were busy."}, {"num": 53, "kr": "걔(여자)는 긴장했었어.", "en": "She was nervous."}, {"num": 54, "kr": "걔(남자)는 자신감이 있었어.", "en": "He was confident."}, {"num": 55, "kr": "우리는 준비됐었어.", "en": "We were ready."}, {"num": 56, "kr": "걔네들은 시간이 됐었어.", "en": "They were available."}, {"num": 57, "kr": "깨끗했어.", "en": "It was clean."}, {"num": 58, "kr": "이것은 쓸모 있었어.", "en": "This was useful."}, {"num": 59, "kr": "이것들은 중요했어.", "en": "These were important."}, {"num": 60, "kr": "그게 맞았어.", "en": "That was correct."}, {"num": 61, "kr": "그것들은 달랐어.", "en": "Those were different."}, {"num": 62, "kr": "난 안 피곤했어.", "en": "I wasn’t tired."}, {"num": 63, "kr": "너는 틀리지 않았어.", "en": "You weren’t wrong."}, {"num": 64, "kr": "걔(여자)는 화나지 않았어.", "en": "She wasn’t angry."}, {"num": 65, "kr": "걔(남자)는 부주의하지 않았어.", "en": "He wasn’t careless."}, {"num": 66, "kr": "우리는 안 바빴어.", "en": "We weren’t busy."}, {"num": 67, "kr": "걔네들은 안 시끄러웠어.", "en": "They weren’t noisy."}, {"num": 68, "kr": "고장 나지 않았었어.", "en": "It wasn’t broken."}, {"num": 69, "kr": "이건 안 어려웠어.", "en": "This wasn’t difficult."}, {"num": 70, "kr": "이것들은 유용하지 않았어.", "en": "These weren’t useful."}, {"num": 71, "kr": "내가 맞았어?", "en": "Was I right?"}, {"num": 72, "kr": "너 확실했었어?", "en": "Were you sure?"}, {"num": 73, "kr": "걔(여자)는 시간이 됐어?", "en": "Was she available?"}, {"num": 74, "kr": "걔(남자)는 책임감이 있었어?", "en": "Was he responsible?"}, {"num": 75, "kr": "우리 준비됐었어?", "en": "Were we ready?"}, {"num": 76, "kr": "걔네들은 바빴어?", "en": "Were they busy?"}, {"num": 77, "kr": "안전했어?", "en": "Was it safe?"}, {"num": 78, "kr": "이게 필요했어?", "en": "Was this necessary?"}, {"num": 79, "kr": "이것들은 유용했어?", "en": "Were these useful?"}, {"num": 80, "kr": "저것들은 맞았어?", "en": "Were those correct?"}, {"num": 81, "kr": "나 행복하지 않았어?", "en": "Wasn't I happy?"}, {"num": 82, "kr": "너 피곤하지 않았어?", "en": "Weren't you tired?"}, {"num": 83, "kr": "걔(여자)는 친절하지 않았어?", "en": "Wasn't she kind?"}, {"num": 84, "kr": "걔(남자)는 정직하지 않았어?", "en": "Wasn't he honest?"}, {"num": 85, "kr": "우리 행복하지 않았어?", "en": "Weren't we happy?"}, {"num": 86, "kr": "걔네들 준비 안 됐었어?", "en": "Weren't they ready?"}, {"num": 87, "kr": "분명하지 않았어?", "en": "Wasn't it clear?"}, {"num": 88, "kr": "이거 중요하지 않았어?", "en": "Wasn't this important?"}, {"num": 89, "kr": "이것들은 깨끗하지 않았어?", "en": "Weren't these clean?"}, {"num": 90, "kr": "저것들은 시간이 되지 않았어?", "en": "Weren't those available?"}, {"num": 91, "kr": "나는 선생님이었어.", "en": "I was a teacher."}, {"num": 92, "kr": "너는 말을 잘 들어주는 사람이었어.", "en": "You were a good listener."}, {"num": 93, "kr": "걔(여자)는 간호사였어.", "en": "She was a nurse."}, {"num": 94, "kr": "걔(남자)는 관리자였어.", "en": "He was a manager."}, {"num": 95, "kr": "우리는 팀워크가 좋은 사람들이었어.", "en": "We were team players."}, {"num": 96, "kr": "걔네들은 친구였어.", "en": "They were friends."}, {"num": 97, "kr": "이게 문제였어.", "en": "This was a problem."}, {"num": 98, "kr": "이것들은 해결책이었어.", "en": "These were solutions."}, {"num": 99, "kr": "그건 좋은 생각이었어.", "en": "That was a good idea."}, {"num": 100, "kr": "그것들은 중요한 서류였어.", "en": "Those were important documents."}, {"num": 101, "kr": "나는 행복할 거야.", "en": "I will be happy."}, {"num": 102, "kr": "너는 바쁠 거야.", "en": "You will be busy."}, {"num": 103, "kr": "걔(여자)는 긴장할 거야.", "en": "She will be nervous."}, {"num": 104, "kr": "걔(남자)는 자신감이 있을 거야.", "en": "He will be confident."}, {"num": 105, "kr": "우리는 준비될 거야.", "en": "We will be ready."}, {"num": 106, "kr": "걔네들은 시간이 될 거야.", "en": "They will be available."}, {"num": 107, "kr": "깨끗할 거야.", "en": "It will be clean."}, {"num": 108, "kr": "이건 쓸모 있을거야.", "en": "This will be useful."}, {"num": 109, "kr": "이것들은 중요할 거야.", "en": "These will be important."}, {"num": 110, "kr": "그게 맞을 거야.", "en": "That will be correct."}, {"num": 111, "kr": "그것들은 다를 거야.", "en": "Those will be different."}, {"num": 112, "kr": "나는 안 피곤할 거야.", "en": "I won’t be tired."}, {"num": 113, "kr": "너는 틀리지 않을 거야.", "en": "You won’t be wrong."}, {"num": 114, "kr": "걔(여자)는 화나지 않을 거야.", "en": "She won’t be angry."}, {"num": 115, "kr": "걔(남자)는 부주의하지 않을 거야.", "en": "He won’t be careless."}, {"num": 116, "kr": "우리는 안 바쁠거야.", "en": "We won’t be busy."}, {"num": 117, "kr": "걔네들 안 시끄러울 거야.", "en": "They won’t be noisy."}, {"num": 118, "kr": "안 고장날 거야.", "en": "It won’t be broken."}, {"num": 119, "kr": "이거 안 어려울 거야.", "en": "This won’t be difficult."}, {"num": 120, "kr": "이것들은 쓸모 없을 거야.", "en": "These won’t be useful."}, {"num": 121, "kr": "내가 맞을까?", "en": "Will I be right?"}, {"num": 122, "kr": "너 확신할 거야?", "en": "Will you be sure?"}, {"num": 123, "kr": "걔(여자)는 시간이 될까?", "en": "Will she be available?"}, {"num": 124, "kr": "걔(남자)는 책임감이 있을까?", "en": "Will he be responsible?"}, {"num": 125, "kr": "우리가 준비가 될까?", "en": "Will we be ready?"}, {"num": 126, "kr": "걔네들 바쁠까?", "en": "Will they be busy?"}, {"num": 127, "kr": "안전할까?", "en": "Will it be safe?"}, {"num": 128, "kr": "이게 필요할까?", "en": "Will this be necessary?"}, {"num": 129, "kr": "이것들은 유용할까?", "en": "Will these be useful?"}, {"num": 130, "kr": "그것들이 맞을까?", "en": "Will those be correct?"}, {"num": 131, "kr": "나 행복하지 않을까?", "en": "Won't I be happy?"}, {"num": 132, "kr": "너 피곤하지 않을까?", "en": "Won't you be tired?"}, {"num": 133, "kr": "걔(여자)는 친절하지 않을까?", "en": "Won't she be kind?"}, {"num": 134, "kr": "걔(남자)는 정직하지 않을까?", "en": "Won't he be honest?"}, {"num": 135, "kr": "우리 행복하지 않을까?", "en": "Won't we be happy?"}, {"num": 136, "kr": "걔네들은 준비되지 않을까?", "en": "Won't they be ready?"}, {"num": 137, "kr": "분명하지 않을까?", "en": "Won't it be clear?"}, {"num": 138, "kr": "이게 중요하지 않을까?", "en": "Won't this be important?"}, {"num": 139, "kr": "이것들은 깨끗하지 않을까?", "en": "Won't these be clean?"}, {"num": 140, "kr": "그것들은 시간이 되지 않을까?", "en": "Won't those be available?"}, {"num": 141, "kr": "나는 선생님일 거야.", "en": "I will be a teacher."}, {"num": 142, "kr": "너는 말을 잘 들어주는 사람일 거야.", "en": "You will be a good listener."}, {"num": 143, "kr": "걔(여자)는 간호사일 거야.", "en": "She will be a nurse."}, {"num": 144, "kr": "걔(남자)는 관리자가 될 거야.", "en": "He will be a manager."}, {"num": 145, "kr": "우리는 팀워크가 좋은 사람들이 될 거야.", "en": "We will be team players."}, {"num": 146, "kr": "걔네들은 친구일 거야.", "en": "They will be friends."}, {"num": 147, "kr": "이게 문제가 될 거야.", "en": "This will be a problem."}, {"num": 148, "kr": "이것들이 해결책이 될 거야.", "en": "These will be solutions."}, {"num": 149, "kr": "그건 좋은 생각일 거야.", "en": "That will be a good idea."}, {"num": 150, "kr": "그것들은 중요한 서류일 거야.", "en": "Those will be important documents."}, {"num": 151, "kr": "나는 행복할 거야.", "en": "I am going to be happy."}, {"num": 152, "kr": "너는 바쁠 거야.", "en": "You are going to be busy."}, {"num": 153, "kr": "걔(여자)는 긴장할 거야.", "en": "She is going to be nervous."}, {"num": 154, "kr": "걔(남자)는 자신감이 있을 거야.", "en": "He is going to be confident."}, {"num": 155, "kr": "우리는 준비될 거야.", "en": "We are going to be ready."}, {"num": 156, "kr": "걔네들은 시간이 될 거야.", "en": "They are going to be available."}, {"num": 157, "kr": "깨끗할 거야.", "en": "It is going to be clean."}, {"num": 158, "kr": "이건 유용할 거야.", "en": "This is going to be useful."}, {"num": 159, "kr": "이것들은 중요할 거야.", "en": "These are going to be important."}, {"num": 160, "kr": "그게 맞을 거야.", "en": "That is going to be correct."}, {"num": 161, "kr": "그것들은 다를 거야.", "en": "Those are going to be different."}, {"num": 162, "kr": "난 피곤하지 않을 거야.", "en": "I am not going to be tired."}, {"num": 163, "kr": "넌 틀리지 않을 거야.", "en": "You aren’t going to be wrong."}, {"num": 164, "kr": "걔(여자)는 화나지 않을 거야.", "en": "She isn’t going to be angry."}, {"num": 165, "kr": "걔(남자)는 부주의하지 않을 거야.", "en": "He isn’t going to be careless."}, {"num": 166, "kr": "우리는 바쁘지 않을 거야.", "en": "We aren’t going to be busy."}, {"num": 167, "kr": "걔네들은 시끄럽지 않을 거야.", "en": "They aren’t going to be noisy."}, {"num": 168, "kr": "고장 나지 않을 거야.", "en": "It isn’t going to be broken."}, {"num": 169, "kr": "이것은 어렵지 않을 거야.", "en": "This isn’t going to be difficult."}, {"num": 170, "kr": "이것들은 유용하지 않을 거야.", "en": "These aren’t going to be useful."}, {"num": 171, "kr": "내가 맞을까?", "en": "Am I going to be right?"}, {"num": 172, "kr": "너 확신할 거야?", "en": "Are you going to be sure?"}, {"num": 173, "kr": "걔(여자)는 시간이 될까?", "en": "Is she going to be available?"}, {"num": 174, "kr": "걔(남자)는 책임감이 있을까?", "en": "Is he going to be responsible?"}, {"num": 175, "kr": "우리 준비될까?", "en": "Are we going to be ready?"}, {"num": 176, "kr": "걔네들은 바쁠까?", "en": "Are they going to be busy?"}, {"num": 177, "kr": "안전할까?", "en": "Is it going to be safe?"}, {"num": 178, "kr": "이게 필요할까?", "en": "Is this going to be necessary?"}, {"num": 179, "kr": "이것들은 유용할까?", "en": "Are these going to be useful?"}, {"num": 180, "kr": "저것들은 맞을까?", "en": "Are those going to be correct?"}, {"num": 181, "kr": "난 행복하지 않을까?", "en": "Aren't I going to be happy?"}, {"num": 182, "kr": "너 피곤하지 않을까?", "en": "Aren't you going to be tired?"}, {"num": 183, "kr": "걔(여자)는 친절하지 않을까?", "en": "Isn't she going to be kind?"}, {"num": 184, "kr": "걔(남자)는 정직하지 않을까?", "en": "Isn't he going to be honest?"}, {"num": 185, "kr": "우리 행복하지 않을까?", "en": "Aren't we going to be happy?"}, {"num": 186, "kr": "걔네들은 준비되지 않을까?", "en": "Aren't they going to be ready?"}, {"num": 187, "kr": "분명하지 않을까?", "en": "Isn't it going to be clear?"}, {"num": 188, "kr": "이게 중요하지 않을까?", "en": "Isn't this going to be important?"}, {"num": 189, "kr": "이것들은 깨끗하지 않을까?", "en": "Aren't these going to be clean?"}, {"num": 190, "kr": "저것들은 시간이 되지 않을까?", "en": "Aren't those going to be available?"}, {"num": 191, "kr": "나는 선생님일 거야.", "en": "I am going to be a teacher."}, {"num": 192, "kr": "너는 말을 잘 들어주는 사람일 거야.", "en": "You are going to be a good listener."}, {"num": 193, "kr": "걔(여자)는 간호사일 거야.", "en": "She is going to be a nurse."}, {"num": 194, "kr": "걔(남자)는 관리자가 될 거야.", "en": "He is going to be a manager."}, {"num": 195, "kr": "우리는 팀워크가 좋은 사람들이 될 거야.", "en": "We are going to be team players."}, {"num": 196, "kr": "걔네들은 친구일 거야.", "en": "They are going to be friends."}, {"num": 197, "kr": "이건 문제가 될 거야.", "en": "This is going to be a problem."}, {"num": 198, "kr": "이것들이 해결책이 될 거야.", "en": "These are going to be solutions."}, {"num": 199, "kr": "그건 좋은 생각일 거야.", "en": "That is going to be a good idea."}, {"num": 200, "kr": "그것들은 중요한 서류일 거야.", "en": "Those are going to be important documents."}, {"num": 201, "kr": "문제가 하나 있어.", "en": "There is a problem."}, {"num": 202, "kr": "질문이 몇 개 있어.", "en": "There are some questions."}, {"num": 203, "kr": "정보가 좀 있어.", "en": "There is some information."}, {"num": 204, "kr": "실수는 없어.", "en": "There isn't a mistake."}, {"num": 205, "kr": "회의는 하나도 없어.", "en": "There aren't any meetings."}, {"num": 206, "kr": "차가 안 막혀.", "en": "There isn't traffic."}, {"num": 207, "kr": "해결책이 있어?", "en": "Is there a solution?"}, {"num": 208, "kr": "기회가 있어?", "en": "Is there an opportunity?"}, {"num": 209, "kr": "물이 있어?", "en": "Is there water?"}, {"num": 210, "kr": "이유가 있지 않아?", "en": "Isn't there a reason?"}, {"num": 211, "kr": "선택지가 있지 않아?", "en": "Isn't there a choice?"}, {"num": 212, "kr": "시간이 없지 않아?", "en": "Isn't there time?"}, {"num": 213, "kr": "실수가 있었어.", "en": "There was a mistake."}, {"num": 214, "kr": "문제들이 몇 개 있었어.", "en": "There were some problems."}, {"num": 215, "kr": "돈이 좀 있었어.", "en": "There was some money."}, {"num": 216, "kr": "회의가 없었어.", "en": "There wasn't a meeting."}, {"num": 217, "kr": "고객이 한 명도 없었어.", "en": "There weren't any customers."}, {"num": 218, "kr": "정보가 하나도 없었어.", "en": "There wasn't any information."}, {"num": 219, "kr": "이유가 있었어?", "en": "Was there a reason?"}, {"num": 220, "kr": "해결책이 있었어?", "en": "Was there a solution?"}, {"num": 221, "kr": "커피가 있었어?", "en": "Was there coffee?"}, {"num": 222, "kr": "문제가 있지 않았어?", "en": "Wasn't there a problem?"}, {"num": 223, "kr": "질문이 하나도 없었어?", "en": "Weren't there any questions?"}, {"num": 224, "kr": "시간이 하나도 없었어?", "en": "Wasn't there any time?"}, {"num": 225, "kr": "회의가 있을 거야.", "en": "There will be a meeting."}, {"num": 226, "kr": "변화가 있을 거야.", "en": "There will be a change."}, {"num": 227, "kr": "진전이 좀 있을 거야.", "en": "There will be some progress."}, {"num": 228, "kr": "문제가 없을 거야.", "en": "There won't be a problem."}, {"num": 229, "kr": "실수가 없을 거야.", "en": "There won't be a mistake."}, {"num": 230, "kr": "차 안 막힐 거야.", "en": "There won't be traffic."}, {"num": 231, "kr": "기회가 있을까?", "en": "Will there be an opportunity?"}, {"num": 232, "kr": "질문이 있을까?", "en": "Will there be a question?"}, {"num": 233, "kr": "정보가 있을까?", "en": "Will there be information?"}, {"num": 234, "kr": "해결책이 있지 않을까?", "en": "Won't there be a solution?"}, {"num": 235, "kr": "문제가 있지 않을까?", "en": "Won't there be a problem?"}, {"num": 236, "kr": "돈이 하나도 없지 않을까?", "en": "Won't there be any money?"}, {"num": 237, "kr": "시간이 있을까?", "en": "Will there be time?"}, {"num": 238, "kr": "변화가 있을 거야.", "en": "There is going to be a change."}, {"num": 239, "kr": "회의가 몇 번 있을 거야.", "en": "There are going to be some meetings."}, {"num": 240, "kr": "진전이 좀 있을 거야.", "en": "There is going to be some progress."}, {"num": 241, "kr": "문제가 없을 거야.", "en": "There isn't going to be a problem."}, {"num": 242, "kr": "실수는 없을 거야.", "en": "There isn’t going to be a mistake."}, {"num": 243, "kr": "차 안 막힐 거야.", "en": "There isn't going to be traffic."}, {"num": 244, "kr": "해결책이 있을까?", "en": "Is there going to be a solution?"}, {"num": 245, "kr": "기회가 있을까?", "en": "Is there going to be an opportunity?"}, {"num": 246, "kr": "정보가 있을까?", "en": "Is there going to be information?"}, {"num": 247, "kr": "회의가 있지 않을까?", "en": "Isn't there going to be a meeting?"}, {"num": 248, "kr": "질문이 있지 않을까?", "en": "Isn’t there going to be a question?"}, {"num": 249, "kr": "음식이 있지 않을까?", "en": "Isn't there going to be food?"}, {"num": 250, "kr": "변화가 있을까?", "en": "Is there going to be a change?"}];
+let sequence=[], idx=0, order='ordered', hintOn=true, revealed=false;
+function setOrder(mode){order=mode;document.getElementById('ordered').classList.toggle('active',mode==='ordered');document.getElementById('random').classList.toggle('active',mode==='random')}
+function toggleHint(){
+ hintOn=!hintOn;
+ ['hintToggle','hintToggleStudy'].forEach(id=>{const b=document.getElementById(id);if(b){b.textContent=hintOn?'ON':'OFF';b.classList.toggle('on',hintOn)}});
+ document.getElementById('hint').style.display=hintOn?'flex':'none';
+}
+function extractHint(sentence){
+  // Return only the complement after be, never the subject or "be / going to be".
+  let s = sentence.replace(/[.!?]+$/,'').trim().replace(/[’‘]/g,"'");
+  // Normalize subject contractions used in the sentence list.
+  s = s.replace(/^I'm\b/i,'I am')
+       .replace(/^you're\b/i,'you are')
+       .replace(/^he's\b/i,'he is')
+       .replace(/^she's\b/i,'she is')
+       .replace(/^it's\b/i,'it is')
+       .replace(/^we're\b/i,'we are')
+       .replace(/^they're\b/i,'they are')
+       .replace(/^that's\b/i,'that is')
+       .replace(/^this's\b/i,'this is');
+
+  // Existential there + be: show only the noun phrase (e.g. "a solution").
+  const existential = [
+    /^there\s+(?:is|are|was|were)\s+(?:not\s+)?going\s+to\s+be\s+(.+)$/i,
+    /^there\s+(?:isn't|aren't|wasn't|weren't)\s+going\s+to\s+be\s+(.+)$/i,
+    /^there\s+(?:will\s+not\s+be|won't\s+be|will\s+be)\s+(.+)$/i,
+    /^there\s+(?:is|are|was|were)\s+(?:not\s+)?(.+)$/i,
+    /^there\s+(?:isn't|aren't|wasn't|weren't)\s+(.+)$/i
+  ];
+  // Existential statements and questions: show only the noun phrase (e.g. "a solution").
+  if (/^there\b/i.test(s)) {
+    for (const re of existential) {
+      const m = s.match(re);
+      if (m) return cleanHint(m[1]);
+    }
+  }
+  const existentialQuestion = s.match(/^(?:is|are|was|were|isn't|aren't|wasn't|weren't|will|won't)\s+there\s+(?:going\s+to\s+be\s+|be\s+)?(.+)$/i);
+  if (existentialQuestion) return cleanHint(existentialQuestion[1]);
+
+  // Questions: be auxiliary + subject + optional "going to be" / "be" + complement.
+  const questionPatterns = [
+    /^(?:am|is|are|was|were|isn't|aren't|wasn't|weren't)\s+(?:i|you|he|she|it|we|they|this|that|these|those)\s+(?:not\s+)?(.+)$/i,
+    /^(?:will|won't)\s+(?:i|you|he|she|it|we|they|this|that|these|those)\s+(?:not\s+)?(?:be\s+)?(.+)$/i,
+    /^(?:am|is|are)\s+(?:i|you|he|she|it|we|they|this|that|these|those)\s+(?:not\s+)?going\s+to\s+be\s+(.+)$/i,
+    /^(?:isn't|aren't)\s+(?:i|you|he|she|it|we|they|this|that|these|those)\s+going\s+to\s+be\s+(.+)$/i,
+    /^(?:am|is|are|was|were|isn't|aren't|wasn't|weren't)\s+(?:i|you|he|she|it|we|they|this|that|these|those)\s+(.+)$/i
+  ];
+  for (const re of questionPatterns) {
+    const m = s.match(re);
+    if (m) {
+      let tail = m[1].trim();
+      tail = tail.replace(/^(?:going\s+to\s+be|not\s+going\s+to\s+be|not\s+be|be)\s+/i,'');
+      return cleanHint(tail);
+    }
+  }
+
+  // Statements: subject + be-verb / future form + complement.
+  const statementPatterns = [
+    /^(?:i)\s+(?:am\s+not\s+going\s+to\s+be|am\s+going\s+to\s+be|am\s+not|am|wasn't|was\s+not|was|will\s+not\s+be|won't\s+be|will\s+be)\s+(.+)$/i,
+    /^(?:you|we|they|these|those)\s+(?:aren't\s+going\s+to\s+be|are\s+not\s+going\s+to\s+be|are\s+going\s+to\s+be|are\s+not|aren't|are|weren't|were\s+not|were|will\s+not\s+be|won't\s+be|will\s+be)\s+(.+)$/i,
+    /^(?:he|she|it|this|that)\s+(?:isn't\s+going\s+to\s+be|is\s+not\s+going\s+to\s+be|is\s+going\s+to\s+be|is\s+not|isn't|is|wasn't|was\s+not|was|will\s+not\s+be|won't\s+be|will\s+be)\s+(.+)$/i
+  ];
+  for (const re of statementPatterns) {
+    const m = s.match(re);
+    if (m) return cleanHint(m[1]);
+  }
+
+  // Catch remaining forms such as "I won't be tired" and other be-based constructions.
+  const fallback = s.match(/^(?:i|you|he|she|it|we|they|this|that|these|those)\s+(.+)$/i);
+  if (fallback) {
+    let tail = fallback[1]
+      .replace(/^(?:am|is|are|was|were|isn't|aren't|wasn't|weren't)\s+/i,'')
+      .replace(/^(?:will\s+not\s+be|won't\s+be|will\s+be|going\s+to\s+be|not\s+going\s+to\s+be)\s+/i,'')
+      .trim();
+    return cleanHint(tail);
+  }
+  return cleanHint(s);
+}
+function cleanHint(value){
+  return String(value || '').trim()
+    .replace(/^(?:am|is|are|was|were|be|been|being)\s+/i,'')
+    .replace(/^(?:going\s+to\s+be|not\s+going\s+to\s+be)\s+/i,'')
+    .replace(/\s+/g,' ');
+}
+function start(){
+ sequence=[...items];if(order==='random')for(let i=sequence.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[sequence[i],sequence[j]]=[sequence[j],sequence[i]]}
+ idx=0;document.getElementById('setup').style.display='none';document.getElementById('study').style.display='block';render();
+}
+function render(){
+ const x=sequence[idx];revealed=false;
+ document.getElementById('count').textContent=String(idx+1).padStart(3,'0')+' / '+sequence.length;
+ document.getElementById('num').textContent='SENTENCE '+String(x.num).padStart(3,'0');
+ document.getElementById('kr').textContent=x.kr;
+ document.getElementById('en').textContent=x.en;
+ document.getElementById('hintText').textContent=extractHint(x.en);
+ document.getElementById('hint').style.display=hintOn?'block':'none';
+ document.getElementById('answer').classList.remove('show');
+ document.getElementById('reveal').textContent='정답 확인';
+ document.getElementById('prev').disabled=idx===0;
+ document.getElementById('bar').style.width=(sequence.length<=1?100:idx/(sequence.length-1)*100)+'%';
+ document.getElementById('progressLabel').textContent=`진행 ${idx+1} / ${sequence.length}`;
+ document.getElementById('progress').setAttribute('aria-valuemax',sequence.length);
+ document.getElementById('progress').setAttribute('aria-valuenow',idx+1);
+}
+function reveal(){
+ if(!revealed){
+   revealed=true;
+   document.getElementById('answer').classList.add('show');
+   document.getElementById('reveal').textContent=idx===sequence.length-1?'연습 완료 🎉':'다음 문제 →';
+ }else{
+   if(idx<sequence.length-1){idx++;render();}
+   else{showCelebration();}
+ }
+}
+function move(step){if(idx+step<0||idx+step>=sequence.length)return;idx+=step;render()}
+function goHome(){document.getElementById('celebrate').classList.remove('show');document.getElementById('study').style.display='none';document.getElementById('setup').style.display='block'}
+function goToProgress(clientX){
+ const track=document.querySelector('.progress-track');
+ const rect=track.getBoundingClientRect();
+ const ratio=Math.max(0,Math.min(1,(clientX-rect.left)/rect.width));
+ const target=Math.round(ratio*(sequence.length-1));
+ if(target!==idx){idx=target;render();}
+}
+const progressHit=document.getElementById('progressHit');
+let draggingProgress=false;
+progressHit.addEventListener('pointerdown',e=>{draggingProgress=true;progressHit.setPointerCapture(e.pointerId);goToProgress(e.clientX)});
+progressHit.addEventListener('pointermove',e=>{if(draggingProgress)goToProgress(e.clientX)});
+progressHit.addEventListener('pointerup',()=>{draggingProgress=false});
+progressHit.addEventListener('pointercancel',()=>{draggingProgress=false});
+document.getElementById('progress').addEventListener('keydown',e=>{
+ if(!sequence.length)return;
+ if(e.key==='ArrowRight'){e.preventDefault();idx=Math.min(sequence.length-1,idx+1);render()}
+ if(e.key==='ArrowLeft'){e.preventDefault();idx=Math.max(0,idx-1);render()}
+ if(e.key==='Home'){e.preventDefault();idx=0;render()}
+ if(e.key==='End'){e.preventDefault();idx=sequence.length-1;render()}
+});
+function showCelebration(){
+ document.getElementById('celebrateMessage').innerHTML=`${sequence.length}개 문장 연습을 모두 마쳤어요.<br>끝까지 해낸 자신을 칭찬해 주세요!`;
+ document.getElementById('celebrate').classList.add('show');
+}
+function closeCelebration(){
+ document.getElementById('celebrate').classList.remove('show');
+ goHome();
+}
+document.addEventListener('keydown',e=>{if(document.getElementById('study').style.display==='block'){if(e.key==='ArrowLeft')move(-1);if(e.key==='ArrowRight')move(1);if(e.key===' '){e.preventDefault();reveal()}}});
+</script>
+</body>
+</html>
