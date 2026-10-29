@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PSE 스파르타 | 일반동사 긍정문·의문문 드릴링</title>
+<style>
+:root{--ink:#17231e;--muted:#748078;--paper:#f5f5ef;--card:#fff;--green:#c8f169;--line:#e6e9df;--accent:#2c4939}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,Pretendard,"Noto Sans KR",system-ui,sans-serif;min-height:100vh}
+button{font:inherit;cursor:pointer;border:0}button:focus-visible{outline:3px solid #8bb63c;outline-offset:3px}
+.wrap{width:min(100%,760px);margin:auto;padding:24px 18px 42px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:26px}
+.brand{font-size:12px;letter-spacing:.18em;font-weight:900;color:var(--accent)}.pill{border:1px solid #dce1d5;border-radius:999px;padding:8px 12px;color:var(--muted);font-size:11px;font-weight:800}
+h1{font-size:clamp(30px,7vw,48px);line-height:1.08;letter-spacing:-.055em;margin:0;font-weight:950}.subtitle{color:var(--muted);font-size:14px;margin:12px 0 24px}
+.setup,.study{background:var(--card);border:1px solid var(--line);border-radius:28px;padding:clamp(20px,5vw,34px);box-shadow:0 14px 40px #293b2510}
+.section-label{font-size:11px;font-weight:900;letter-spacing:.12em;color:var(--muted);margin-bottom:12px}
+.segment{display:flex;gap:8px;background:#f0f2eb;padding:5px;border-radius:15px;margin-bottom:20px}.segment button{flex:1;padding:12px 8px;border-radius:11px;background:transparent;color:#69736a;font-size:13px;font-weight:800}.segment button.active{background:var(--accent);color:white;box-shadow:0 4px 10px #182b2020}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 0;border-top:1px solid var(--line);font-size:14px;font-weight:750}.switch{background:#e7eae2;color:#69736a;border-radius:999px;padding:8px 13px;font-size:12px;font-weight:900;min-width:72px}.switch.on{background:var(--green);color:#26351c}
+.primary{width:100%;background:var(--green);color:#20301a;border-radius:16px;padding:17px;font-size:16px;font-weight:950;margin-top:18px;box-shadow:0 7px 0 #a9d64e}.primary:active{transform:translateY(2px);box-shadow:0 5px 0 #a9d64e}
+.study{display:none;padding:0;overflow:hidden}.study-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}.back{background:#f1f3ec;border-radius:12px;padding:10px 12px;font-size:12px;font-weight:850}.count{font-size:12px;font-weight:900;color:var(--muted);font-variant-numeric:tabular-nums}
+.progress{height:12px;background:#eef0e9;position:relative;cursor:pointer;touch-action:none;padding:4px 0}
+.progress-track{height:4px;background:#e5e9df;border-radius:99px;position:relative;margin:0 14px}
+.bar{height:4px;background:#a5d642;width:0%;border-radius:99px;position:relative;transition:width .12s}
+.bar::after{content:"";position:absolute;right:-6px;top:-4px;width:12px;height:12px;background:#2c4939;border:2px solid #fff;border-radius:50%;box-shadow:0 1px 4px #0002}
+.progress-hit{position:absolute;inset:-10px -14px;cursor:ew-resize}
+.progress-meta{display:flex;justify-content:space-between;padding:8px 20px 0;color:#8a9487;font-size:11px;font-weight:850;font-variant-numeric:tabular-nums}
+.celebrate{position:fixed;inset:0;background:#17231ecc;z-index:50;display:none;align-items:center;justify-content:center;padding:20px}
+.celebrate.show{display:flex}.celebrate-card{background:#fffdf7;width:min(100%,420px);border-radius:28px;padding:34px 25px;text-align:center;box-shadow:0 24px 90px #0004;animation:pop .28s ease-out}
+.celebrate-icon{font-size:54px;margin-bottom:14px}.celebrate h2{font-size:29px;line-height:1.2;letter-spacing:-.04em;margin:0 0 12px;font-weight:950}.celebrate p{font-size:15px;line-height:1.7;color:#667064;margin:0 0 24px}
+@keyframes pop{from{transform:translateY(12px) scale(.96);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.question{padding:clamp(26px,7vw,54px) clamp(20px,6vw,46px) 26px;text-align:center;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.num{font-size:11px;font-weight:950;color:#849083;letter-spacing:.13em;margin-bottom:24px}.kr{font-size:clamp(27px,6vw,40px);line-height:1.45;font-weight:900;letter-spacing:-.04em;word-break:keep-all}
+
+.answer-slot{height:148px;min-height:148px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding:12px 20px;border-top:1px dashed #dfe4d8;overflow:hidden}.answer{border-top:0;padding:0;text-align:center;display:block;visibility:hidden;opacity:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .15s}.answer.show{visibility:visible;opacity:1}
+.answer{border-top:1px dashed #dfe4d8;padding:24px 20px 28px;text-align:center;display:none}.answer.show{display:block}.en{font-size:clamp(21px,5vw,29px);font-weight:900;line-height:1.45;word-break:keep-all;color:#2c4939}.answer-label{font-size:10px;letter-spacing:.12em;color:#98a195;font-weight:900;margin-bottom:8px}
+.controls{display:grid;grid-template-columns:58px 1fr 58px;gap:8px;padding:0 18px 18px}.control{border-radius:15px;min-height:54px;font-weight:900}.secondary{background:#f0f2eb;color:#3e4b40}.main-action{background:var(--accent);color:white}.control:disabled{opacity:.3;cursor:default}
+.footnote{text-align:center;color:#9aa196;font-size:11px;margin:18px 0 0}
+@media(min-width:600px){.wrap{padding-top:34px}.question{min-height:340px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top"><div class="brand">PSE / SPARTA</div><div class="pill">60 SENTENCE DRILL</div></div>
+  <h1>PSE 스파르타<br>일반동사 드릴링</h1>
+  <p class="subtitle">한국어를 보고 영어로 말해 보세요. 정답은 원할 때 확인할 수 있습니다.</p>
+  <section class="setup" id="setup">
+    <div class="section-label">DRILL SETTINGS</div>
+    <div class="section-label">문제 출제 방식</div>
+    <div class="segment"><button id="ordered" class="active" onclick="setOrder('ordered')">순서대로</button><button id="random" onclick="setOrder('random')">랜덤</button></div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;margin:0">일반동사 긍정문과 의문문을 연습합니다. 한국어를 보고 영어로 말한 뒤 정답을 확인하세요.</p>
+    <button class="primary" onclick="start()">60문장 연습 시작 →</button>
+  </section>
+  <section class="study" id="study">
+    <div class="study-head"><button class="back" onclick="goHome()">← 처음으로</button><div class="count" id="count">001 / 060</div></div>
+    <div class="progress" id="progress" role="slider" aria-label="문제 진행 위치" aria-valuemin="1" aria-valuemax="60" aria-valuenow="1" tabindex="0">
+      <div class="progress-track"><div class="bar" id="bar"></div><div class="progress-hit" id="progressHit"></div></div>
+    </div>
+    <div class="progress-meta"><span id="progressLabel">진행 1 / 60</span><span>막대를 움직여 문제 이동</span></div>
+    <div class="question">
+      <div class="num" id="num">SENTENCE 001</div>
+      <div class="kr" id="kr"></div>
+      
+    </div>
+    <div class="answer-slot"><div class="answer" id="answer"><div class="answer-label">MODEL ANSWER</div><div class="en" id="en"></div></div></div>
+    <div class="controls" style="grid-template-columns:58px 1fr">
+      <button class="control secondary" id="prev" onclick="move(-1)" aria-label="이전 문제">← 이전</button>
+      <button class="control main-action" id="reveal" onclick="reveal()">정답 확인</button>
+    </div>
+  </section>
+  <p class="footnote">PSE SPARTA · GENERAL VERB DRILL</p>
+</main>
+<div class="celebrate" id="celebrate" role="dialog" aria-modal="true" aria-labelledby="celebrateTitle">
+  <div class="celebrate-card">
+    <div class="celebrate-icon">🎉🏆🎉</div>
+    <h2 id="celebrateTitle">정말 수고했어요!</h2>
+    <p id="celebrateMessage">60개 문장 연습을 모두 마쳤어요.<br>꾸준히 말한 만큼 영어가 쌓이고 있어요!</p>
+    <button class="primary" onclick="closeCelebration()">처음으로 돌아가기</button>
+  </div>
+</div>
+<script>
+const items = [{"num": 1, "kr": "난 7시에 일어나.", "en": "I get up at seven."}, {"num": 2, "kr": "넌 찬물로 세수하니?", "en": "Do you wash your face with cold water?"}, {"num": 3, "kr": "걘(여자) 아침에 샤워 해.", "en": "She takes a shower in the morning."}, {"num": 4, "kr": "걘(남자) 점심 먹고 양치해?", "en": "Does he brush his teeth after lunch?"}, {"num": 5, "kr": "난 오늘 새 셔츠를 입었어.", "en": "I’m wearing a new shirt today."}, {"num": 6, "kr": "걘(여자) 안경 써.", "en": "She wears the same glasses every day."}, {"num": 7, "kr": "걘(여자) 날 보고 웃었어.", "en": "She smiled at me."}, {"num": 8, "kr": "우린 보통 집에서 저녁을 먹어.", "en": "We usually eat dinner at home."}, {"num": 9, "kr": "걔(남자) 물 마셨어?", "en": "Did he drink water?"}, {"num": 10, "kr": "우리 아버지는 주말에 파스타 요리하셔.", "en": "My dad cooks pasta on the weekend."}, {"num": 11, "kr": "걔네들은 지금 점심 만들고 있어.", "en": "They are making lunch now."}, {"num": 12, "kr": "나 방 청소했어.", "en": "I cleaned my room."}, {"num": 13, "kr": "너 책상 정리 했어?", "en": "Did you clean up your desk?"}, {"num": 14, "kr": "걔(남자)가 커튼을 열었어.", "en": "He opened the curtains."}, {"num": 15, "kr": "걔(남자)가 자기 방 문을 닫았어?", "en": "Did he close his bedroom door?"}, {"num": 16, "kr": "제가 불 켤 게요.", "en": "I will turn on the light."}, {"num": 17, "kr": "우리는 카카오톡 써.", "en": "We use Kakaotalk."}, {"num": 18, "kr": "난 새 노트북이 필요해.", "en": "I need a new laptop."}, {"num": 19, "kr": "커피 더 마실래?", "en": "Do you want more coffee?"}, {"num": 20, "kr": "걔(남자)가 지금 열쇠 갖고 있어.", "en": "He has the keys now."}, {"num": 21, "kr": "걔(여자)가 어제 택배를 받았어.", "en": "She received the package yesterday."}, {"num": 22, "kr": "이거 잘 보관해.", "en": "Keep this safe."}, {"num": 23, "kr": "걔네들 내일 서울 가?", "en": "Are they going to Seoul tomorrow?"}, {"num": 24, "kr": "나 오늘 집에 일찍 올게.", "en": "I’ll come home early today."}, {"num": 25, "kr": "걔(남자)는 일 그만뒀어.", "en": "He quit his job."}, {"num": 26, "kr": "걘(여자) 고향으로 돌아갈 거야.", "en": "She will return to her hometown."}, {"num": 27, "kr": "우린 여름마다 여행해.", "en": "We travel every summer."}, {"num": 28, "kr": "너 어제 박물관 갔어?", "en": "Did you visit the museum yesterday?"}, {"num": 29, "kr": "걔네들은 걸어서 출근해.", "en": "They walk to work."}, {"num": 30, "kr": "걔(남자) 요즘 뛰고 있어?", "en": "Is he running these days?"}, {"num": 31, "kr": "난 주말에 엄마 차를 운전해.", "en": "I drive my mother’s car on the weekend."}, {"num": 32, "kr": "걘(여자) 매일 자전거 타.", "en": "She rides a bicycle every day."}, {"num": 33, "kr": "나 내일 제주도 가.", "en": "I’m flying to Jeju tomorrow."}, {"num": 34, "kr": "너 이거 떨어뜨렸니?", "en": "Did you drop this?"}, {"num": 35, "kr": "걔(남자)가 내일 서류 가져올 거야.", "en": "He will bring the documents tomorrow."}, {"num": 36, "kr": "걘(여자) 다음 주에 이사할 거야.", "en": "She is going to move next week."}, {"num": 37, "kr": "우린 매일 이 다리를 건너.", "en": "We cross this bridge every day."}, {"num": 38, "kr": "너 안내원의 지시를 따랐어?", "en": "Did you follow the guide's directions?"}, {"num": 39, "kr": "우린 호텔에서 사흘 동안 묵을 거야.", "en": "We will stay at the hotel for three days."}, {"num": 40, "kr": "걘(여자) 런던 살아.", "en": "She lives in London."}, {"num": 41, "kr": "너 버스에서 유튜브 봐?", "en": "Do you watch YouTube on the bus?"}, {"num": 42, "kr": "걔네들은 입구 앞에 서 있었어.", "en": "They were standing in front of the entrance."}, {"num": 43, "kr": "걘(여자) 널 20분 동안 기다렸어.", "en": "She waited for you for twenty minutes."}, {"num": 44, "kr": "너 걔(남자)한테 프로젝트에 대해서 말해줬어?", "en": "Did you tell him about the project?"}, {"num": 45, "kr": "너 회의에서 영어로 말 해?", "en": "Do you speak English in meetings?"}, {"num": 46, "kr": "걔(남자)가 길을 물어봤어.", "en": "He asked for directions."}, {"num": 47, "kr": "걘(여자) 내 질문에 대답했어.", "en": "She answered my question."}, {"num": 48, "kr": "네가 나한테 전화했어?", "en": "Did you call me?"}, {"num": 49, "kr": "너 걔(여자)한테 문자 했어?", "en": "Did you text her?"}, {"num": 50, "kr": "난 매일 아침 이메일을 확인해.", "en": "I check my email every morning."}, {"num": 51, "kr": "난 매일 일기 써.", "en": "I write in my journal every day."}, {"num": 52, "kr": "너 이 안내문 읽었어?", "en": "Did you read this notice?"}, {"num": 53, "kr": "걔(여자)가 어제 쇼핑몰에서 너 봤어.", "en": "She saw you at the mall yesterday."}, {"num": 54, "kr": "너 음식 주문했어?", "en": "Did you order food?"}, {"num": 55, "kr": "걔(남자)는 알아.", "en": "He knows."}, {"num": 56, "kr": "내가 비행기표 예약했어.", "en": "I booked the flight."}, {"num": 57, "kr": "난 한국에서 대학교를 졸업했어.", "en": "I graduated from university in Korea."}, {"num": 58, "kr": "너 한국에서 살았어?", "en": "Did you live in Korea?"}, {"num": 59, "kr": "너 오늘 집에 있을 거야?", "en": "Are you going to stay home today?"}, {"num": 60, "kr": "너 매운 음식 좋아해?", "en": "Do you like spicy food?"}];
+let sequence=[], idx=0, order='ordered', revealed=false;
+function setOrder(mode){order=mode;document.getElementById('ordered').classList.toggle('active',mode==='ordered');document.getElementById('random').classList.toggle('active',mode==='random')}
+function start(){
+ sequence=[...items];if(order==='random')for(let i=sequence.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[sequence[i],sequence[j]]=[sequence[j],sequence[i]]}
+ idx=0;document.getElementById('setup').style.display='none';document.getElementById('study').style.display='block';render();
+}
+function render(){
+ const x=sequence[idx];revealed=false;
+ document.getElementById('count').textContent=String(idx+1).padStart(3,'0')+' / '+String(sequence.length).padStart(3,'0');
+ document.getElementById('num').textContent='SENTENCE '+String(x.num).padStart(3,'0');
+ document.getElementById('kr').textContent=x.kr;
+ document.getElementById('en').textContent=x.en;
+ document.getElementById('answer').classList.remove('show');
+ document.getElementById('reveal').textContent='정답 확인';
+ document.getElementById('prev').disabled=idx===0;
+ document.getElementById('bar').style.width=(sequence.length<=1?100:idx/(sequence.length-1)*100)+'%';
+ document.getElementById('progressLabel').textContent=`진행 ${idx+1} / ${sequence.length}`;
+ document.getElementById('progress').setAttribute('aria-valuemax',sequence.length);
+ document.getElementById('progress').setAttribute('aria-valuenow',idx+1);
+}
+function reveal(){
+ if(!revealed){
+   revealed=true;
+   document.getElementById('answer').classList.add('show');
+   document.getElementById('reveal').textContent=idx===sequence.length-1?'연습 완료 🎉':'다음 문제 →';
+ }else{
+   if(idx<sequence.length-1){idx++;render();}
+   else{showCelebration();}
+ }
+}
+function move(step){if(idx+step<0||idx+step>=sequence.length)return;idx+=step;render()}
+function goHome(){document.getElementById('celebrate').classList.remove('show');document.getElementById('study').style.display='none';document.getElementById('setup').style.display='block'}
+function goToProgress(clientX){
+ const track=document.querySelector('.progress-track');
+ const rect=track.getBoundingClientRect();
+ const ratio=Math.max(0,Math.min(1,(clientX-rect.left)/rect.width));
+ const target=Math.round(ratio*(sequence.length-1));
+ if(target!==idx){idx=target;render();}
+}
+const progressHit=document.getElementById('progressHit');
+let draggingProgress=false;
+progressHit.addEventListener('pointerdown',e=>{draggingProgress=true;progressHit.setPointerCapture(e.pointerId);goToProgress(e.clientX)});
+progressHit.addEventListener('pointermove',e=>{if(draggingProgress)goToProgress(e.clientX)});
+progressHit.addEventListener('pointerup',()=>{draggingProgress=false});
+progressHit.addEventListener('pointercancel',()=>{draggingProgress=false});
+document.getElementById('progress').addEventListener('keydown',e=>{
+ if(!sequence.length)return;
+ if(e.key==='ArrowRight'){e.preventDefault();idx=Math.min(sequence.length-1,idx+1);render()}
+ if(e.key==='ArrowLeft'){e.preventDefault();idx=Math.max(0,idx-1);render()}
+ if(e.key==='Home'){e.preventDefault();idx=0;render()}
+ if(e.key==='End'){e.preventDefault();idx=sequence.length-1;render()}
+});
+function showCelebration(){
+ document.getElementById('celebrateMessage').innerHTML=`${sequence.length}개 문장 연습을 모두 마쳤어요.<br>끝까지 해낸 자신을 칭찬해 주세요!`;
+ document.getElementById('celebrate').classList.add('show');
+}
+function closeCelebration(){
+ document.getElementById('celebrate').classList.remove('show');
+ goHome();
+}
+document.addEventListener('keydown',e=>{if(document.getElementById('study').style.display==='block'){if(e.key==='ArrowLeft')move(-1);if(e.key==='ArrowRight')move(1);if(e.key===' '){e.preventDefault();reveal()}}});
+</script>
+</body>
+</html>
