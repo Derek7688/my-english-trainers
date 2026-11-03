@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PSE 스파르타 | Lesson 09</title>
+<style>
+:root{--ink:#17231e;--muted:#748078;--paper:#f5f5ef;--card:#fff;--green:#c8f169;--line:#e6e9df;--accent:#2c4939}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,Pretendard,"Noto Sans KR",system-ui,sans-serif;min-height:100vh}
+button{font:inherit;cursor:pointer;border:0}button:focus-visible{outline:3px solid #8bb63c;outline-offset:3px}
+.wrap{width:min(100%,760px);margin:auto;padding:24px 18px 42px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:26px}
+.brand{font-size:12px;letter-spacing:.18em;font-weight:900;color:var(--accent)}.pill{border:1px solid #dce1d5;border-radius:999px;padding:8px 12px;color:var(--muted);font-size:11px;font-weight:800}
+h1{font-size:clamp(30px,7vw,48px);line-height:1.08;letter-spacing:-.055em;margin:0;font-weight:950}.subtitle{color:var(--muted);font-size:14px;margin:12px 0 24px}
+.setup,.study{background:var(--card);border:1px solid var(--line);border-radius:28px;padding:clamp(20px,5vw,34px);box-shadow:0 14px 40px #293b2510}
+.section-label{font-size:11px;font-weight:900;letter-spacing:.12em;color:var(--muted);margin-bottom:12px}
+.segment{display:flex;gap:8px;background:#f0f2eb;padding:5px;border-radius:15px;margin-bottom:20px}.segment button{flex:1;padding:12px 8px;border-radius:11px;background:transparent;color:#69736a;font-size:13px;font-weight:800}.segment button.active{background:var(--accent);color:white;box-shadow:0 4px 10px #182b2020}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 0;border-top:1px solid var(--line);font-size:14px;font-weight:750}.switch{background:#e7eae2;color:#69736a;border-radius:999px;padding:8px 13px;font-size:12px;font-weight:900;min-width:72px}.switch.on{background:var(--green);color:#26351c}
+.primary{width:100%;background:var(--green);color:#20301a;border-radius:16px;padding:17px;font-size:16px;font-weight:950;margin-top:18px;box-shadow:0 7px 0 #a9d64e}.primary:active{transform:translateY(2px);box-shadow:0 5px 0 #a9d64e}
+.study{display:none;padding:0;overflow:hidden}.study-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}.back{background:#f1f3ec;border-radius:12px;padding:10px 12px;font-size:12px;font-weight:850}.count{font-size:12px;font-weight:900;color:var(--muted);font-variant-numeric:tabular-nums}
+.progress{height:12px;background:#eef0e9;position:relative;cursor:pointer;touch-action:none;padding:4px 0}
+.progress-track{height:4px;background:#e5e9df;border-radius:99px;position:relative;margin:0 14px}
+.bar{height:4px;background:#a5d642;width:0%;border-radius:99px;position:relative;transition:width .12s}
+.bar::after{content:"";position:absolute;right:-6px;top:-4px;width:12px;height:12px;background:#2c4939;border:2px solid #fff;border-radius:50%;box-shadow:0 1px 4px #0002}
+.progress-hit{position:absolute;inset:-10px -14px;cursor:ew-resize}
+.progress-meta{display:flex;justify-content:space-between;padding:8px 20px 0;color:#8a9487;font-size:11px;font-weight:850;font-variant-numeric:tabular-nums}
+.celebrate{position:fixed;inset:0;background:#17231ecc;z-index:50;display:none;align-items:center;justify-content:center;padding:20px}
+.celebrate.show{display:flex}.celebrate-card{background:#fffdf7;width:min(100%,420px);border-radius:28px;padding:34px 25px;text-align:center;box-shadow:0 24px 90px #0004;animation:pop .28s ease-out}
+.celebrate-icon{font-size:54px;margin-bottom:14px}.celebrate h2{font-size:29px;line-height:1.2;letter-spacing:-.04em;margin:0 0 12px;font-weight:950}.celebrate p{font-size:15px;line-height:1.7;color:#667064;margin:0 0 24px}
+@keyframes pop{from{transform:translateY(12px) scale(.96);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.question{padding:clamp(26px,7vw,54px) clamp(20px,6vw,46px) 26px;text-align:center;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.num{font-size:11px;font-weight:950;color:#849083;letter-spacing:.13em;margin-bottom:24px}.kr{font-size:clamp(27px,6vw,40px);line-height:1.45;font-weight:900;letter-spacing:-.04em;word-break:keep-all}
+
+.answer-slot{height:148px;min-height:148px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding:12px 20px;border-top:1px dashed #dfe4d8;overflow:hidden}.answer{border-top:0;padding:0;text-align:center;display:block;visibility:hidden;opacity:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .15s}.answer.show{visibility:visible;opacity:1}
+.answer{border-top:1px dashed #dfe4d8;padding:24px 20px 28px;text-align:center;display:none}.answer.show{display:block}.en{font-size:clamp(21px,5vw,29px);font-weight:900;line-height:1.45;word-break:keep-all;color:#2c4939}.answer-label{font-size:10px;letter-spacing:.12em;color:#98a195;font-weight:900;margin-bottom:8px}
+.controls{display:grid;grid-template-columns:58px 1fr 58px;gap:8px;padding:0 18px 18px}.control{border-radius:15px;min-height:54px;font-weight:900}.secondary{background:#f0f2eb;color:#3e4b40}.main-action{background:var(--accent);color:white}.control:disabled{opacity:.3;cursor:default}
+.footnote{text-align:center;color:#9aa196;font-size:11px;margin:18px 0 0}
+@media(min-width:600px){.wrap{padding-top:34px}.question{min-height:340px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top"><div class="brand">PSE / SPARTA</div><div class="pill">70 SENTENCE DRILL</div></div>
+  <h1>가주어 진주어 및 순환구조</h1>
+  <p class="subtitle">that절을 받는 동사와 의문사로 시작하는 간접의문문을 연습합니다. 한국어를 보고 영어로 말한 뒤 정답을 확인하세요.</p>
+  <section class="setup" id="setup">
+    <div class="section-label">DRILL SETTINGS</div>
+    <div class="section-label">문제 출제 방식</div>
+    <div class="segment"><button id="ordered" class="active" onclick="setOrder('ordered')">순서대로</button><button id="random" onclick="setOrder('random')">랜덤</button></div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;margin:0">일반동사 긍정문과 의문문을 연습합니다. 한국어를 보고 영어로 말한 뒤 정답을 확인하세요.</p>
+    <button class="primary" onclick="start()">70문장 연습 시작 →</button>
+  </section>
+  <section class="study" id="study">
+    <div class="study-head"><button class="back" onclick="goHome()">← 처음으로</button><div class="count" id="count">001 / 060</div></div>
+    <div class="progress" id="progress" role="slider" aria-label="문제 진행 위치" aria-valuemin="1" aria-valuemax="60" aria-valuenow="1" tabindex="0">
+      <div class="progress-track"><div class="bar" id="bar"></div><div class="progress-hit" id="progressHit"></div></div>
+    </div>
+    <div class="progress-meta"><span id="progressLabel">진행 1 / 60</span><span>막대를 움직여 문제 이동</span></div>
+    <div class="question">
+      <div class="num" id="num">SENTENCE 001</div>
+      <div class="kr" id="kr"></div>
+      
+    </div>
+    <div class="answer-slot"><div class="answer" id="answer"><div class="answer-label">MODEL ANSWER</div><div class="en" id="en"></div></div></div>
+    <div class="controls" style="grid-template-columns:58px 1fr">
+      <button class="control secondary" id="prev" onclick="move(-1)" aria-label="이전 문제">← 이전</button>
+      <button class="control main-action" id="reveal" onclick="reveal()">정답 확인</button>
+    </div>
+  </section>
+  <p class="footnote">PSE SPARTA · GENERAL VERB DRILL</p>
+</main>
+<div class="celebrate" id="celebrate" role="dialog" aria-modal="true" aria-labelledby="celebrateTitle">
+  <div class="celebrate-card">
+    <div class="celebrate-icon">🎉🏆🎉</div>
+    <h2 id="celebrateTitle">정말 수고했어요!</h2>
+    <p id="celebrateMessage">70개 문장 연습을 모두 마쳤어요.<br>꾸준히 말한 만큼 영어가 쌓이고 있어요!</p>
+    <button class="primary" onclick="closeCelebration()">처음으로 돌아가기</button>
+  </div>
+</div>
+<script>
+const items = [{"num":1,"kr":"일찍 자는 건 중요해.","en":"It is important to go to bed early."},{"num":2,"kr":"새로운 사람들을 만난 건 재밌어.","en":"It is fun to meet new people."},{"num":3,"kr":"이 질문에 답하는 건 어렵지 않아.","en":"It isn’t hard to answer this question."},{"num":4,"kr":"거기서 주차할 곳 찾기 쉬웠어?","en":"Was it easy to find a place to park there?"},{"num":5,"kr":"매일 영어를 연습하는 건 도움이 돼.","en":"It is helpful to practice English every day."},{"num":6,"kr":"혼자 여행하는 건 신나지 않아.","en":"It isn’t exciting to travel alone."},{"num":7,"kr":"기다리는 건 지루해.","en":"It is boring to wait."},{"num":8,"kr":"실수하는 게 괜찮아?","en":"Is it okay to make mistakes?"},{"num":9,"kr":"다른 나라에서 사는 건 어려워.","en":"It is hard to live in another country."},{"num":10,"kr":"새로운 걸 배우는 게 재미있어?","en":"Is it interesting to learn new things?"},{"num":11,"kr":"내가 혼자 결정하는 건 어려워.","en":"It is hard for me to decide alone."},{"num":12,"kr":"아무것도 안 가져와도 됩니다.","en":"It isn't necessary for you to bring anything."},{"num":13,"kr":"걔(남자)는 공항에 가기 쉬워?","en":"Is it easy for him to get to the airport?"},{"num":14,"kr":"우리가 함께 일하는 거 좋지 않아?","en":"Isn’t it good for us to work together?"},{"num":15,"kr":"걔네들이 여기서 기다리는 게 왜 불편해?","en":"Why is it inconvenient for them to wait here?"},{"num":16,"kr":"걔(남자)가 바쁜 건 분명해.","en":"It is clear (that) he is busy."},{"num":17,"kr":"걔(여자)가 여기 산다는 건 사실이야.","en":"It is a fact (that) she lives here."},{"num":18,"kr":"걔(남자)가 거기에 없을 수도 있어?","en":"Is it possible (that) he won’t be there?"},{"num":19,"kr":"도와주고 싶어 한다니 고마워.","en":"It is nice (that) you want to help."},{"num":20,"kr":"걔들이 이겼다니 놀라웠어.","en":"It was surprising (that) they won."},{"num":21,"kr":"걔(남자)가 내 이름을 기억한다니 놀랍지 않아?","en":"Isn’t it amazing (that) he remembers my name?"},{"num":22,"kr":"걔(여자)가 오늘 오는 건 확실해.","en":"It is certain (that) she will come today."},{"num":23,"kr":"우리가 질 거라는 건 뻔했어.","en":"It was obvious (that) we would lose."},{"num":24,"kr":"네가 열심히 연습했다는 게 중요해.","en":"It is important (that) you practiced hard."},{"num":25,"kr":"걔(여자)가 그 말을 했다는 게 사실이야?","en":"Is it true (that) she said that?"},{"num":26,"kr":"네가 집에 무사히 도착해서 다행이야.","en":"It is a relief (that) you got home safe."},{"num":27,"kr":"네가 파티에 못 온다니 아쉬워.","en":"It is a shame (that) you can’t come to the party."},{"num":28,"kr":"걔네들이 계획을 바꿨다니 실망스러웠어.","en":"It was disappointing (that) they changed the plan."},{"num":29,"kr":"걔(남자)가 아무 말도 안 했다니 이상하지 않아?","en":"Isn’t it weird (that) he didn’t say anything?"},{"num":30,"kr":"걔(남자)가 결혼했다니 충격적이야.","en":"It is shocking (that) he’s married."},{"num":31,"kr":"난 출근하는 데 20분 걸려.","en":"It takes me 20 minutes to get to work."},{"num":32,"kr":"걔(여자)가 저녁 준비하는 데 한 시간 걸려.","en":"It takes her an hour to make dinner."},{"num":33,"kr":"거기 가는 데 오래 안 걸려.","en":"It doesn’t take long to get there."},{"num":34,"kr":"공항까지 가는 데 오래 걸려?","en":"Does it take a long time to get to the airport?"},{"num":35,"kr":"넌 준비하는 데 얼마나 오래 걸려?","en":"How long does it take you to get ready?"},{"num":36,"kr":"걔(남자)가 출근하는 데 얼마나 걸려?","en":"How long does it take him to get to work?"},{"num":37,"kr":"우린 보고서 끝내는 데 두 시간 걸렸어.","en":"It took us two hours to finish the report."},{"num":38,"kr":"너 여기 찾는 데 오래 걸렸어?","en":"Did it take you a long time to find this place?"},{"num":39,"kr":"걔들한테 전화하는 데 오래 안 걸릴 거야.","en":"It won’t take long to call them."},{"num":40,"kr":"이거 고치는 데 얼마나 걸릴까?","en":"How long will it take to fix this?"},{"num":41,"kr":"역까지 걸어가는 데 10분쯤 걸려.","en":"It takes about ten minutes to walk to the station."},{"num":42,"kr":"걔(여자)가 결정하는 데 며칠 걸렸어.","en":"It took her a few days to make a decision."},{"num":43,"kr":"왜 이렇게 오래 걸렸어?","en":"Why did it take so long?"},{"num":44,"kr":"알아내는 데 오래 안 걸려.","en":"It doesn’t take long to find out."},{"num":45,"kr":"걔네들이 이사하는 데 몇 시간 걸렸어?","en":"How many hours did it take them to move?"},{"num":46,"kr":"나 들어오는 데 30분 걸렸어.","en":"It took me 30 minutes to get in."},{"num":47,"kr":"넌 익숙해지는 데 얼마나 걸렸어?","en":"How long did it take you to get used to it?"},{"num":48,"kr":"일에 익숙해지는 데 몇 주 걸려요.","en":"It takes a few weeks to get used to the job."},{"num":49,"kr":"넌 잠드는 데 오래 걸려?","en":"Does it take you a long time to fall asleep?"},{"num":50,"kr":"파스타 만드는 데 15분밖에 안 걸렸어.","en":"It took only 15 minutes to cook pasta."},{"num":51,"kr":"바닥이 걷기에 미끄러워.","en":"The floor is slippery to walk on."},{"num":52,"kr":"이 설명은 이해하기 어렵지 않아.","en":"This explanation isn’t hard to understand."},{"num":53,"kr":"그곳은 우리가 밤에 돌아다니기엔 위험해.","en":"That place is dangerous for us to walk around at night."},{"num":54,"kr":"이 책은 읽기 쉬워.","en":"This book is easy to read."},{"num":55,"kr":"이 의자는 앉기에 편하지 않아.","en":"This chair isn’t comfortable to sit on."},{"num":56,"kr":"이 음식은 네가 먹기엔 매워.","en":"This food is spicy for you to eat."},{"num":57,"kr":"그 문제가 풀기 어려워?","en":"Is that problem hard to solve?"},{"num":58,"kr":"이 가방은 들기에 가벼워.","en":"This bag is light to carry."},{"num":59,"kr":"내 이름이 발음하기 어렵지 않아.","en":"My name isn’t difficult to pronounce."},{"num":60,"kr":"이 물은 마시기에 안전해?","en":"Is this water safe to drink?"},{"num":61,"kr":"이 방은 청소하기 쉬워.","en":"This room is easy to clean."},{"num":62,"kr":"이 신발은 신고 다니기에 편해?","en":"Are these shoes comfortable to walk in?"},{"num":63,"kr":"한글은 배우기 쉬워.","en":"Hangul is easy to learn."},{"num":64,"kr":"그 도시는 왜 돌아다니기 무서워?","en":"Why is that city scary to walk around?"},{"num":65,"kr":"서울은 외국인이 여행하기엔 좋은 도시야.","en":"Seoul is a great city for foreigners to visit."},{"num":66,"kr":"이 소파는 눕기에 편해?","en":"Is this sofa comfortable to lie on?"},{"num":67,"kr":"이 문장은 이해하기 쉬워.","en":"This sentence is easy to understand."},{"num":68,"kr":"이 길은 밤에 운전하기 위험하지 않아?","en":"Isn’t this road dangerous to drive on at night?"},{"num":69,"kr":"이 셔츠 세탁하기 쉬워?","en":"Is this shirt easy to wash?"},{"num":70,"kr":"걔(남자)는 같이 살기 불편해.","en":"He's hard to live with."}];
+let sequence=[], idx=0, order='ordered', revealed=false;
+function setOrder(mode){order=mode;document.getElementById('ordered').classList.toggle('active',mode==='ordered');document.getElementById('random').classList.toggle('active',mode==='random')}
+function start(){
+ sequence=[...items];if(order==='random')for(let i=sequence.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[sequence[i],sequence[j]]=[sequence[j],sequence[i]]}
+ idx=0;document.getElementById('setup').style.display='none';document.getElementById('study').style.display='block';render();
+}
+function render(){
+ const x=sequence[idx];revealed=false;
+ document.getElementById('count').textContent=String(idx+1).padStart(3,'0')+' / '+String(sequence.length).padStart(3,'0');
+ document.getElementById('num').textContent='SENTENCE '+String(x.num).padStart(3,'0');
+ document.getElementById('kr').textContent=x.kr;
+ document.getElementById('en').textContent=x.en;
+ document.getElementById('answer').classList.remove('show');
+ document.getElementById('reveal').textContent='정답 확인';
+ document.getElementById('prev').disabled=idx===0;
+ document.getElementById('bar').style.width=(sequence.length<=1?100:idx/(sequence.length-1)*100)+'%';
+ document.getElementById('progressLabel').textContent=`진행 ${idx+1} / ${sequence.length}`;
+ document.getElementById('progress').setAttribute('aria-valuemax',sequence.length);
+ document.getElementById('progress').setAttribute('aria-valuenow',idx+1);
+}
+function reveal(){
+ if(!revealed){
+   revealed=true;
+   document.getElementById('answer').classList.add('show');
+   document.getElementById('reveal').textContent=idx===sequence.length-1?'연습 완료 🎉':'다음 문제 →';
+ }else{
+   if(idx<sequence.length-1){idx++;render();}
+   else{showCelebration();}
+ }
+}
+function move(step){if(idx+step<0||idx+step>=sequence.length)return;idx+=step;render()}
+function goHome(){document.getElementById('celebrate').classList.remove('show');document.getElementById('study').style.display='none';document.getElementById('setup').style.display='block'}
+function goToProgress(clientX){
+ const track=document.querySelector('.progress-track');
+ const rect=track.getBoundingClientRect();
+ const ratio=Math.max(0,Math.min(1,(clientX-rect.left)/rect.width));
+ const target=Math.round(ratio*(sequence.length-1));
+ if(target!==idx){idx=target;render();}
+}
+const progressHit=document.getElementById('progressHit');
+let draggingProgress=false;
+progressHit.addEventListener('pointerdown',e=>{draggingProgress=true;progressHit.setPointerCapture(e.pointerId);goToProgress(e.clientX)});
+progressHit.addEventListener('pointermove',e=>{if(draggingProgress)goToProgress(e.clientX)});
+progressHit.addEventListener('pointerup',()=>{draggingProgress=false});
+progressHit.addEventListener('pointercancel',()=>{draggingProgress=false});
+document.getElementById('progress').addEventListener('keydown',e=>{
+ if(!sequence.length)return;
+ if(e.key==='ArrowRight'){e.preventDefault();idx=Math.min(sequence.length-1,idx+1);render()}
+ if(e.key==='ArrowLeft'){e.preventDefault();idx=Math.max(0,idx-1);render()}
+ if(e.key==='Home'){e.preventDefault();idx=0;render()}
+ if(e.key==='End'){e.preventDefault();idx=sequence.length-1;render()}
+});
+function showCelebration(){
+ document.getElementById('celebrateMessage').innerHTML=`${sequence.length}개 문장 연습을 모두 마쳤어요.<br>끝까지 해낸 자신을 칭찬해 주세요!`;
+ document.getElementById('celebrate').classList.add('show');
+}
+function closeCelebration(){
+ document.getElementById('celebrate').classList.remove('show');
+ goHome();
+}
+document.addEventListener('keydown',e=>{if(document.getElementById('study').style.display==='block'){if(e.key==='ArrowLeft')move(-1);if(e.key==='ArrowRight')move(1);if(e.key===' '){e.preventDefault();reveal()}}});
+</script>
+</body>
+</html>
