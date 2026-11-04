@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PSE 스파르타 | Lesson 12</title>
+<style>
+:root{--ink:#17231e;--muted:#748078;--paper:#f5f5ef;--card:#fff;--green:#c8f169;--line:#e6e9df;--accent:#2c4939}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,Pretendard,"Noto Sans KR",system-ui,sans-serif;min-height:100vh}
+button{font:inherit;cursor:pointer;border:0}button:focus-visible{outline:3px solid #8bb63c;outline-offset:3px}
+.wrap{width:min(100%,760px);margin:auto;padding:24px 18px 42px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:26px}
+.brand{font-size:12px;letter-spacing:.18em;font-weight:900;color:var(--accent)}.pill{border:1px solid #dce1d5;border-radius:999px;padding:8px 12px;color:var(--muted);font-size:11px;font-weight:800}
+h1{font-size:clamp(30px,7vw,48px);line-height:1.08;letter-spacing:-.055em;margin:0;font-weight:950}.subtitle{color:var(--muted);font-size:14px;margin:12px 0 24px}
+.setup,.study{background:var(--card);border:1px solid var(--line);border-radius:28px;padding:clamp(20px,5vw,34px);box-shadow:0 14px 40px #293b2510}
+.section-label{font-size:11px;font-weight:900;letter-spacing:.12em;color:var(--muted);margin-bottom:12px}
+.segment{display:flex;gap:8px;background:#f0f2eb;padding:5px;border-radius:15px;margin-bottom:20px}.segment button{flex:1;padding:12px 8px;border-radius:11px;background:transparent;color:#69736a;font-size:13px;font-weight:800}.segment button.active{background:var(--accent);color:white;box-shadow:0 4px 10px #182b2020}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 0;border-top:1px solid var(--line);font-size:14px;font-weight:750}.switch{background:#e7eae2;color:#69736a;border-radius:999px;padding:8px 13px;font-size:12px;font-weight:900;min-width:72px}.switch.on{background:var(--green);color:#26351c}
+.primary{width:100%;background:var(--green);color:#20301a;border-radius:16px;padding:17px;font-size:16px;font-weight:950;margin-top:18px;box-shadow:0 7px 0 #a9d64e}.primary:active{transform:translateY(2px);box-shadow:0 5px 0 #a9d64e}
+.study{display:none;padding:0;overflow:hidden}.study-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}.back{background:#f1f3ec;border-radius:12px;padding:10px 12px;font-size:12px;font-weight:850}.count{font-size:12px;font-weight:900;color:var(--muted);font-variant-numeric:tabular-nums}
+.progress{height:12px;background:#eef0e9;position:relative;cursor:pointer;touch-action:none;padding:4px 0}
+.progress-track{height:4px;background:#e5e9df;border-radius:99px;position:relative;margin:0 14px}
+.bar{height:4px;background:#a5d642;width:0%;border-radius:99px;position:relative;transition:width .12s}
+.bar::after{content:"";position:absolute;right:-6px;top:-4px;width:12px;height:12px;background:#2c4939;border:2px solid #fff;border-radius:50%;box-shadow:0 1px 4px #0002}
+.progress-hit{position:absolute;inset:-10px -14px;cursor:ew-resize}
+.progress-meta{display:flex;justify-content:space-between;padding:8px 20px 0;color:#8a9487;font-size:11px;font-weight:850;font-variant-numeric:tabular-nums}
+.celebrate{position:fixed;inset:0;background:#17231ecc;z-index:50;display:none;align-items:center;justify-content:center;padding:20px}
+.celebrate.show{display:flex}.celebrate-card{background:#fffdf7;width:min(100%,420px);border-radius:28px;padding:34px 25px;text-align:center;box-shadow:0 24px 90px #0004;animation:pop .28s ease-out}
+.celebrate-icon{font-size:54px;margin-bottom:14px}.celebrate h2{font-size:29px;line-height:1.2;letter-spacing:-.04em;margin:0 0 12px;font-weight:950}.celebrate p{font-size:15px;line-height:1.7;color:#667064;margin:0 0 24px}
+@keyframes pop{from{transform:translateY(12px) scale(.96);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.question{padding:clamp(26px,7vw,54px) clamp(20px,6vw,46px) 26px;text-align:center;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.num{font-size:11px;font-weight:950;color:#849083;letter-spacing:.13em;margin-bottom:24px}.kr{font-size:clamp(27px,6vw,40px);line-height:1.45;font-weight:900;letter-spacing:-.04em;word-break:keep-all}
+
+.answer-slot{height:148px;min-height:148px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding:12px 20px;border-top:1px dashed #dfe4d8;overflow:hidden}.answer{border-top:0;padding:0;text-align:center;display:block;visibility:hidden;opacity:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .15s}.answer.show{visibility:visible;opacity:1}
+.answer{border-top:1px dashed #dfe4d8;padding:24px 20px 28px;text-align:center;display:none}.answer.show{display:block}.en{font-size:clamp(21px,5vw,29px);font-weight:900;line-height:1.45;word-break:keep-all;color:#2c4939}.answer-label{font-size:10px;letter-spacing:.12em;color:#98a195;font-weight:900;margin-bottom:8px}
+.controls{display:grid;grid-template-columns:58px 1fr 58px;gap:8px;padding:0 18px 18px}.control{border-radius:15px;min-height:54px;font-weight:900}.secondary{background:#f0f2eb;color:#3e4b40}.main-action{background:var(--accent);color:white}.control:disabled{opacity:.3;cursor:default}
+.footnote{text-align:center;color:#9aa196;font-size:11px;margin:18px 0 0}
+@media(min-width:600px){.wrap{padding-top:34px}.question{min-height:340px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top"><div class="brand">PSE / SPARTA</div><div class="pill">55 SENTENCE DRILL</div></div>
+  <h1>여러가지 동사패턴</h1>
+  <p class="subtitle">여러 가지 동사 패턴을 연습합니다. 한국어를 보고 영어로 말한 뒤 정답을 확인하세요.</p>
+  <section class="setup" id="setup">
+    <div class="section-label">DRILL SETTINGS</div>
+    <div class="section-label">문제 출제 방식</div>
+    <div class="segment"><button id="ordered" class="active" onclick="setOrder('ordered')">순서대로</button><button id="random" onclick="setOrder('random')">랜덤</button></div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;margin:0">일반동사 긍정문과 의문문을 연습합니다. 한국어를 보고 영어로 말한 뒤 정답을 확인하세요.</p>
+    <button class="primary" onclick="start()">55문장 연습 시작 →</button>
+  </section>
+  <section class="study" id="study">
+    <div class="study-head"><button class="back" onclick="goHome()">← 처음으로</button><div class="count" id="count">001 / 060</div></div>
+    <div class="progress" id="progress" role="slider" aria-label="문제 진행 위치" aria-valuemin="1" aria-valuemax="60" aria-valuenow="1" tabindex="0">
+      <div class="progress-track"><div class="bar" id="bar"></div><div class="progress-hit" id="progressHit"></div></div>
+    </div>
+    <div class="progress-meta"><span id="progressLabel">진행 1 / 60</span><span>막대를 움직여 문제 이동</span></div>
+    <div class="question">
+      <div class="num" id="num">SENTENCE 001</div>
+      <div class="kr" id="kr"></div>
+      
+    </div>
+    <div class="answer-slot"><div class="answer" id="answer"><div class="answer-label">MODEL ANSWER</div><div class="en" id="en"></div></div></div>
+    <div class="controls" style="grid-template-columns:58px 1fr">
+      <button class="control secondary" id="prev" onclick="move(-1)" aria-label="이전 문제">← 이전</button>
+      <button class="control main-action" id="reveal" onclick="reveal()">정답 확인</button>
+    </div>
+  </section>
+  <p class="footnote">PSE SPARTA · GENERAL VERB DRILL</p>
+</main>
+<div class="celebrate" id="celebrate" role="dialog" aria-modal="true" aria-labelledby="celebrateTitle">
+  <div class="celebrate-card">
+    <div class="celebrate-icon">🎉🏆🎉</div>
+    <h2 id="celebrateTitle">정말 수고했어요!</h2>
+    <p id="celebrateMessage">55개 문장 연습을 모두 마쳤어요.<br>꾸준히 말한 만큼 영어가 쌓이고 있어요!</p>
+    <button class="primary" onclick="closeCelebration()">처음으로 돌아가기</button>
+  </div>
+</div>
+<script>
+const items = [{"num":1,"kr":"난 네가 여기 있어 줬으면 좋겠어.","en":"I want you to stay here."},{"num":2,"kr":"네가 솔직하게 말해 줬으면 좋겠어.","en":"I want you to be honest."},{"num":3,"kr":"내가 도와줄까?","en":"Do you want me to help you?"},{"num":4,"kr":"내가 무슨 말을 하길 바래?","en":"What do you want me to say?"},{"num":5,"kr":"걔(여자)는 우리가 조용히 하길 원해.","en":"She wants us to be quiet."},{"num":6,"kr":"이 서류를 확인해 주셨으면 합니다.","en":"I would like you to check this document."},{"num":7,"kr":"조금 천천히 말해 주셨으면 합니다.","en":"I would like you to speak a little slowly."},{"num":8,"kr":"제가 뭘 확인해 줬으면 하시나요?","en":"What would you like me to check?"},{"num":9,"kr":"걔(여자)가 나한테 기다리라고 했어.","en":"She told me to wait."},{"num":10,"kr":"너 걔네들한테 뭐 하라고 했어?","en":"What did you tell them to do?"},{"num":11,"kr":"의사가 나한테 물을 많이 마시라고 했어.","en":"The doctor told me to drink a lot of water."},{"num":12,"kr":"내가 너한테 늦지 말라고 몇 번 말했어?","en":"How many times did I tell you not to be late?"},{"num":13,"kr":"걔(남자)가 나한테 오지 말아달라고 했어.","en":"He asked me not to come."},{"num":14,"kr":"걔(여자)한테 조금만 기다려 달라고 해.","en":"Ask her to wait a little."},{"num":15,"kr":"걔(남자)가 우리한테 조금 일찍 와달라고 했어.","en":"He asked us to come a little early."},{"num":16,"kr":"걔네들이 나한테 지원하라고 설득했어.","en":"They convinced me to apply."},{"num":17,"kr":"내가 걔(남자)를 설득해서 다시 시도하게 했어.","en":"I convinced him to try again."},{"num":18,"kr":"나한테 약 먹으라고 다시 알려 줘.","en":"Remind me to take my medicine."},{"num":19,"kr":"나한테 회의 시간 확인하라고 다시 알려 줘.","en":"Remind me to check the meeting time."},{"num":20,"kr":"내가 이 상자를 옮기는 걸 도와줄래?","en":"Can you help me (to) move this box?"},{"num":21,"kr":"걔(남자)가 나 적응하게 도와줬어.","en":"He helped me (to) settle in."},{"num":22,"kr":"나 면접 준비하는 거 도와줄래?","en":"Can you help me (to) prepare for the interview?"},{"num":23,"kr":"내가 뭘 주문했으면 좋겠어?","en":"What do you want me to order?"},{"num":24,"kr":"난 너희가 거기에 무사히 도착했으면 좋겠어.","en":"I want you to get there safe."},{"num":25,"kr":"걔(남자)한테 아무것도 먹지 말라고 다시 알려줘.","en":"Remind him not to eat anything."},{"num":26,"kr":"난 네가 좀 쉬는 게 좋을 것 같아. (추천)","en":"I recommend that you get some rest."},{"num":27,"kr":"난 우리가 택시를 타는 게 좋을 것 같아. (제안)","en":"I suggest that we take a taxi."},{"num":28,"kr":"난 너희가 일찍 출발하는 게 좋을 것 같아. (추천)","en":"I recommend that you leave early."},{"num":29,"kr":"넌 우리가 어디서 만나는 게 좋을 것 같아? (제안)","en":"Where do you suggest that we meet?"},{"num":30,"kr":"넌 내가 저녁 먹으러 어디 가는 게 좋을 것 같아? (추천)","en":"Where do you recommend that I go for dinner?"},{"num":31,"kr":"저한테 사실대로 말하세요.","en":"I insist that you tell me the truth."},{"num":32,"kr":"모두 규칙을 따라야 합니다.","en":"I insist that everyone follow the rules."},{"num":33,"kr":"걘(여자) 네가 사과를 해야 한다고 고집 부려.","en":"She insists that he apologize."},{"num":34,"kr":"걔(남자)가 자기가 다 쏘겠다고 고집 부렸어.","en":"He insisted that he pay for everything."},{"num":35,"kr":"당신 저한테 사과하세요.","en":"I demand that you apologize to me."},{"num":36,"kr":"전액 환불해주세요.","en":"I demand that you give me a full refund."},{"num":37,"kr":"매니저랑 직접 얘기할게요.","en":"I demand that I speak to the manager."},{"num":38,"kr":"그들은 우리가 증거를 제출할 것을 요구해.","en":"They demand that we submit the evidence."},{"num":39,"kr":"난 걔(남자)가 여기 있는 게 좋을 것 같아. (추천)","en":"I recommend that he be here."},{"num":40,"kr":"난 걔(여자)가 런닝을 시작하는 게 좋을 것 같아. (제안)","en":"I suggest that she start running."},{"num":41,"kr":"난 걔(남자)가 길을 건너고 있는 걸 봤어.","en":"I saw him crossing the street."},{"num":42,"kr":"우리는 공원에서 밴드가 연주하는 걸 구경했어.","en":"We watched a band playing in the park."},{"num":43,"kr":"나 아까 걔(여자)가 점심 먹고 있는 거 봤어.","en":"I saw her having lunch earlier."},{"num":44,"kr":"누군가가 노크하는 소리가 들렸어.","en":"I heard someone knock."},{"num":45,"kr":"아기가 울고 있는 소리를 들었어.","en":"I heard the baby crying."},{"num":46,"kr":"걔(남자)가 내 이름을 부르는 걸 들었어.","en":"I heard him call my name."},{"num":47,"kr":"알람 울리는 소리를 못 들었어.","en":"I didn’t hear the alarm go off."},{"num":48,"kr":"난 걔(여자)가 피아노를 연주하는 걸 지켜봤어.","en":"I watched her play the piano."},{"num":49,"kr":"나는 걔네들이 함께 노래하는 걸 들었어.","en":"I listened to them sing together."},{"num":50,"kr":"누군가가 코 고는 소리가 들렸어.","en":"I heard someone snoring."},{"num":51,"kr":"나 네가 들어오는 거 못 봤어.","en":"I didn’t see you come in."},{"num":52,"kr":"나 어제 네가 누군가랑 말다툼 하고 있는 거 봤어.","en":"I saw you arguing with someone yesterday."},{"num":53,"kr":"빗방울 떨어지는 소리가 들려.","en":"I hear the raindrops falling."},{"num":54,"kr":"우리 엄마가 아침 요리를 하시는 소리가 들렸어.","en":"I heard my mom cooking breakfast."},{"num":55,"kr":"하늘에서 비행기가 날아가는 게 보였어.","en":"I watched an airplane flying across the sky."}];
+let sequence=[], idx=0, order='ordered', revealed=false;
+function setOrder(mode){order=mode;document.getElementById('ordered').classList.toggle('active',mode==='ordered');document.getElementById('random').classList.toggle('active',mode==='random')}
+function start(){
+ sequence=[...items];if(order==='random')for(let i=sequence.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[sequence[i],sequence[j]]=[sequence[j],sequence[i]]}
+ idx=0;document.getElementById('setup').style.display='none';document.getElementById('study').style.display='block';render();
+}
+function render(){
+ const x=sequence[idx];revealed=false;
+ document.getElementById('count').textContent=String(idx+1).padStart(3,'0')+' / '+String(sequence.length).padStart(3,'0');
+ document.getElementById('num').textContent='SENTENCE '+String(x.num).padStart(3,'0');
+ document.getElementById('kr').textContent=x.kr;
+ document.getElementById('en').textContent=x.en;
+ document.getElementById('answer').classList.remove('show');
+ document.getElementById('reveal').textContent='정답 확인';
+ document.getElementById('prev').disabled=idx===0;
+ document.getElementById('bar').style.width=(sequence.length<=1?100:idx/(sequence.length-1)*100)+'%';
+ document.getElementById('progressLabel').textContent=`진행 ${idx+1} / ${sequence.length}`;
+ document.getElementById('progress').setAttribute('aria-valuemax',sequence.length);
+ document.getElementById('progress').setAttribute('aria-valuenow',idx+1);
+}
+function reveal(){
+ if(!revealed){
+   revealed=true;
+   document.getElementById('answer').classList.add('show');
+   document.getElementById('reveal').textContent=idx===sequence.length-1?'연습 완료 🎉':'다음 문제 →';
+ }else{
+   if(idx<sequence.length-1){idx++;render();}
+   else{showCelebration();}
+ }
+}
+function move(step){if(idx+step<0||idx+step>=sequence.length)return;idx+=step;render()}
+function goHome(){document.getElementById('celebrate').classList.remove('show');document.getElementById('study').style.display='none';document.getElementById('setup').style.display='block'}
+function goToProgress(clientX){
+ const track=document.querySelector('.progress-track');
+ const rect=track.getBoundingClientRect();
+ const ratio=Math.max(0,Math.min(1,(clientX-rect.left)/rect.width));
+ const target=Math.round(ratio*(sequence.length-1));
+ if(target!==idx){idx=target;render();}
+}
+const progressHit=document.getElementById('progressHit');
+let draggingProgress=false;
+progressHit.addEventListener('pointerdown',e=>{draggingProgress=true;progressHit.setPointerCapture(e.pointerId);goToProgress(e.clientX)});
+progressHit.addEventListener('pointermove',e=>{if(draggingProgress)goToProgress(e.clientX)});
+progressHit.addEventListener('pointerup',()=>{draggingProgress=false});
+progressHit.addEventListener('pointercancel',()=>{draggingProgress=false});
+document.getElementById('progress').addEventListener('keydown',e=>{
+ if(!sequence.length)return;
+ if(e.key==='ArrowRight'){e.preventDefault();idx=Math.min(sequence.length-1,idx+1);render()}
+ if(e.key==='ArrowLeft'){e.preventDefault();idx=Math.max(0,idx-1);render()}
+ if(e.key==='Home'){e.preventDefault();idx=0;render()}
+ if(e.key==='End'){e.preventDefault();idx=sequence.length-1;render()}
+});
+function showCelebration(){
+ document.getElementById('celebrateMessage').innerHTML=`${sequence.length}개 문장 연습을 모두 마쳤어요.<br>끝까지 해낸 자신을 칭찬해 주세요!`;
+ document.getElementById('celebrate').classList.add('show');
+}
+function closeCelebration(){
+ document.getElementById('celebrate').classList.remove('show');
+ goHome();
+}
+document.addEventListener('keydown',e=>{if(document.getElementById('study').style.display==='block'){if(e.key==='ArrowLeft')move(-1);if(e.key==='ArrowRight')move(1);if(e.key===' '){e.preventDefault();reveal()}}});
+</script>
+</body>
+</html>
