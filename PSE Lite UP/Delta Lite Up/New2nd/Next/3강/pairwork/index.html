@@ -94,6 +94,17 @@ function render(){
 $('previous').addEventListener('click',()=>{if(current>0){current--;render()}});
 $('next').addEventListener('click',()=>{if(current<order.length-1)current++;else current=0;render()});
 $('reshuffle').addEventListener('click',()=>{for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]]}current=0;render()});
-$('startButton').addEventListener('click',()=>{document.body.classList.remove('not-started');$('startScreen').remove()});
+$('startButton').addEventListener('click',()=>{
+  // 시작할 때마다 50개 질문의 순서를 새로 무작위로 섞습니다.
+  order=QUESTIONS.map((_,i)=>i);
+  for(let i=order.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [order[i],order[j]]=[order[j],order[i]];
+  }
+  current=0;
+  render();
+  document.body.classList.remove('not-started');
+  $('startScreen').remove();
+});
 render();
 </script></body></html>
