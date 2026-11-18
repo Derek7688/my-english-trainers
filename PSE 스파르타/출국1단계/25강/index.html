@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PSE 스파르타 | Lesson 25</title>
+<style>
+:root{--ink:#17231e;--muted:#748078;--paper:#f5f5ef;--card:#fff;--green:#c8f169;--line:#e6e9df;--accent:#2c4939}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,Pretendard,"Noto Sans KR",system-ui,sans-serif;min-height:100vh}
+button{font:inherit;cursor:pointer;border:0}button:focus-visible{outline:3px solid #8bb63c;outline-offset:3px}
+.wrap{width:min(100%,760px);margin:auto;padding:24px 18px 42px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:26px}
+.brand{font-size:12px;letter-spacing:.18em;font-weight:900;color:var(--accent)}.pill{border:1px solid #dce1d5;border-radius:999px;padding:8px 12px;color:var(--muted);font-size:11px;font-weight:800}
+h1{font-size:clamp(30px,7vw,48px);line-height:1.08;letter-spacing:-.055em;margin:0;font-weight:950}.subtitle{color:var(--muted);font-size:14px;margin:12px 0 24px}
+.setup,.study{background:var(--card);border:1px solid var(--line);border-radius:28px;padding:clamp(20px,5vw,34px);box-shadow:0 14px 40px #293b2510}
+.section-label{font-size:11px;font-weight:900;letter-spacing:.12em;color:var(--muted);margin-bottom:12px}
+.segment{display:flex;gap:8px;background:#f0f2eb;padding:5px;border-radius:15px;margin-bottom:20px}.segment button{flex:1;padding:12px 8px;border-radius:11px;background:transparent;color:#69736a;font-size:13px;font-weight:800}.segment button.active{background:var(--accent);color:white;box-shadow:0 4px 10px #182b2020}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 0;border-top:1px solid var(--line);font-size:14px;font-weight:750}.switch{background:#e7eae2;color:#69736a;border-radius:999px;padding:8px 13px;font-size:12px;font-weight:900;min-width:72px}.switch.on{background:var(--green);color:#26351c}
+.primary{width:100%;background:var(--green);color:#20301a;border-radius:16px;padding:17px;font-size:16px;font-weight:950;margin-top:18px;box-shadow:0 7px 0 #a9d64e}.primary:active{transform:translateY(2px);box-shadow:0 5px 0 #a9d64e}
+.study{display:none;padding:0;overflow:hidden}.study-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}.back{background:#f1f3ec;border-radius:12px;padding:10px 12px;font-size:12px;font-weight:850}.count{font-size:12px;font-weight:900;color:var(--muted);font-variant-numeric:tabular-nums}
+.progress{height:12px;background:#eef0e9;position:relative;cursor:pointer;touch-action:none;padding:4px 0}
+.progress-track{height:4px;background:#e5e9df;border-radius:99px;position:relative;margin:0 14px}
+.bar{height:4px;background:#a5d642;width:0%;border-radius:99px;position:relative;transition:width .12s}
+.bar::after{content:"";position:absolute;right:-6px;top:-4px;width:12px;height:12px;background:#2c4939;border:2px solid #fff;border-radius:50%;box-shadow:0 1px 4px #0002}
+.progress-hit{position:absolute;inset:-10px -14px;cursor:ew-resize}
+.progress-meta{display:flex;justify-content:space-between;padding:8px 20px 0;color:#8a9487;font-size:11px;font-weight:850;font-variant-numeric:tabular-nums}
+.celebrate{position:fixed;inset:0;background:#17231ecc;z-index:50;display:none;align-items:center;justify-content:center;padding:20px}
+.celebrate.show{display:flex}.celebrate-card{background:#fffdf7;width:min(100%,420px);border-radius:28px;padding:34px 25px;text-align:center;box-shadow:0 24px 90px #0004;animation:pop .28s ease-out}
+.celebrate-icon{font-size:54px;margin-bottom:14px}.celebrate h2{font-size:29px;line-height:1.2;letter-spacing:-.04em;margin:0 0 12px;font-weight:950}.celebrate p{font-size:15px;line-height:1.7;color:#667064;margin:0 0 24px}
+@keyframes pop{from{transform:translateY(12px) scale(.96);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.question{padding:clamp(26px,7vw,54px) clamp(20px,6vw,46px) 26px;text-align:center;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.num{font-size:11px;font-weight:950;color:#849083;letter-spacing:.13em;margin-bottom:24px}.kr{font-size:clamp(27px,6vw,40px);line-height:1.45;font-weight:900;letter-spacing:-.04em;word-break:keep-all}
+
+.answer-slot{height:148px;min-height:148px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding:12px 20px;border-top:1px dashed #dfe4d8;overflow:hidden}.answer{border-top:0;padding:0;text-align:center;display:block;visibility:hidden;opacity:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .15s}.answer.show{visibility:visible;opacity:1}
+.answer{border-top:1px dashed #dfe4d8;padding:24px 20px 28px;text-align:center;display:none}.answer.show{display:block}.en{font-size:clamp(21px,5vw,29px);font-weight:900;line-height:1.45;word-break:keep-all;color:#2c4939}.answer-label{font-size:10px;letter-spacing:.12em;color:#98a195;font-weight:900;margin-bottom:8px}
+.controls{display:grid;grid-template-columns:58px 1fr 58px;gap:8px;padding:0 18px 18px}.control{border-radius:15px;min-height:54px;font-weight:900}.secondary{background:#f0f2eb;color:#3e4b40}.main-action{background:var(--accent);color:white}.control:disabled{opacity:.3;cursor:default}
+.footnote{text-align:center;color:#9aa196;font-size:11px;margin:18px 0 0}
+@media(min-width:600px){.wrap{padding-top:34px}.question{min-height:340px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top"><div class="brand">PSE / SPARTA</div><div class="pill">45 SENTENCE DRILL</div></div>
+  <h1>가정법 Part 1</h1>
+  <p class="subtitle">가정법 Part 1 문장을 연습합니다. 한국어를 보고 영어로 말한 뒤 정답을 확인하세요.</p>
+  <section class="setup" id="setup">
+    <div class="section-label">DRILL SETTINGS</div>
+    <div class="section-label">문제 출제 방식</div>
+    <div class="segment"><button id="ordered" class="active" onclick="setOrder('ordered')">순서대로</button><button id="random" onclick="setOrder('random')">랜덤</button></div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;margin:0">MAY와 MIGHT 문장을 한국어에서 영어로 바꾸어 말하는 연습을 합니다.</p>
+    <button class="primary" onclick="start()">45문장 연습 시작 →</button>
+  </section>
+  <section class="study" id="study">
+    <div class="study-head"><button class="back" onclick="goHome()">← 처음으로</button><div class="count" id="count">001 / 045</div></div>
+    <div class="progress" id="progress" role="slider" aria-label="문제 진행 위치" aria-valuemin="1" aria-valuemax="45" aria-valuenow="1" tabindex="0">
+      <div class="progress-track"><div class="bar" id="bar"></div><div class="progress-hit" id="progressHit"></div></div>
+    </div>
+    <div class="progress-meta"><span id="progressLabel">진행 1 / 45</span><span>막대를 움직여 문제 이동</span></div>
+    <div class="question">
+      <div class="num" id="num">SENTENCE 001</div>
+      <div class="kr" id="kr"></div>
+      
+    </div>
+    <div class="answer-slot"><div class="answer" id="answer"><div class="answer-label">MODEL ANSWER</div><div class="en" id="en"></div></div></div>
+    <div class="controls" style="grid-template-columns:58px 1fr">
+      <button class="control secondary" id="prev" onclick="move(-1)" aria-label="이전 문제">← 이전</button>
+      <button class="control main-action" id="reveal" onclick="reveal()">정답 확인</button>
+    </div>
+  </section>
+  <p class="footnote">PSE SPARTA · 가정법 PART 1 DRILL</p>
+</main>
+<div class="celebrate" id="celebrate" role="dialog" aria-modal="true" aria-labelledby="celebrateTitle">
+  <div class="celebrate-card">
+    <div class="celebrate-icon">🎉🏆🎉</div>
+    <h2 id="celebrateTitle">정말 수고했어요!</h2>
+    <p id="celebrateMessage">45개 문장 연습을 모두 마쳤어요.<br>꾸준히 말한 만큼 영어가 쌓이고 있어요!</p>
+    <button class="primary" onclick="closeCelebration()">처음으로 돌아가기</button>
+  </div>
+</div>
+<script>
+const items = [{"num":1,"kr":"내가 시간이 있다면, 매일 헬스장에서 운동을 할 텐데.","en":"If I had time, I would go to the gym every day."},{"num":2,"kr":"네가 일을 더 열심히 한다면, 돈 걱정을 안 해도 되겠지.","en":"If you worked harder, you wouldn’t have to worry about money."},{"num":3,"kr":"내가 돈이 많으면, 이런 걸 하고 있지는 않을 텐데.","en":"If I had a lot of money, I wouldn’t be doing something like this."},{"num":4,"kr":"네가 정말 좋은 친구였다면, 날 위해서 이걸 해줬겠지.","en":"If you’d been really a good friend, you would’ve done this for me."},{"num":5,"kr":"내가 미국에서 태어났으면, 영어를 안 배워도 됐을 텐데.","en":"If I’d been born in America, I wouldn’t’ve had to learn English."},{"num":6,"kr":"내가 요리를 잘하면, 너한테 더 맛있는 걸 만들어 줬을 텐데.","en":"If I were a good cook, I would’ve made you something better."},{"num":7,"kr":"오늘이 금요일이라면 진짜 행복하겠다.","en":"If it were Friday today, I would be so happy."},{"num":8,"kr":"내가 돈이 더 많다면, 우리가 여기 더 오래 있을 수 있을 텐데.","en":"If I had more money, we would be able to stay here longer."},{"num":9,"kr":"학원이 우리 집 앞에 있다면, 1시간 더 늦게 일어나도 될 텐데.","en":"If the academy were in front of my place, I would be able to wake up an hour later."},{"num":10,"kr":"책임감에 이름이 있다면, 그 이름은 Derek일 거라고 Derek이 말했어.","en":"Derek said, “If responsibility had a name, it would be Derek.”"},{"num":11,"kr":"내가 지금 20대라면, 예전처럼 내 젊음을 낭비하진 않을 거야.","en":"If I were in my twenties now, I wouldn’t waste my youth like I used to."},{"num":12,"kr":"내 키가 조금만 더 컸으면, 바지를 수선할 필요가 없을 텐데.","en":"If I were a little taller, I wouldn’t have to get my pants altered."},{"num":13,"kr":"사람들이 더 많다면, 우리가 요리를 더 많이 시킬 수 있을텐데.","en":"If there were more people, we would be able to order more dishes."},{"num":14,"kr":"네가 영어를 더 자주 말한다면, 영어 실력이 점점 더 좋아지고 있겠지.","en":"If you spoke English more often, your English would be getting better and better."},{"num":15,"kr":"그렇게 쉬웠으면, 아무나 했겠지.","en":"If it’d been that easy, anyone would’ve done it."},{"num":16,"kr":"걔(여자)가 나를 안 믿었으면, 나한테 아무것도 안 물어봤을 거야.","en":"If she hadn’t believed me, she wouldn’t’ve asked me anything."},{"num":17,"kr":"사람들이 내가 누군지 안다면, 나를 이런 식으로 대하진 않을 거야.","en":"If they knew who I am, they wouldn’t be treating me like this."},{"num":18,"kr":"우리 부모님이 아니었다면, 난 지금 이 자리에 있지 못했을 거에요.","en":"If it hadn’t been for my parents, I wouldn’t be where I am now."},{"num":19,"kr":"내가 차가 있으면, 널 집에 데려다 줄 텐데.","en":"If I had a car, I would take you home."},{"num":20,"kr":"내가 부자면, 우린 우리가 갖고 싶은 거 아무거나 다 살 수 있을 텐데.","en":"If I were rich, we would be able to buy anything we want."},{"num":21,"kr":"내가 너만큼 노래를 잘 한다면, 진짜 좋겠다.","en":"If I could sing as well as you do, it would be awesome."},{"num":22,"kr":"그때 투자했더라면, 내 인생이 엄청 달라졌을 텐데.","en":"If I’d invested at that time, my life would’ve changed a lot."},{"num":23,"kr":"걔(여자)가 지금 여기 있으면, 빵 터져서 엄청 웃고 있을 거야.","en":"If she were here now, she would be cracking up."},{"num":24,"kr":"세종대왕님이 아니었다면, 우린 아직도 한자를 쓰고 있을 거야.","en":"If it hadn't been for King Sejong the Great, we would still be using Chinese characters."},{"num":25,"kr":"내가 너라면, 그런 말은 하지 않을 텐데.","en":"If I were you, I wouldn’t say something like that."},{"num":26,"kr":"내가 너라면, 내 삶에 만족할 텐데.","en":"If I were you, I would be happy with my life."},{"num":27,"kr":"내가 너라면, 당장 퇴사했을 거야.","en":"If I’d been you, I would’ve quit right away."},{"num":28,"kr":"내가 너라면, 그렇게 확신하지는 않을 거야.","en":"If I were you, I wouldn’t be so sure."},{"num":29,"kr":"내가 너라면, 그건 안 시킬 거야.","en":"If I were you, I wouldn’t order it."},{"num":30,"kr":"내가 걔(남자)였다면, 내가 가진 모든 걸 소중히 했을 텐데.","en":"If I’d been him, I would’ve cherished everything I had."},{"num":31,"kr":"내가 너라면, 스스로 무덤을 파는 짓은 안 할 거야.","en":"If I were you, I wouldn’t dig my own grave."},{"num":32,"kr":"내가 네 입장이라면, 펑펑 울고 있을 텐데.","en":"If I were in your shoes, I would be crying my eyes out."},{"num":33,"kr":"내가 네 입장이라면, 걔네들을 더 이상 신뢰하지 않을 거야.","en":"If I were in your shoes, I wouldn’t trust them anymore."},{"num":34,"kr":"내가 네 입장이었다면, 뭔가 방법을 찾으려고 애쓰고 있었을 텐데.","en":"If I’d been in your shoes, I would’ve been trying to find a way."},{"num":35,"kr":"너도 내 입장이면, 패닉일 거야.","en":"If you were in my shoes, you would be panicking."},{"num":36,"kr":"내가 네 입장이라면, 나 자신이 싫을 텐데.","en":"If I were in your shoes, I would hate myself."},{"num":37,"kr":"내가 우리 부모님의 입장이었다면, 그렇게 살지 못 했을 거야.","en":"If I’d been in my parents’ shoes, I wouldn’t’ve been able to live like that."},{"num":38,"kr":"가격이 조금 더 낮다면, 살만 할 텐데.","en":"If the price were a little lower, it would be worth buying."},{"num":39,"kr":"내가 걔(남자)를 봤으면, 인사를 했겠지.","en":"If I’d seen him, I would’ve said hi."},{"num":40,"kr":"사람들이 전부 너 같다면, 세상이 더 살기 좋은 곳일텐데.","en":"If everyone were like you, the world would be a better place to live."},{"num":41,"kr":"너 안 먹었으면, 후회했을 거야.","en":"If you hadn’t eaten it, you would’ve regretted it."},{"num":42,"kr":"날씨가 좋다면, 사람들이 더 많을텐데.","en":"If the weather were nice, there would be more people."},{"num":43,"kr":"네가 해야 할 일을 한다면, 내가 네 걱정을 안 해도 되겠지.","en":"If you did what you have to do, I wouldn’t have to worry about you."},{"num":44,"kr":"어제 아프지 않았으면, 너랑 같이 갔을텐데.","en":"If I hadn’t been sick yesterday, I would’ve gone with you."},{"num":45,"kr":"걔(남자)가 성격만 더 좋았어도, 너랑 좋은 친구가 됐을 텐데.","en":"If he’d had a better personality, he would’ve been good friends with you."}];
+let sequence=[], idx=0, order='ordered', revealed=false;
+function setOrder(mode){order=mode;document.getElementById('ordered').classList.toggle('active',mode==='ordered');document.getElementById('random').classList.toggle('active',mode==='random')}
+function start(){
+ sequence=[...items];if(order==='random')for(let i=sequence.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[sequence[i],sequence[j]]=[sequence[j],sequence[i]]}
+ idx=0;document.getElementById('setup').style.display='none';document.getElementById('study').style.display='block';render();
+}
+function render(){
+ const x=sequence[idx];revealed=false;
+ document.getElementById('count').textContent=String(idx+1).padStart(3,'0')+' / '+String(sequence.length).padStart(3,'0');
+ document.getElementById('num').textContent='SENTENCE '+String(x.num).padStart(3,'0');
+ document.getElementById('kr').textContent=x.kr;
+ document.getElementById('en').textContent=x.en;
+ document.getElementById('answer').classList.remove('show');
+ document.getElementById('reveal').textContent='정답 확인';
+ document.getElementById('prev').disabled=idx===0;
+ document.getElementById('bar').style.width=(sequence.length<=1?100:idx/(sequence.length-1)*100)+'%';
+ document.getElementById('progressLabel').textContent=`진행 ${idx+1} / ${sequence.length}`;
+ document.getElementById('progress').setAttribute('aria-valuemax',sequence.length);
+ document.getElementById('progress').setAttribute('aria-valuenow',idx+1);
+}
+function reveal(){
+ if(!revealed){
+   revealed=true;
+   document.getElementById('answer').classList.add('show');
+   document.getElementById('reveal').textContent=idx===sequence.length-1?'연습 완료 🎉':'다음 문제 →';
+ }else{
+   if(idx<sequence.length-1){idx++;render();}
+   else{showCelebration();}
+ }
+}
+function move(step){if(idx+step<0||idx+step>=sequence.length)return;idx+=step;render()}
+function goHome(){document.getElementById('celebrate').classList.remove('show');document.getElementById('study').style.display='none';document.getElementById('setup').style.display='block'}
+function goToProgress(clientX){
+ const track=document.querySelector('.progress-track');
+ const rect=track.getBoundingClientRect();
+ const ratio=Math.max(0,Math.min(1,(clientX-rect.left)/rect.width));
+ const target=Math.round(ratio*(sequence.length-1));
+ if(target!==idx){idx=target;render();}
+}
+const progressHit=document.getElementById('progressHit');
+let draggingProgress=false;
+progressHit.addEventListener('pointerdown',e=>{draggingProgress=true;progressHit.setPointerCapture(e.pointerId);goToProgress(e.clientX)});
+progressHit.addEventListener('pointermove',e=>{if(draggingProgress)goToProgress(e.clientX)});
+progressHit.addEventListener('pointerup',()=>{draggingProgress=false});
+progressHit.addEventListener('pointercancel',()=>{draggingProgress=false});
+document.getElementById('progress').addEventListener('keydown',e=>{
+ if(!sequence.length)return;
+ if(e.key==='ArrowRight'){e.preventDefault();idx=Math.min(sequence.length-1,idx+1);render()}
+ if(e.key==='ArrowLeft'){e.preventDefault();idx=Math.max(0,idx-1);render()}
+ if(e.key==='Home'){e.preventDefault();idx=0;render()}
+ if(e.key==='End'){e.preventDefault();idx=sequence.length-1;render()}
+});
+function showCelebration(){
+ document.getElementById('celebrateMessage').innerHTML=`${sequence.length}개 문장 연습을 모두 마쳤어요.<br>끝까지 해낸 자신을 칭찬해 주세요!`;
+ document.getElementById('celebrate').classList.add('show');
+}
+function closeCelebration(){
+ document.getElementById('celebrate').classList.remove('show');
+ goHome();
+}
+document.addEventListener('keydown',e=>{if(document.getElementById('study').style.display==='block'){if(e.key==='ArrowLeft')move(-1);if(e.key==='ArrowRight')move(1);if(e.key===' '){e.preventDefault();reveal()}}});
+</script>
+</body>
+</html>
