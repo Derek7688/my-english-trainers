@@ -165,7 +165,7 @@ const coreData = [
   {num:'40',kr:'너 헬스장에 있었던 거 아니야?',en:"Weren't you at the gym?"}
 ];
 
-// 핵심 문장마다 주어만 바꾼 응용 문장 2개씩 생성: 총 80개.
+// 핵심 문장마다 주어를 바꾸고, 주어에 연결된 소유격도 일치시킨 응용 문장 2개씩 생성: 총 80개.
 // Didn't you -> Didn't she/he/they, Weren't you -> Wasn't she/he / Weren't they.
 const subjectPairs = [
   [{en:'she',kr:'걔(여자)'},{en:'he',kr:'걔(남자)'}],
@@ -180,10 +180,19 @@ function makeApplied(core,index){
     if(en.startsWith("Didn't you ")){
       en=en.replace(/^Didn't you /,`Didn't ${s.en} `);
       kr=kr.replace(/^너 /,`${s.kr} `);
-    } else if(en.startsWith("Weren't you ")){
-      const be=s.en==='they'?"Weren't":"Wasn't";
-      en=en.replace(/^Weren't you /,`${be} ${s.en} `);
+    } else if(en.startsWith('Were you ')){
+      const be=s.en==='they'?'Were':'Was';
+      en=en.replace(/^Were you /,`${be} ${s.en} `);
       kr=kr.replace(/^너 /,`${s.kr} `);
+    }
+    // 소유격 your는 응용문장의 주어에 맞춰 her/his/their로 변경한다.
+    if(/\byour\b/.test(en)){
+      const possessive={she:'her',he:'his',they:'their'}[s.en];
+      en=en.replace(/\byour\b/g,possessive);
+      const subjectKr=s.en==='they'?'걔네들은':`${s.kr}는`;
+      const possessiveKr=({ '06': '자기 친구 만났어?', '07': '자기 엄마한테 전화했어?', '19': '자기 숙제했어?',
+                            '01': '자기 방 청소 안 했어?', '14': '자기 친구랑 이야기 안 했어?' })[core.num];
+      if(possessiveKr) kr=subjectKr+' '+possessiveKr;
     }
     return {num:`${core.num}-${j+1}`,coreNum:core.num,coreKr:core.kr,coreEn:core.en,kr,en};
   });
