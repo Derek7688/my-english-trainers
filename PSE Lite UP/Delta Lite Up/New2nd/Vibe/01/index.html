@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Vibe 1강 | Question Drill</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap');
+body{font-family:'Pretendard',sans-serif;touch-action:manipulation}
+.card-container{min-height:390px;display:flex;flex-direction:column;justify-content:center}
+.banner-inner{transition:all .5s ease}
+#progress-container{cursor:pointer;touch-action:none}
+#timer-gauge-bar{transition:width 50ms linear}
+.mode-btn-active{background:#0f172a!important;color:#fff!important;border-color:#0f172a!important}
+.auto-active{background:#f97316!important;color:#fff!important;border-color:#f97316!important}
+.answer-hidden{visibility:hidden;opacity:0;transform:translateY(12px);pointer-events:none}
+.answer-visible{visibility:visible;opacity:1;transform:translateY(0)}
+#control-panel{min-height:64px}
+.nav-control{height:56px;display:flex;align-items:center;justify-content:center;white-space:nowrap}
+.hide-control{width:92px;flex:0 0 92px;transition:opacity .18s ease,background-color .18s ease,color .18s ease}
+.hide-control.is-unavailable{opacity:.35;cursor:default}
+.hide-control.is-available{opacity:1}
+</style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col items-center justify-start p-4">
+
+<template id="banner-template">
+  <div class="promo-banner bg-white border border-blue-50 p-4 rounded-[2.2rem] mb-6 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849','_blank')">
+    <div class="banner-inner flex items-center gap-4">
+      <div class="banner-icon w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+      <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center text-left">
+        <h3 class="banner-title font-black text-slate-800 text-[14px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+        <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+      </div>
+    </div>
+  </div>
+</template>
+
+<div id="setup-screen" class="bg-white p-7 sm:p-8 rounded-[2.5rem] shadow-2xl max-w-sm w-full border border-slate-100 my-auto text-center">
+  <h1 class="text-2xl font-black text-slate-800 mb-5">Vibe 1강</h1>
+  <p class="text-slate-500 text-xs leading-relaxed mb-5">한국어 질문을 보고 영어로 말한 뒤 정답을 확인하세요.<br>핵심 문장 30개 또는 응용 문장 60개를 연습할 수 있습니다.</p>
+  <div id="setup-banner-area"></div>
+
+  <div class="mb-5 px-1 text-left">
+    <p class="text-slate-700 font-bold text-sm mb-3">연습할 문장 선택</p>
+    <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-2xl">
+      <button id="tab-core" onclick="selectContentMode('core')" class="py-3 rounded-xl font-black text-xs transition-all mode-btn-active shadow-sm">📘 핵심 문장 30개</button>
+      <button id="tab-applied" onclick="selectContentMode('applied')" class="py-3 rounded-xl font-bold text-xs text-slate-500 transition-all">🔄 응용 문장 60개</button>
+    </div>
+  </div>
+
+  <div class="mb-6 px-1 text-left">
+    <p class="text-slate-700 font-bold text-sm mb-3">출제 순서 선택</p>
+    <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-2xl">
+      <button id="tab-ordered" onclick="selectOrderMode('ordered')" class="py-3 rounded-xl font-black text-xs transition-all mode-btn-active shadow-sm">🔢 순서대로</button>
+      <button id="tab-random" onclick="selectOrderMode('random')" class="py-3 rounded-xl font-bold text-xs text-slate-500 transition-all">🎲 랜덤</button>
+    </div>
+    <p id="mode-desc" class="text-[11px] font-semibold text-slate-400 mt-2 px-1">핵심 문장 30개를 1번부터 순서대로 연습합니다.</p>
+  </div>
+
+  <div class="mb-6">
+    <button id="auto-mode-btn" onclick="toggleAutoMode()" class="w-full py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-600 flex items-center justify-center gap-2 transition-all"><span id="auto-icon">⚪</span> 자동 재생 OFF</button>
+    <p class="text-[10px] text-slate-400 mt-2">자동 재생은 생각 시간 후 정답을 보여주고 다음 문제로 넘어갑니다.</p>
+  </div>
+  <button onclick="startStudy()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold text-lg shadow-xl active:scale-95 transition-all">연습 시작하기</button>
+</div>
+
+<div id="study-screen" class="hidden w-full max-w-lg text-slate-900 mx-auto">
+  <div class="flex justify-between items-center mb-4 px-2">
+    <button onclick="location.reload()" class="p-2 hover:bg-slate-200 rounded-full text-slate-400" aria-label="처음으로">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"/></svg>
+    </button>
+    <div id="active-lesson-name" class="text-slate-400 font-black text-xs tracking-widest uppercase text-center flex-1">VIBE · CAN QUESTION DRILL</div>
+    <div class="w-10"></div>
+  </div>
+
+  <div id="prev-item-box" class="w-full px-8 mb-2 flex flex-col items-center justify-center text-center opacity-0 min-h-12">
+    <p id="prev-kr" class="text-xs font-bold text-slate-400 truncate w-full"></p>
+    <p id="prev-en" class="text-xs font-black text-blue-300 truncate w-full"></p>
+  </div>
+
+  <div class="bg-white p-8 sm:p-10 rounded-[3rem] shadow-2xl card-container text-center mb-5 border border-slate-50 relative overflow-hidden">
+    <div id="timer-gauge-container" class="absolute top-0 left-0 right-0 h-1.5 bg-slate-100 hidden overflow-hidden"><div id="timer-gauge-bar" class="h-full bg-orange-500 w-full"></div></div>
+    <div class="absolute top-6 left-7 right-7 flex justify-between items-center">
+      <span id="sentence-number" class="bg-slate-100 text-slate-400 px-3 py-1 rounded-lg text-[10px] font-black">01</span>
+      <div class="flex items-center gap-2">
+        <span id="badge-playmode" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">핵심 · 순서</span>
+        <button onclick="switchModeInGame()" id="mode-switch-btn" class="text-slate-300 font-bold text-[10px] underline">자동 전환</button>
+        <div id="mode-status" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-slate-50 text-slate-300">수동</div>
+      </div>
+    </div>
+    <div id="core-reference" class="text-xs text-slate-400 font-bold mb-5 mt-5 hidden"></div>
+    <div id="kr-box" class="text-2xl sm:text-3xl font-bold text-slate-800 leading-relaxed mb-8 break-keep px-2"></div>
+    <div id="en-box" class="answer-hidden transition-all duration-500 w-full text-center">
+      <div class="h-px bg-slate-100 w-16 mx-auto mb-6"></div>
+      <p id="en-text" class="text-xl sm:text-2xl font-black text-blue-600 leading-snug break-keep px-2"></p>
+      <p id="answer-note" class="text-[10px] text-slate-300 mt-4">모범 답안 · 먼저 직접 말해 보세요</p>
+    </div>
+    <div id="finish-ui" class="hidden absolute inset-0 bg-white z-50 flex flex-col items-center justify-center p-6 text-center rounded-[3rem]">
+      <p class="text-4xl mb-4">🎉</p>
+      <h2 class="text-2xl font-black mb-2 text-slate-800">연습 완료!</h2>
+      <p id="finish-summary" class="text-sm text-slate-500 mb-5">드릴을 모두 마쳤습니다.</p>
+      <div id="finish-banner-area" class="w-full"></div>
+      <button id="cal-confirm-btn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg mb-2">복습 알림 예약하기</button>
+      <button onclick="location.reload()" class="text-slate-400 text-sm font-bold py-2">처음으로 돌아가기</button>
+    </div>
+  </div>
+
+  <div id="study-banner-area"></div>
+  <div id="control-panel" class="flex gap-2 mb-5 items-center">
+    <button onclick="prevStep()" id="prev-btn" class="nav-control w-12 shrink-0 bg-white border border-slate-200 text-slate-500 rounded-2xl font-bold text-xl shadow-sm" aria-label="이전 문제" title="이전 문제">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+    </button>
+    <button onclick="handleAction()" id="main-btn" class="nav-control flex-1 min-w-0 bg-slate-900 text-white rounded-2xl font-bold text-base shadow-lg active:scale-[.98] transition-transform">정답 확인</button>
+    <button onclick="hideAnswer()" id="hide-answer-btn" class="nav-control hide-control is-unavailable bg-white border border-slate-200 text-slate-500 rounded-2xl font-bold text-xs" aria-label="정답 숨기기" aria-disabled="true" title="정답 숨기기">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.9 5.2A10.7 10.7 0 0121 12a10.7 10.7 0 00-3.2 4.8"/></svg><span>숨기기</span>
+    </button>
+  </div>
+  <div id="progress-container" class="h-4 flex items-center w-full mb-2"><div class="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden pointer-events-none"><div id="progress-bar" class="h-full bg-orange-500 transition-all duration-300" style="width:0%"></div></div></div>
+  <p id="progress-text" class="text-center text-slate-400 text-[9px] font-bold uppercase tracking-widest pb-6 pointer-events-none">Step 1 / 30</p>
+</div>
+
+<template id="unused-template"></template>
+<script>
+const coreData = [
+  {num:"001",kr:"너 이 프로그램 쓸 줄 알아?",en:"Can you use this program?"},
+  {num:"002",kr:"너 영어로 발표할 수 있어?",en:"Can you give a presentation in English?"},
+  {num:"003",kr:"너 운전할 수 있어?",en:"Can you drive?"},
+  {num:"004",kr:"네 아들 이제 글씨 읽을 수 있어?",en:"Can your son read now?"},
+  {num:"005",kr:"너 나 없이 살 수 있어?",en:"Can you live without me?"},
+  {num:"006",kr:"나 이것 좀 도와줄래?",en:"Can you help me with this?"},
+  {num:"007",kr:"이거 확인해 줄래?",en:"Can you check this?"},
+  {num:"008",kr:"나중에 전화해 줄 수 있어?",en:"Can you call me later?"},
+  {num:"009",kr:"잠깐 기다려 줄래?",en:"Can you wait a minute?"},
+  {num:"010",kr:"이것 좀 들고 있어줄래?",en:"Can you hold this for me?"},
+  {num:"011",kr:"조용히 해줄래?",en:"Can you be quiet?"},
+  {num:"012",kr:"더 구체적으로 말해줄래?",en:"Can you be more specific?"},
+  {num:"013",kr:"슈퍼마켓 잠깐 들릴 수 있어?",en:"Can you stop by the supermarket?"},
+  {num:"014",kr:"창문 좀 닫아줄래?",en:"Can you close the window?"},
+  {num:"015",kr:"에어컨 좀 켜줄래?",en:"Can you turn on the air conditioner?"},
+  {num:"016",kr:"불 좀 꺼줄 수 있어?",en:"Can you turn off the light?"},
+  {num:"017",kr:"나를 역까지 태워다 줄 수 있어?",en:"Can you drive me to the station?"},
+  {num:"018",kr:"옆으로 비켜줄래?",en:"Can you move over?"},
+  {num:"019",kr:"내 대타 좀 뛰어줄래?",en:"Can you fill in for me?"},
+  {num:"020",kr:"나 좀 혼자 내버려 둘래?",en:"Can you leave me alone?"},
+  {num:"021",kr:"여기 앉아도 돼?",en:"Can I sit here?"},
+  {num:"022",kr:"네 휴대폰 써도 돼?",en:"Can I use your phone?"},
+  {num:"023",kr:"네 펜 빌려도 돼?",en:"Can I borrow your pen?"},
+  {num:"024",kr:"나 이제 가도 돼?",en:"Can I leave now?"},
+  {num:"025",kr:"잠깐만 자리를 비워도 될까?",en:"Can I step away for a second?"},
+  {num:"026",kr:"이거 입어봐도 돼?",en:"Can I try this on?"},
+  {num:"027",kr:"여기 주차해도 돼요?",en:"Can I park here?"},
+  {num:"028",kr:"이제 시작해도 돼?",en:"Can I start now?"},
+  {num:"029",kr:"Derek이라고 불러도 될까?",en:"Can I call you Derek?"},
+  {num:"030",kr:"잠깐 전화 좀 받아도 될까?",en:"Can I take this call?"}
+];
+
+// 각 핵심 문장당 응용 2개: 문장 형태와 주어만 바꾸고, 새로운 정보는 덧붙이지 않습니다.
+const appliedData = [
+  {num:"001-1",coreNum:"001",coreEn:"Can you use this program?",kr:"걔(남자)는 이 프로그램을 사용할 수 있어.",en:"He can use this program."},
+  {num:"001-2",coreNum:"001",coreEn:"Can you use this program?",kr:"걔(여자)는 이 프로그램을 사용할 수 없니?",en:"Can't she use this program?"},
+  {num:"002-1",coreNum:"002",coreEn:"Can you give a presentation in English?",kr:"걔(남자)는 영어로 발표할 수 없어.",en:"He can't give a presentation in English."},
+  {num:"002-2",coreNum:"002",coreEn:"Can you give a presentation in English?",kr:"걔(여자)는 영어로 발표할 수 있어.",en:"She can give a presentation in English."},
+  {num:"003-1",coreNum:"003",coreEn:"Can you drive?",kr:"걔(남자)는 운전할 수 있어.",en:"He can drive."},
+  {num:"003-2",coreNum:"003",coreEn:"Can you drive?",kr:"걔(여자)는 운전할 수 없니?",en:"Can't she drive?"},
+  {num:"004-1",coreNum:"004",coreEn:"Can your son read now?",kr:"걔(남자)는 이제 글씨를 읽을 수 있어.",en:"He can read now."},
+  {num:"004-2",coreNum:"004",coreEn:"Can your son read now?",kr:"걔(여자)는 이제 글씨를 읽을 수 없어.",en:"She can't read now."},
+  {num:"005-1",coreNum:"005",coreEn:"Can you live without me?",kr:"걔(남자)는 나 없이 살 수 없어.",en:"He can't live without me."},
+  {num:"005-2",coreNum:"005",coreEn:"Can you live without me?",kr:"걔(여자)는 나 없이 살 수 있어.",en:"She can live without me."},
+  {num:"006-1",coreNum:"006",coreEn:"Can you help me with this?",kr:"걔(남자)는 이것으로 나를 도와줄 수 있어.",en:"He can help me with this."},
+  {num:"006-2",coreNum:"006",coreEn:"Can you help me with this?",kr:"걔(여자)는 이것으로 나를 도와줄 수 없니?",en:"Can't she help me with this?"},
+  {num:"007-1",coreNum:"007",coreEn:"Can you check this?",kr:"걔(남자)는 이걸 확인할 수 없어.",en:"He can't check this."},
+  {num:"007-2",coreNum:"007",coreEn:"Can you check this?",kr:"걔(여자)는 이걸 확인할 수 있어.",en:"She can check this."},
+  {num:"008-1",coreNum:"008",coreEn:"Can you call me later?",kr:"걔(남자)는 나중에 나에게 전화할 수 있어.",en:"He can call me later."},
+  {num:"008-2",coreNum:"008",coreEn:"Can you call me later?",kr:"걔(여자)는 나중에 나에게 전화할 수 없니?",en:"Can't she call me later?"},
+  {num:"009-1",coreNum:"009",coreEn:"Can you wait a minute?",kr:"걔(남자)는 잠깐 기다릴 수 없어.",en:"He can't wait a minute."},
+  {num:"009-2",coreNum:"009",coreEn:"Can you wait a minute?",kr:"걔(여자)는 잠깐 기다릴 수 있어.",en:"She can wait a minute."},
+  {num:"010-1",coreNum:"010",coreEn:"Can you hold this for me?",kr:"걔(남자)는 이것을 나를 위해 들고 있을 수 있어.",en:"He can hold this for me."},
+  {num:"010-2",coreNum:"010",coreEn:"Can you hold this for me?",kr:"걔(여자)는 이것을 나를 위해 들고 있을 수 없니?",en:"Can't she hold this for me?"},
+  {num:"011-1",coreNum:"011",coreEn:"Can you be quiet?",kr:"걔(남자)는 조용히 할 수 있어.",en:"He can be quiet."},
+  {num:"011-2",coreNum:"011",coreEn:"Can you be quiet?",kr:"걔(여자)는 조용히 할 수 없니?",en:"Can't she be quiet?"},
+  {num:"012-1",coreNum:"012",coreEn:"Can you be more specific?",kr:"걔(남자)는 더 구체적일 수 없어.",en:"He can't be more specific."},
+  {num:"012-2",coreNum:"012",coreEn:"Can you be more specific?",kr:"걔(여자)는 더 구체적일 수 있어.",en:"She can be more specific."},
+  {num:"013-1",coreNum:"013",coreEn:"Can you stop by the supermarket?",kr:"걔(남자)는 슈퍼마켓에 잠깐 들를 수 있어.",en:"He can stop by the supermarket."},
+  {num:"013-2",coreNum:"013",coreEn:"Can you stop by the supermarket?",kr:"걔(여자)는 슈퍼마켓에 잠깐 들를 수 없니?",en:"Can't she stop by the supermarket?"},
+  {num:"014-1",coreNum:"014",coreEn:"Can you close the window?",kr:"걔(남자)는 창문을 닫을 수 없어.",en:"He can't close the window."},
+  {num:"014-2",coreNum:"014",coreEn:"Can you close the window?",kr:"걔(여자)는 창문을 닫을 수 있어.",en:"She can close the window."},
+  {num:"015-1",coreNum:"015",coreEn:"Can you turn on the air conditioner?",kr:"걔(남자)는 에어컨을 켤 수 있어.",en:"He can turn on the air conditioner."},
+  {num:"015-2",coreNum:"015",coreEn:"Can you turn on the air conditioner?",kr:"걔(여자)는 에어컨을 켤 수 없니?",en:"Can't she turn on the air conditioner?"},
+  {num:"016-1",coreNum:"016",coreEn:"Can you turn off the light?",kr:"걔(남자)는 불을 끌 수 없어.",en:"He can't turn off the light."},
+  {num:"016-2",coreNum:"016",coreEn:"Can you turn off the light?",kr:"걔(여자)는 불을 끌 수 있어.",en:"She can turn off the light."},
+  {num:"017-1",coreNum:"017",coreEn:"Can you drive me to the station?",kr:"걔(남자)는 나를 역까지 태워다 줄 수 있어.",en:"He can drive me to the station."},
+  {num:"017-2",coreNum:"017",coreEn:"Can you drive me to the station?",kr:"걔(여자)는 나를 역까지 태워다 줄 수 없니?",en:"Can't she drive me to the station?"},
+  {num:"018-1",coreNum:"018",coreEn:"Can you move over?",kr:"걔(남자)는 옆으로 비킬 수 없어.",en:"He can't move over."},
+  {num:"018-2",coreNum:"018",coreEn:"Can you move over?",kr:"걔(여자)는 옆으로 비킬 수 있어.",en:"She can move over."},
+  {num:"019-1",coreNum:"019",coreEn:"Can you fill in for me?",kr:"걔(남자)는 나 대신 대타를 뛸 수 있어.",en:"He can fill in for me."},
+  {num:"019-2",coreNum:"019",coreEn:"Can you fill in for me?",kr:"걔(여자)는 나 대신 대타를 뛸 수 없니?",en:"Can't she fill in for me?"},
+  {num:"020-1",coreNum:"020",coreEn:"Can you leave me alone?",kr:"걔(남자)는 나를 혼자 내버려 둘 수 없어.",en:"He can't leave me alone."},
+  {num:"020-2",coreNum:"020",coreEn:"Can you leave me alone?",kr:"걔(여자)는 나를 혼자 내버려 둘 수 있어.",en:"She can leave me alone."},
+  {num:"021-1",coreNum:"021",coreEn:"Can I sit here?",kr:"걔(남자)는 여기 앉을 수 있어.",en:"He can sit here."},
+  {num:"021-2",coreNum:"021",coreEn:"Can I sit here?",kr:"걔(여자)는 여기 앉을 수 없니?",en:"Can't she sit here?"},
+  {num:"022-1",coreNum:"022",coreEn:"Can I use your phone?",kr:"걔(남자)는 네 휴대폰을 사용할 수 없어.",en:"He can't use your phone."},
+  {num:"022-2",coreNum:"022",coreEn:"Can I use your phone?",kr:"걔(여자)는 네 휴대폰을 사용할 수 있어.",en:"She can use your phone."},
+  {num:"023-1",coreNum:"023",coreEn:"Can I borrow your pen?",kr:"걔(남자)는 네 펜을 빌릴 수 있어.",en:"He can borrow your pen."},
+  {num:"023-2",coreNum:"023",coreEn:"Can I borrow your pen?",kr:"걔(여자)는 네 펜을 빌릴 수 없니?",en:"Can't she borrow your pen?"},
+  {num:"024-1",coreNum:"024",coreEn:"Can I leave now?",kr:"걔(남자)는 이제 갈 수 없어.",en:"He can't leave now."},
+  {num:"024-2",coreNum:"024",coreEn:"Can I leave now?",kr:"걔(여자)는 이제 갈 수 있어.",en:"She can leave now."},
+  {num:"025-1",coreNum:"025",coreEn:"Can I step away for a second?",kr:"걔(남자)는 잠깐 자리를 비울 수 있어.",en:"He can step away for a second."},
+  {num:"025-2",coreNum:"025",coreEn:"Can I step away for a second?",kr:"걔(여자)는 잠깐 자리를 비울 수 없니?",en:"Can't she step away for a second?"},
+  {num:"026-1",coreNum:"026",coreEn:"Can I try this on?",kr:"걔(남자)는 이걸 입어볼 수 없어.",en:"He can't try this on."},
+  {num:"026-2",coreNum:"026",coreEn:"Can I try this on?",kr:"걔(여자)는 이걸 입어볼 수 있어.",en:"She can try this on."},
+  {num:"027-1",coreNum:"027",coreEn:"Can I park here?",kr:"걔(남자)는 여기에 주차할 수 있어.",en:"He can park here."},
+  {num:"027-2",coreNum:"027",coreEn:"Can I park here?",kr:"걔(여자)는 여기에 주차할 수 없니?",en:"Can't she park here?"},
+  {num:"028-1",coreNum:"028",coreEn:"Can I start now?",kr:"걔(남자)는 이제 시작할 수 없어.",en:"He can't start now."},
+  {num:"028-2",coreNum:"028",coreEn:"Can I start now?",kr:"걔(여자)는 이제 시작할 수 있어.",en:"She can start now."},
+  {num:"029-1",coreNum:"029",coreEn:"Can I call you Derek?",kr:"걔(남자)는 너를 Derek이라고 부를 수 있어.",en:"He can call you Derek."},
+  {num:"029-2",coreNum:"029",coreEn:"Can I call you Derek?",kr:"걔(여자)는 너를 Derek이라고 부를 수 없니?",en:"Can't she call you Derek?"},
+  {num:"030-1",coreNum:"030",coreEn:"Can I take this call?",kr:"걔(남자)는 이 전화를 받을 수 있어.",en:"He can take this call."},
+  {num:"030-2",coreNum:"030",coreEn:"Can I take this call?",kr:"걔(여자)는 이 전화를 받을 수 없니?",en:"Can't she take this call?"}
+];
+
+let contentMode='core',orderMode='ordered',studySequence=[],currentIdx=0,isRevealed=false,isAutoMode=false,autoGaugeTimer=null;
+const KR_THINK_TIME=5000,EN_CONFIRM_TIME=2500;
+const bannerMsgs=[{icon:'🔥',text:'하루 1분 투자! 실전 패턴 Pop!'},{icon:'🎬',text:'미드 보면서 실전 영어 패턴도 Pop!'}];
+let currentBannerIdx=0;
+
+function injectBanners(){
+  const t=document.getElementById('banner-template').content;
+  ['setup-banner-area','study-banner-area','finish-banner-area'].forEach(id=>{
+    const a=document.getElementById(id);if(a)a.appendChild(t.cloneNode(true));
+  });
+}
+function rotateBanners(){
+  currentBannerIdx=(currentBannerIdx+1)%bannerMsgs.length;
+  const m=bannerMsgs[currentBannerIdx];
+  document.querySelectorAll('.promo-banner').forEach(b=>{
+    const i=b.querySelector('.banner-inner');if(!i)return;
+    i.style.opacity=0;i.style.transform='translateY(3px)';
+    setTimeout(()=>{
+      b.querySelector('.banner-icon').innerText=m.icon;
+      b.querySelector('.banner-title').innerText=m.text;
+      i.style.opacity=1;i.style.transform='translateY(0)';
+    },500);
+  });
+}
+function selectContentMode(m){contentMode=m;updateSelections();}
+function selectOrderMode(m){orderMode=m;updateSelections();}
+function updateSelections(){
+  [['core','tab-core',contentMode],['applied','tab-applied',contentMode],['ordered','tab-ordered',orderMode],['random','tab-random',orderMode]].forEach(([value,id,selected])=>{
+    document.getElementById(id).className=value===selected
+      ?'py-3 rounded-xl font-black text-xs transition-all mode-btn-active shadow-sm'
+      :'py-3 rounded-xl font-bold text-xs text-slate-500 transition-all';
+  });
+  document.getElementById('mode-desc').innerText=`${contentMode==='core'?'핵심 문장 30개':'응용 문장 60개'}를 ${orderMode==='ordered'?'순서대로':'중복 없이 랜덤으로'} 연습합니다.`;
+}
+function toggleAutoMode(){
+  isAutoMode=!isAutoMode;
+  const b=document.getElementById('auto-mode-btn');
+  b.innerHTML=isAutoMode?'🟠 자동 재생 ON':'⚪ 자동 재생 OFF';
+  b.className=`w-full py-4 rounded-2xl border-2 font-bold flex items-center justify-center gap-2 transition-all ${isAutoMode?'auto-active':'border-slate-100 text-slate-600'}`;
+}
+function switchModeInGame(){
+  isAutoMode=!isAutoMode;updateInGameModeUI();
+  if(isAutoMode)runAutoGauge(isRevealed?EN_CONFIRM_TIME:KR_THINK_TIME);else stopAutoGauge();
+}
+function updateInGameModeUI(){
+  const s=document.getElementById('mode-status'),b=document.getElementById('mode-switch-btn');
+  s.innerText=isAutoMode?'자동':'수동';
+  s.className=isAutoMode?'text-[9px] font-black px-2 py-0.5 rounded-full bg-orange-100 text-orange-600':'text-[9px] font-black px-2 py-0.5 rounded-full bg-slate-50 text-slate-300';
+  b.innerText=isAutoMode?'수동 전환':'자동 전환';
+}
+function runAutoGauge(duration){
+  stopAutoGauge();if(!isAutoMode)return;
+  const c=document.getElementById('timer-gauge-container'),bar=document.getElementById('timer-gauge-bar');
+  c.classList.remove('hidden');bar.style.transition='none';bar.style.width='100%';
+  const start=Date.now();
+  requestAnimationFrame(()=>bar.style.transition='width 50ms linear');
+  autoGaugeTimer=setInterval(()=>{
+    const left=Math.max(0,duration-(Date.now()-start));
+    bar.style.width=`${left/duration*100}%`;
+    if(left<=0){stopAutoGauge();handleAction();}
+  },50);
+}
+function stopAutoGauge(){
+  if(autoGaugeTimer){clearInterval(autoGaugeTimer);autoGaugeTimer=null;}
+  const c=document.getElementById('timer-gauge-container'),b=document.getElementById('timer-gauge-bar');
+  if(c)c.classList.add('hidden');if(b)b.style.width='100%';
+}
+function shuffleArray(a){
+  const c=[...a];for(let i=c.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[c[i],c[j]]=[c[j],c[i]];}return c;
+}
+function startStudy(){
+  const source=contentMode==='core'?coreData:appliedData;
+  studySequence=orderMode==='random'?shuffleArray(source):[...source];
+  currentIdx=0;
+  document.getElementById('badge-playmode').innerText=`${contentMode==='core'?'핵심':'응용'} · ${orderMode==='ordered'?'순서':'랜덤'}`;
+  document.getElementById('setup-screen').classList.add('hidden');
+  document.getElementById('study-screen').classList.remove('hidden');
+  document.getElementById('finish-ui').classList.add('hidden');
+  document.getElementById('prev-item-box').classList.remove('hidden');
+  document.getElementById('study-banner-area').style.display='';
+  document.getElementById('control-panel').style.display='flex';
+  initProgressControl();updateInGameModeUI();render();
+}
+function render(){
+  stopAutoGauge();
+  const item=studySequence[currentIdx],pb=document.getElementById('prev-item-box');
+  if(currentIdx>0){
+    const p=studySequence[currentIdx-1];
+    document.getElementById('prev-kr').innerText='직전: '+p.kr;
+    document.getElementById('prev-en').innerText=contentMode==='applied'?p.en:'';
+    document.getElementById('prev-en').classList.toggle('hidden',contentMode==='core');
+    pb.classList.remove('opacity-0');pb.classList.add('opacity-40');
+  }else{
+    pb.classList.add('opacity-0');pb.classList.remove('opacity-40');
+    document.getElementById('prev-en').classList.toggle('hidden',contentMode==='core');
+  }
+  document.getElementById('sentence-number').innerText=`${item.num} · ${currentIdx+1}/${studySequence.length}`;
+  const coreRef=document.getElementById('core-reference');
+  if(contentMode==='core'){coreRef.classList.add('hidden');}
+  else{coreRef.classList.remove('hidden');coreRef.innerText=`핵심 문장 ${item.coreNum}: ${item.coreEn}`;}
+  document.getElementById('kr-box').innerText=item.kr;
+  document.getElementById('en-text').innerText=item.en;
+  document.getElementById('answer-note').classList.toggle('hidden',contentMode==='core');
+  document.getElementById('progress-text').innerText=`Step ${currentIdx+1} / ${studySequence.length}`;
+  document.getElementById('progress-bar').style.width=`${studySequence.length<=1?100:currentIdx/(studySequence.length-1)*100}%`;
+  document.getElementById('en-box').className='answer-hidden transition-all duration-500 w-full text-center';
+  document.getElementById('main-btn').innerText='정답 확인';
+  setHideButtonState(false);isRevealed=false;
+  const prev=document.getElementById('prev-btn');
+  prev.classList.toggle('text-slate-300',currentIdx===0);
+  prev.classList.toggle('text-slate-500',currentIdx>0);
+  prev.classList.toggle('opacity-40',currentIdx===0);
+  prev.classList.toggle('pointer-events-none',currentIdx===0);
+  if(isAutoMode)runAutoGauge(KR_THINK_TIME);
+}
+function handleAction(){
+  stopAutoGauge();
+  if(!isRevealed){
+    document.getElementById('en-box').className='answer-visible transition-all duration-500 w-full text-center';
+    document.getElementById('main-btn').innerText='다음 문제';
+    setHideButtonState(true);isRevealed=true;
+    if(isAutoMode)runAutoGauge(EN_CONFIRM_TIME);
+  }else{
+    currentIdx++;
+    if(currentIdx<studySequence.length)render();else finishStudy();
+  }
+}
+function setHideButtonState(available){
+  const b=document.getElementById('hide-answer-btn');
+  b.classList.toggle('is-available',available);b.classList.toggle('is-unavailable',!available);
+  b.setAttribute('aria-disabled',String(!available));
+}
+function hideAnswer(){
+  if(!isRevealed)return;
+  stopAutoGauge();
+  document.getElementById('en-box').className='answer-hidden transition-all duration-500 w-full text-center';
+  document.getElementById('main-btn').innerText='정답 확인';
+  setHideButtonState(false);isRevealed=false;
+  if(isAutoMode)runAutoGauge(KR_THINK_TIME);
+}
+function prevStep(){if(currentIdx>0){currentIdx--;render();}}
+function initProgressControl(){
+  const c=document.getElementById('progress-container');
+  const seek=e=>{
+    const r=c.getBoundingClientRect(),x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
+    const p=Math.max(0,Math.min(1,x/r.width)),n=Math.round(p*(studySequence.length-1));
+    if(n!==currentIdx){currentIdx=n;render();}
+  };
+  c.onmousedown=e=>{
+    seek(e);const move=m=>seek(m),up=()=>{
+      document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);
+    };
+    document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);
+  };
+  c.ontouchstart=e=>{
+    seek(e);const move=m=>{m.preventDefault();seek(m);},up=()=>{
+      document.removeEventListener('touchmove',move);document.removeEventListener('touchend',up);
+    };
+    document.addEventListener('touchmove',move,{passive:false});document.addEventListener('touchend',up);
+  };
+}
+function finishStudy(){
+  stopAutoGauge();
+  document.getElementById('finish-ui').classList.remove('hidden');
+  document.getElementById('prev-item-box').classList.add('hidden');
+  document.getElementById('study-banner-area').style.display='none';
+  document.getElementById('control-panel').style.display='none';
+  document.getElementById('finish-summary').innerText=`${studySequence.length}개 문장 연습을 모두 마쳤습니다. 수고하셨습니다!`;
+  document.getElementById('cal-confirm-btn').onclick=()=>{
+    const days=prompt('며칠 뒤에 복습 알림을 예약할까요? (1~30)','1');
+    if(!days)return;
+    const n=Math.max(1,Math.min(30,parseInt(days)||1)),d=new Date();d.setDate(d.getDate()+n);
+    const date=d.toISOString().replace(/-|:|\.\d+/g,'').slice(0,8);
+    const title=encodeURIComponent(`[복습] Vibe 1강 Question Drill (${contentMode==='core'?'핵심':'응용'} · ${orderMode==='ordered'?'순서':'랜덤'} 모드)`);
+    const details=encodeURIComponent(`Vibe 1강 CAN 의문문 드릴 복습하기!\n\n🔗 주소: ${location.href}`);
+    location.href=`https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&dates=${date}T090000/${date}T100000`;
+  };
+}
+window.onload=()=>{injectBanners();setInterval(rotateBanners,4000);};
+</script>
+</body>
+</html>
