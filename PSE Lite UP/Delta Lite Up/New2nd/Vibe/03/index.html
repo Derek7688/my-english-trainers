@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Vibe 3강 | SHOULD Drill</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap');
+body{font-family:'Pretendard',sans-serif;touch-action:manipulation}
+.card-container{min-height:390px;display:flex;flex-direction:column;justify-content:center}
+.banner-inner{transition:all .5s ease}
+#progress-container{cursor:pointer;touch-action:none}
+#timer-gauge-bar{transition:width 50ms linear}
+.mode-btn-active{background:#0f172a!important;color:#fff!important;border-color:#0f172a!important}
+.auto-active{background:#f97316!important;color:#fff!important;border-color:#f97316!important}
+.answer-hidden{visibility:hidden;opacity:0;transform:translateY(12px);pointer-events:none}
+.answer-visible{visibility:visible;opacity:1;transform:translateY(0)}
+#control-panel{min-height:64px}
+.nav-control{height:56px;display:flex;align-items:center;justify-content:center;white-space:nowrap}
+.hide-control{width:92px;flex:0 0 92px;transition:opacity .18s ease,background-color .18s ease,color .18s ease}
+.hide-control.is-unavailable{opacity:.35;cursor:default}
+.hide-control.is-available{opacity:1}
+</style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col items-center justify-start p-4">
+
+<template id="banner-template">
+  <div class="promo-banner bg-white border border-blue-50 p-4 rounded-[2.2rem] mb-6 cursor-pointer shadow-lg transition-all active:scale-95 w-full max-w-sm mx-auto" onclick="window.open('https://www.pse-learning.co.kr/course/course_list.jsp?cid=120849','_blank')">
+    <div class="banner-inner flex items-center gap-4">
+      <div class="banner-icon w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-blue-200 shadow-lg text-white font-bold">🔥</div>
+      <div class="flex-1 overflow-hidden h-10 flex flex-col justify-center text-left">
+        <h3 class="banner-title font-black text-slate-800 text-[14px] tracking-tight leading-tight">하루 1분 투자! 실전 패턴 Pop!</h3>
+        <p class="text-blue-600 font-bold text-[9px] uppercase tracking-widest mt-0.5">수강 신청하고 영어 실력 Pop! →</p>
+      </div>
+    </div>
+  </div>
+</template>
+
+<div id="setup-screen" class="bg-white p-7 sm:p-8 rounded-[2.5rem] shadow-2xl max-w-sm w-full border border-slate-100 my-auto text-center">
+  <h1 class="text-2xl font-black text-slate-800 mb-5">Vibe 3강</h1>
+  <p class="text-slate-500 text-xs leading-relaxed mb-5">한국어 질문을 보고 영어로 말한 뒤 정답을 확인하세요.<br>핵심 문장 30개 또는 응용 문장 60개를 연습할 수 있습니다.</p>
+  <div id="setup-banner-area"></div>
+
+  <div class="mb-5 px-1 text-left">
+    <p class="text-slate-700 font-bold text-sm mb-3">연습할 문장 선택</p>
+    <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-2xl">
+      <button id="tab-core" onclick="selectContentMode('core')" class="py-3 rounded-xl font-black text-xs transition-all mode-btn-active shadow-sm">📘 핵심 문장 30개</button>
+      <button id="tab-applied" onclick="selectContentMode('applied')" class="py-3 rounded-xl font-bold text-xs text-slate-500 transition-all">🔄 응용 문장 60개</button>
+    </div>
+  </div>
+
+  <div class="mb-6 px-1 text-left">
+    <p class="text-slate-700 font-bold text-sm mb-3">출제 순서 선택</p>
+    <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-2xl">
+      <button id="tab-ordered" onclick="selectOrderMode('ordered')" class="py-3 rounded-xl font-black text-xs transition-all mode-btn-active shadow-sm">🔢 순서대로</button>
+      <button id="tab-random" onclick="selectOrderMode('random')" class="py-3 rounded-xl font-bold text-xs text-slate-500 transition-all">🎲 랜덤</button>
+    </div>
+    <p id="mode-desc" class="text-[11px] font-semibold text-slate-400 mt-2 px-1">핵심 문장 30개를 1번부터 순서대로 연습합니다.</p>
+  </div>
+
+  <div class="mb-6">
+    <button id="auto-mode-btn" onclick="toggleAutoMode()" class="w-full py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-600 flex items-center justify-center gap-2 transition-all"><span id="auto-icon">⚪</span> 자동 재생 OFF</button>
+    <p class="text-[10px] text-slate-400 mt-2">자동 재생은 생각 시간 후 정답을 보여주고 다음 문제로 넘어갑니다.</p>
+  </div>
+  <button onclick="startStudy()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold text-lg shadow-xl active:scale-95 transition-all">연습 시작하기</button>
+</div>
+
+<div id="study-screen" class="hidden w-full max-w-lg text-slate-900 mx-auto">
+  <div class="flex justify-between items-center mb-4 px-2">
+    <button onclick="location.reload()" class="p-2 hover:bg-slate-200 rounded-full text-slate-400" aria-label="처음으로">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"/></svg>
+    </button>
+    <div id="active-lesson-name" class="text-slate-400 font-black text-xs tracking-widest uppercase text-center flex-1">VIBE · SHOULD DRILL</div>
+    <div class="w-10"></div>
+  </div>
+
+  <div id="prev-item-box" class="w-full px-8 mb-2 flex flex-col items-center justify-center text-center opacity-0 min-h-12">
+    <p id="prev-kr" class="text-xs font-bold text-slate-400 truncate w-full"></p>
+    <p id="prev-en" class="text-xs font-black text-blue-300 truncate w-full"></p>
+  </div>
+
+  <div class="bg-white p-8 sm:p-10 rounded-[3rem] shadow-2xl card-container text-center mb-5 border border-slate-50 relative overflow-hidden">
+    <div id="timer-gauge-container" class="absolute top-0 left-0 right-0 h-1.5 bg-slate-100 hidden overflow-hidden"><div id="timer-gauge-bar" class="h-full bg-orange-500 w-full"></div></div>
+    <div class="absolute top-6 left-7 right-7 flex justify-between items-center">
+      <span id="sentence-number" class="bg-slate-100 text-slate-400 px-3 py-1 rounded-lg text-[10px] font-black">01</span>
+      <div class="flex items-center gap-2">
+        <span id="badge-playmode" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">핵심 · 순서</span>
+        <button onclick="switchModeInGame()" id="mode-switch-btn" class="text-slate-300 font-bold text-[10px] underline">자동 전환</button>
+        <div id="mode-status" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-slate-50 text-slate-300">수동</div>
+      </div>
+    </div>
+    <div id="core-reference" class="text-xs text-slate-400 font-bold mb-5 mt-5 hidden"></div>
+    <div id="kr-box" class="text-2xl sm:text-3xl font-bold text-slate-800 leading-relaxed mb-8 break-keep px-2"></div>
+    <div id="en-box" class="answer-hidden transition-all duration-500 w-full text-center">
+      <div class="h-px bg-slate-100 w-16 mx-auto mb-6"></div>
+      <p id="en-text" class="text-xl sm:text-2xl font-black text-blue-600 leading-snug break-keep px-2"></p>
+      <p id="answer-note" class="text-[10px] text-slate-300 mt-4">모범 답안 · 먼저 직접 말해 보세요</p>
+    </div>
+    <div id="finish-ui" class="hidden absolute inset-0 bg-white z-50 flex flex-col items-center justify-center p-6 text-center rounded-[3rem]">
+      <p class="text-4xl mb-4">🎉</p>
+      <h2 class="text-2xl font-black mb-2 text-slate-800">연습 완료!</h2>
+      <p id="finish-summary" class="text-sm text-slate-500 mb-5">드릴을 모두 마쳤습니다.</p>
+      <div id="finish-banner-area" class="w-full"></div>
+      <button id="cal-confirm-btn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg mb-2">복습 알림 예약하기</button>
+      <button onclick="location.reload()" class="text-slate-400 text-sm font-bold py-2">처음으로 돌아가기</button>
+    </div>
+  </div>
+
+  <div id="study-banner-area"></div>
+  <div id="control-panel" class="flex gap-2 mb-5 items-center">
+    <button onclick="prevStep()" id="prev-btn" class="nav-control w-12 shrink-0 bg-white border border-slate-200 text-slate-500 rounded-2xl font-bold text-xl shadow-sm" aria-label="이전 문제" title="이전 문제">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+    </button>
+    <button onclick="handleAction()" id="main-btn" class="nav-control flex-1 min-w-0 bg-slate-900 text-white rounded-2xl font-bold text-base shadow-lg active:scale-[.98] transition-transform">정답 확인</button>
+    <button onclick="hideAnswer()" id="hide-answer-btn" class="nav-control hide-control is-unavailable bg-white border border-slate-200 text-slate-500 rounded-2xl font-bold text-xs" aria-label="정답 숨기기" aria-disabled="true" title="정답 숨기기">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.9 5.2A10.7 10.7 0 0121 12a10.7 10.7 0 00-3.2 4.8"/></svg><span>숨기기</span>
+    </button>
+  </div>
+  <div id="progress-container" class="h-4 flex items-center w-full mb-2"><div class="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden pointer-events-none"><div id="progress-bar" class="h-full bg-orange-500 transition-all duration-300" style="width:0%"></div></div></div>
+  <p id="progress-text" class="text-center text-slate-400 text-[9px] font-bold uppercase tracking-widest pb-6 pointer-events-none">Step 1 / 30</p>
+</div>
+
+<template id="unused-template"></template>
+<script>
+const coreData = [
+  {num:"001",kr:"지금 주유하는 게 좋을까?",en:"Should I fill up now?"},
+  {num:"002",kr:"아침마다 스트레칭하는 게 좋을까?",en:"Should I stretch every morning?"},
+  {num:"003",kr:"지금 휴대폰을 충전하는 게 좋을까?",en:"Should I charge my phone now?"},
+  {num:"004",kr:"걔(남자)를 손절하는 게 좋을까?",en:"Should I cut ties with him?"},
+  {num:"005",kr:"이 주식을 지금 사는 게 좋을까?",en:"Should I buy this stock now?"},
+  {num:"006",kr:"이 파일들을 백업하는 게 좋을까?",en:"Should I back up these files?"},
+  {num:"007",kr:"이 서류를 인쇄하는 게 좋을까?",en:"Should I print out this document?"},
+  {num:"008",kr:"이 전화를 받는 게 좋을까?",en:"Should I take this call?"},
+  {num:"009",kr:"재킷을 챙기는 게 좋을까?",en:"Should I pack a jacket?"},
+  {num:"010",kr:"걔네들을 한식당에 데려가는 게 좋을까?",en:"Should I take them out to a Korean restaurant?"},
+  {num:"011",kr:"이직하는 게 좋을까?",en:"Should I switch jobs?"},
+  {num:"012",kr:"여기에 주차하는 게 좋을까?",en:"Should I park here?"},
+  {num:"013",kr:"이 사진을 삭제하는 게 좋을까?",en:"Should I delete this photo?"},
+  {num:"014",kr:"이 이메일을 전달하는 게 좋을까?",en:"Should I forward this email?"},
+  {num:"015",kr:"회의 일정을 변경하는 게 좋을까?",en:"Should I reschedule the meeting?"},
+  {num:"016",kr:"너 크게 심호흡하는 게 좋지 않겠어?",en:"Shouldn't you take a deep breath?"},
+  {num:"017",kr:"너 가격을 비교하는 게 좋지 않겠어?",en:"Shouldn't you compare the prices?"},
+  {num:"018",kr:"너 호텔을 예약하는 게 좋지 않겠어?",en:"Shouldn't you book a hotel?"},
+  {num:"019",kr:"너 방을 꾸미는 게 좋지 않겠어?",en:"Shouldn't you decorate the room?"},
+  {num:"020",kr:"너 테이블을 세팅하는 게 좋지 않겠어?",en:"Shouldn't you set the table?"},
+  {num:"021",kr:"너 화면을 닦는 게 좋지 않겠어?",en:"Shouldn't you wipe the screen?"},
+  {num:"022",kr:"너 바닥을 쓰는 게 좋지 않겠어?",en:"Shouldn't you sweep the floor?"},
+  {num:"023",kr:"너 이 서류들을 분류하는 게 좋지 않겠어?",en:"Shouldn't you sort these papers?"},
+  {num:"024",kr:"너 상자에 라벨을 붙이는 게 좋지 않겠어?",en:"Shouldn't you label the box?"},
+  {num:"025",kr:"너 그 책을 반납하는 게 좋지 않겠어?",en:"Shouldn't you return the book?"},
+  {num:"026",kr:"걔(여자)한테 물어보는 게 좋지 않겠어?",en:"Shouldn't you ask her?"},
+  {num:"027",kr:"너 파일을 첨부하는 게 좋지 않겠어?",en:"Shouldn't you attach the file?"},
+  {num:"028",kr:"너 날짜를 확인하는 게 좋지 않겠어?",en:"Shouldn't you confirm the date?"},
+  {num:"029",kr:"먼저 준비 운동을 하는 게 좋지 않겠어?",en:"Shouldn't you warm up first?"},
+  {num:"030",kr:"너 컵을 헹구는 게 좋지 않겠어?",en:"Shouldn't you rinse the cup?"}
+];
+
+// 각 핵심 문장당 응용 2개
+const appliedData = [
+  {
+    "num": 1,
+    "coreNum": 1,
+    "coreEn": "Should I fill up now?",
+    "kr": "지금 주유하는 게 좋겠다.",
+    "en": "I should fill up now."
+  },
+  {
+    "num": 2,
+    "coreNum": 1,
+    "coreEn": "Should I fill up now?",
+    "kr": "걔(남자)가 지금 주유하는 게 좋을까?",
+    "en": "Should he fill up now?"
+  },
+  {
+    "num": 3,
+    "coreNum": 2,
+    "coreEn": "Should I stretch every morning?",
+    "kr": "아침마다 스트레칭하는 게 좋겠다.",
+    "en": "I should stretch every morning."
+  },
+  {
+    "num": 4,
+    "coreNum": 2,
+    "coreEn": "Should I stretch every morning?",
+    "kr": "걔(여자)가 아침마다 스트레칭하는 게 좋을까?",
+    "en": "Should she stretch every morning?"
+  },
+  {
+    "num": 5,
+    "coreNum": 3,
+    "coreEn": "Should I charge my phone now?",
+    "kr": "지금 휴대폰을 충전하는 게 좋겠다.",
+    "en": "I should charge my phone now."
+  },
+  {
+    "num": 6,
+    "coreNum": 3,
+    "coreEn": "Should I charge my phone now?",
+    "kr": "너 지금 휴대폰을 충전하는 게 좋을까?",
+    "en": "Should you charge your phone now?"
+  },
+  {
+    "num": 7,
+    "coreNum": 4,
+    "coreEn": "Should I cut ties with him?",
+    "kr": "걔(남자)를 손절하는 게 좋겠다.",
+    "en": "I should cut ties with him."
+  },
+  {
+    "num": 8,
+    "coreNum": 4,
+    "coreEn": "Should I cut ties with him?",
+    "kr": "걔(여자)가 걔(남자)를 손절하는 게 좋을까?",
+    "en": "Should she cut ties with him?"
+  },
+  {
+    "num": 9,
+    "coreNum": 5,
+    "coreEn": "Should I buy this stock now?",
+    "kr": "이 주식을 지금 사는 게 좋겠다.",
+    "en": "I should buy this stock now."
+  },
+  {
+    "num": 10,
+    "coreNum": 5,
+    "coreEn": "Should I buy this stock now?",
+    "kr": "걔(남자)가 이 주식을 지금 사는 게 좋을까?",
+    "en": "Should he buy this stock now?"
+  },
+  {
+    "num": 11,
+    "coreNum": 6,
+    "coreEn": "Should I back up these files?",
+    "kr": "이 파일들을 백업하는 게 좋겠다.",
+    "en": "I should back up these files."
+  },
+  {
+    "num": 12,
+    "coreNum": 6,
+    "coreEn": "Should I back up these files?",
+    "kr": "걔(여자)가 이 파일들을 백업하는 게 좋을까?",
+    "en": "Should she back up these files?"
+  },
+  {
+    "num": 13,
+    "coreNum": 7,
+    "coreEn": "Should I print out this document?",
+    "kr": "이 서류를 인쇄하는 게 좋겠다.",
+    "en": "I should print out this document."
+  },
+  {
+    "num": 14,
+    "coreNum": 7,
+    "coreEn": "Should I print out this document?",
+    "kr": "너 이 서류를 인쇄하는 게 좋을까?",
+    "en": "Should you print out this document?"
+  },
+  {
+    "num": 15,
+    "coreNum": 8,
+    "coreEn": "Should I take this call?",
+    "kr": "이 전화를 받는 게 좋겠다.",
+    "en": "I should take this call."
+  },
+  {
+    "num": 16,
+    "coreNum": 8,
+    "coreEn": "Should I take this call?",
+    "kr": "걔(남자)가 이 전화를 받는 게 좋을까?",
+    "en": "Should he take this call?"
+  },
+  {
+    "num": 17,
+    "coreNum": 9,
+    "coreEn": "Should I pack a jacket?",
+    "kr": "재킷을 챙기는 게 좋겠다.",
+    "en": "I should pack a jacket."
+  },
+  {
+    "num": 18,
+    "coreNum": 9,
+    "coreEn": "Should I pack a jacket?",
+    "kr": "걔(여자)가 재킷을 챙기는 게 좋을까?",
+    "en": "Should she pack a jacket?"
+  },
+  {
+    "num": 19,
+    "coreNum": 10,
+    "coreEn": "Should I take them out to a Korean restaurant?",
+    "kr": "걔네들을 한식당에 데려가는 게 좋겠다.",
+    "en": "I should take them out to a Korean restaurant."
+  },
+  {
+    "num": 20,
+    "coreNum": 10,
+    "coreEn": "Should I take them out to a Korean restaurant?",
+    "kr": "걔(남자)가 걔네들을 한식당에 데려가는 게 좋을까?",
+    "en": "Should he take them out to a Korean restaurant?"
+  },
+  {
+    "num": 21,
+    "coreNum": 11,
+    "coreEn": "Should I switch jobs?",
+    "kr": "이직하는 게 좋겠다.",
+    "en": "I should switch jobs."
+  },
+  {
+    "num": 22,
+    "coreNum": 11,
+    "coreEn": "Should I switch jobs?",
+    "kr": "너 이직하는 게 좋을까?",
+    "en": "Should you switch jobs?"
+  },
+  {
+    "num": 23,
+    "coreNum": 12,
+    "coreEn": "Should I park here?",
+    "kr": "여기에 주차하는 게 좋겠다.",
+    "en": "I should park here."
+  },
+  {
+    "num": 24,
+    "coreNum": 12,
+    "coreEn": "Should I park here?",
+    "kr": "걔(남자)가 여기에 주차하는 게 좋을까?",
+    "en": "Should he park here?"
+  },
+  {
+    "num": 25,
+    "coreNum": 13,
+    "coreEn": "Should I delete this photo?",
+    "kr": "이 사진을 삭제하는 게 좋겠다.",
+    "en": "I should delete this photo."
+  },
+  {
+    "num": 26,
+    "coreNum": 13,
+    "coreEn": "Should I delete this photo?",
+    "kr": "걔(여자)가 이 사진을 삭제하는 게 좋을까?",
+    "en": "Should she delete this photo?"
+  },
+  {
+    "num": 27,
+    "coreNum": 14,
+    "coreEn": "Should I forward this email?",
+    "kr": "이 이메일을 전달하는 게 좋겠다.",
+    "en": "I should forward this email."
+  },
+  {
+    "num": 28,
+    "coreNum": 14,
+    "coreEn": "Should I forward this email?",
+    "kr": "너 이 이메일을 전달하는 게 좋을까?",
+    "en": "Should you forward this email?"
+  },
+  {
+    "num": 29,
+    "coreNum": 15,
+    "coreEn": "Should I reschedule the meeting?",
+    "kr": "회의 일정을 변경하는 게 좋겠다.",
+    "en": "I should reschedule the meeting."
+  },
+  {
+    "num": 30,
+    "coreNum": 15,
+    "coreEn": "Should I reschedule the meeting?",
+    "kr": "걔(남자)가 회의 일정을 변경하는 게 좋을까?",
+    "en": "Should he reschedule the meeting?"
+  },
+  {
+    "num": 31,
+    "coreNum": 16,
+    "coreEn": "Shouldn't you take a deep breath?",
+    "kr": "너는 크게 심호흡하는 게 좋아.",
+    "en": "You should take a deep breath."
+  },
+  {
+    "num": 32,
+    "coreNum": 16,
+    "coreEn": "Shouldn't you take a deep breath?",
+    "kr": "걔(남자)는 크게 심호흡하는 게 좋지 않겠어?",
+    "en": "Shouldn't he take a deep breath?"
+  },
+  {
+    "num": 33,
+    "coreNum": 17,
+    "coreEn": "Shouldn't you compare the prices?",
+    "kr": "너는 가격을 비교하는 게 좋아.",
+    "en": "You should compare the prices."
+  },
+  {
+    "num": 34,
+    "coreNum": 17,
+    "coreEn": "Shouldn't you compare the prices?",
+    "kr": "걔(여자)는 가격을 비교하는 게 좋지 않겠어?",
+    "en": "Shouldn't she compare the prices?"
+  },
+  {
+    "num": 35,
+    "coreNum": 18,
+    "coreEn": "Shouldn't you book a hotel?",
+    "kr": "너는 호텔을 예약하는 게 좋아.",
+    "en": "You should book a hotel."
+  },
+  {
+    "num": 36,
+    "coreNum": 18,
+    "coreEn": "Shouldn't you book a hotel?",
+    "kr": "걔(남자)는 호텔을 예약하는 게 좋지 않겠어?",
+    "en": "Shouldn't he book a hotel?"
+  },
+  {
+    "num": 37,
+    "coreNum": 19,
+    "coreEn": "Shouldn't you decorate the room?",
+    "kr": "너는 방을 꾸미는 게 좋아.",
+    "en": "You should decorate the room."
+  },
+  {
+    "num": 38,
+    "coreNum": 19,
+    "coreEn": "Shouldn't you decorate the room?",
+    "kr": "걔(여자)는 방을 꾸미는 게 좋지 않겠어?",
+    "en": "Shouldn't she decorate the room?"
+  },
+  {
+    "num": 39,
+    "coreNum": 20,
+    "coreEn": "Shouldn't you set the table?",
+    "kr": "너는 테이블을 세팅하는 게 좋아.",
+    "en": "You should set the table."
+  },
+  {
+    "num": 40,
+    "coreNum": 20,
+    "coreEn": "Shouldn't you set the table?",
+    "kr": "걔(남자)는 테이블을 세팅하는 게 좋지 않겠어?",
+    "en": "Shouldn't he set the table?"
+  },
+  {
+    "num": 41,
+    "coreNum": 21,
+    "coreEn": "Shouldn't you wipe the screen?",
+    "kr": "너는 화면을 닦는 게 좋아.",
+    "en": "You should wipe the screen."
+  },
+  {
+    "num": 42,
+    "coreNum": 21,
+    "coreEn": "Shouldn't you wipe the screen?",
+    "kr": "걔(여자)는 화면을 닦는 게 좋지 않겠어?",
+    "en": "Shouldn't she wipe the screen?"
+  },
+  {
+    "num": 43,
+    "coreNum": 22,
+    "coreEn": "Shouldn't you sweep the floor?",
+    "kr": "너는 바닥을 쓰는 게 좋아.",
+    "en": "You should sweep the floor."
+  },
+  {
+    "num": 44,
+    "coreNum": 22,
+    "coreEn": "Shouldn't you sweep the floor?",
+    "kr": "걔(남자)는 바닥을 쓰는 게 좋지 않겠어?",
+    "en": "Shouldn't he sweep the floor?"
+  },
+  {
+    "num": 45,
+    "coreNum": 23,
+    "coreEn": "Shouldn't you sort these papers?",
+    "kr": "너는 이 서류들을 분류하는 게 좋아.",
+    "en": "You should sort these papers."
+  },
+  {
+    "num": 46,
+    "coreNum": 23,
+    "coreEn": "Shouldn't you sort these papers?",
+    "kr": "걔(여자)는 이 서류들을 분류하는 게 좋지 않겠어?",
+    "en": "Shouldn't she sort these papers?"
+  },
+  {
+    "num": 47,
+    "coreNum": 24,
+    "coreEn": "Shouldn't you label the box?",
+    "kr": "너는 상자에 라벨을 붙이는 게 좋아.",
+    "en": "You should label the box."
+  },
+  {
+    "num": 48,
+    "coreNum": 24,
+    "coreEn": "Shouldn't you label the box?",
+    "kr": "걔(남자)는 상자에 라벨을 붙이는 게 좋지 않겠어?",
+    "en": "Shouldn't he label the box?"
+  },
+  {
+    "num": 49,
+    "coreNum": 25,
+    "coreEn": "Shouldn't you return the book?",
+    "kr": "너는 그 책을 반납하는 게 좋아.",
+    "en": "You should return the book."
+  },
+  {
+    "num": 50,
+    "coreNum": 25,
+    "coreEn": "Shouldn't you return the book?",
+    "kr": "걔(여자)는 그 책을 반납하는 게 좋지 않겠어?",
+    "en": "Shouldn't she return the book?"
+  },
+  {
+    "num": 51,
+    "coreNum": 26,
+    "coreEn": "Shouldn't you ask her?",
+    "kr": "너는 걔(여자)한테 물어보는 게 좋아.",
+    "en": "You should ask her."
+  },
+  {
+    "num": 52,
+    "coreNum": 26,
+    "coreEn": "Shouldn't you ask her?",
+    "kr": "걔(남자)는 걔(여자)한테 물어보는 게 좋지 않겠어?",
+    "en": "Shouldn't he ask her?"
+  },
+  {
+    "num": 53,
+    "coreNum": 27,
+    "coreEn": "Shouldn't you attach the file?",
+    "kr": "너는 파일을 첨부하는 게 좋아.",
+    "en": "You should attach the file."
+  },
+  {
+    "num": 54,
+    "coreNum": 27,
+    "coreEn": "Shouldn't you attach the file?",
+    "kr": "걔(여자)는 파일을 첨부하는 게 좋지 않겠어?",
+    "en": "Shouldn't she attach the file?"
+  },
+  {
+    "num": 55,
+    "coreNum": 28,
+    "coreEn": "Shouldn't you confirm the date?",
+    "kr": "너는 날짜를 확인하는 게 좋아.",
+    "en": "You should confirm the date."
+  },
+  {
+    "num": 56,
+    "coreNum": 28,
+    "coreEn": "Shouldn't you confirm the date?",
+    "kr": "걔(남자)는 날짜를 확인하는 게 좋지 않겠어?",
+    "en": "Shouldn't he confirm the date?"
+  },
+  {
+    "num": 57,
+    "coreNum": 29,
+    "coreEn": "Shouldn't you warm up first?",
+    "kr": "너는 먼저 준비 운동을 하는 게 좋아.",
+    "en": "You should warm up first."
+  },
+  {
+    "num": 58,
+    "coreNum": 29,
+    "coreEn": "Shouldn't you warm up first?",
+    "kr": "걔(여자)는 먼저 준비 운동을 하는 게 좋지 않겠어?",
+    "en": "Shouldn't she warm up first?"
+  },
+  {
+    "num": 59,
+    "coreNum": 30,
+    "coreEn": "Shouldn't you rinse the cup?",
+    "kr": "너는 컵을 헹구는 게 좋아.",
+    "en": "You should rinse the cup."
+  },
+  {
+    "num": 60,
+    "coreNum": 30,
+    "coreEn": "Shouldn't you rinse the cup?",
+    "kr": "걔(남자)는 컵을 헹구는 게 좋지 않겠어?",
+    "en": "Shouldn't he rinse the cup?"
+  }
+];
+
+let contentMode='core',orderMode='ordered',studySequence=[],currentIdx=0,isRevealed=false,isAutoMode=false,autoGaugeTimer=null;
+const KR_THINK_TIME=5000,EN_CONFIRM_TIME=2500;
+const bannerMsgs=[{icon:'🔥',text:'하루 1분 투자! 실전 패턴 Pop!'},{icon:'🎬',text:'미드 보면서 실전 영어 패턴도 Pop!'}];
+let currentBannerIdx=0;
+
+function injectBanners(){
+  const t=document.getElementById('banner-template').content;
+  ['setup-banner-area','study-banner-area','finish-banner-area'].forEach(id=>{
+    const a=document.getElementById(id);if(a)a.appendChild(t.cloneNode(true));
+  });
+}
+function rotateBanners(){
+  currentBannerIdx=(currentBannerIdx+1)%bannerMsgs.length;
+  const m=bannerMsgs[currentBannerIdx];
+  document.querySelectorAll('.promo-banner').forEach(b=>{
+    const i=b.querySelector('.banner-inner');if(!i)return;
+    i.style.opacity=0;i.style.transform='translateY(3px)';
+    setTimeout(()=>{
+      b.querySelector('.banner-icon').innerText=m.icon;
+      b.querySelector('.banner-title').innerText=m.text;
+      i.style.opacity=1;i.style.transform='translateY(0)';
+    },500);
+  });
+}
+function selectContentMode(m){contentMode=m;updateSelections();}
+function selectOrderMode(m){orderMode=m;updateSelections();}
+function updateSelections(){
+  [['core','tab-core',contentMode],['applied','tab-applied',contentMode],['ordered','tab-ordered',orderMode],['random','tab-random',orderMode]].forEach(([value,id,selected])=>{
+    document.getElementById(id).className=value===selected
+      ?'py-3 rounded-xl font-black text-xs transition-all mode-btn-active shadow-sm'
+      :'py-3 rounded-xl font-bold text-xs text-slate-500 transition-all';
+  });
+  document.getElementById('mode-desc').innerText=`${contentMode==='core'?'핵심 문장 30개':'응용 문장 60개'}를 ${orderMode==='ordered'?'순서대로':'중복 없이 랜덤으로'} 연습합니다.`;
+}
+function toggleAutoMode(){
+  isAutoMode=!isAutoMode;
+  const b=document.getElementById('auto-mode-btn');
+  b.innerHTML=isAutoMode?'🟠 자동 재생 ON':'⚪ 자동 재생 OFF';
+  b.className=`w-full py-4 rounded-2xl border-2 font-bold flex items-center justify-center gap-2 transition-all ${isAutoMode?'auto-active':'border-slate-100 text-slate-600'}`;
+}
+function switchModeInGame(){
+  isAutoMode=!isAutoMode;updateInGameModeUI();
+  if(isAutoMode)runAutoGauge(isRevealed?EN_CONFIRM_TIME:KR_THINK_TIME);else stopAutoGauge();
+}
+function updateInGameModeUI(){
+  const s=document.getElementById('mode-status'),b=document.getElementById('mode-switch-btn');
+  s.innerText=isAutoMode?'자동':'수동';
+  s.className=isAutoMode?'text-[9px] font-black px-2 py-0.5 rounded-full bg-orange-100 text-orange-600':'text-[9px] font-black px-2 py-0.5 rounded-full bg-slate-50 text-slate-300';
+  b.innerText=isAutoMode?'수동 전환':'자동 전환';
+}
+function runAutoGauge(duration){
+  stopAutoGauge();if(!isAutoMode)return;
+  const c=document.getElementById('timer-gauge-container'),bar=document.getElementById('timer-gauge-bar');
+  c.classList.remove('hidden');bar.style.transition='none';bar.style.width='100%';
+  const start=Date.now();
+  requestAnimationFrame(()=>bar.style.transition='width 50ms linear');
+  autoGaugeTimer=setInterval(()=>{
+    const left=Math.max(0,duration-(Date.now()-start));
+    bar.style.width=`${left/duration*100}%`;
+    if(left<=0){stopAutoGauge();handleAction();}
+  },50);
+}
+function stopAutoGauge(){
+  if(autoGaugeTimer){clearInterval(autoGaugeTimer);autoGaugeTimer=null;}
+  const c=document.getElementById('timer-gauge-container'),b=document.getElementById('timer-gauge-bar');
+  if(c)c.classList.add('hidden');if(b)b.style.width='100%';
+}
+function shuffleArray(a){
+  const c=[...a];for(let i=c.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[c[i],c[j]]=[c[j],c[i]];}return c;
+}
+function startStudy(){
+  const source=contentMode==='core'?coreData:appliedData;
+  studySequence=orderMode==='random'?shuffleArray(source):[...source];
+  currentIdx=0;
+  document.getElementById('badge-playmode').innerText=`${contentMode==='core'?'핵심':'응용'} · ${orderMode==='ordered'?'순서':'랜덤'}`;
+  document.getElementById('setup-screen').classList.add('hidden');
+  document.getElementById('study-screen').classList.remove('hidden');
+  document.getElementById('finish-ui').classList.add('hidden');
+  document.getElementById('prev-item-box').classList.remove('hidden');
+  document.getElementById('study-banner-area').style.display='';
+  document.getElementById('control-panel').style.display='flex';
+  initProgressControl();updateInGameModeUI();render();
+}
+function render(){
+  stopAutoGauge();
+  const item=studySequence[currentIdx],pb=document.getElementById('prev-item-box');
+  if(currentIdx>0){
+    const p=studySequence[currentIdx-1];
+    document.getElementById('prev-kr').innerText='직전: '+p.kr;
+    document.getElementById('prev-en').innerText=contentMode==='applied'?p.en:'';
+    document.getElementById('prev-en').classList.toggle('hidden',contentMode==='core');
+    pb.classList.remove('opacity-0');pb.classList.add('opacity-40');
+  }else{
+    pb.classList.add('opacity-0');pb.classList.remove('opacity-40');
+    document.getElementById('prev-en').classList.toggle('hidden',contentMode==='core');
+  }
+  document.getElementById('sentence-number').innerText=`${item.num} · ${currentIdx+1}/${studySequence.length}`;
+  const coreRef=document.getElementById('core-reference');
+  if(contentMode==='core'){coreRef.classList.add('hidden');}
+  else{coreRef.classList.remove('hidden');coreRef.innerText=`핵심 문장 ${item.coreNum}: ${item.coreEn}`;}
+  document.getElementById('kr-box').innerText=item.kr;
+  document.getElementById('en-text').innerText=item.en;
+  document.getElementById('answer-note').classList.toggle('hidden',contentMode==='core');
+  document.getElementById('progress-text').innerText=`Step ${currentIdx+1} / ${studySequence.length}`;
+  document.getElementById('progress-bar').style.width=`${studySequence.length<=1?100:currentIdx/(studySequence.length-1)*100}%`;
+  document.getElementById('en-box').className='answer-hidden transition-all duration-500 w-full text-center';
+  document.getElementById('main-btn').innerText='정답 확인';
+  setHideButtonState(false);isRevealed=false;
+  const prev=document.getElementById('prev-btn');
+  prev.classList.toggle('text-slate-300',currentIdx===0);
+  prev.classList.toggle('text-slate-500',currentIdx>0);
+  prev.classList.toggle('opacity-40',currentIdx===0);
+  prev.classList.toggle('pointer-events-none',currentIdx===0);
+  if(isAutoMode)runAutoGauge(KR_THINK_TIME);
+}
+function handleAction(){
+  stopAutoGauge();
+  if(!isRevealed){
+    document.getElementById('en-box').className='answer-visible transition-all duration-500 w-full text-center';
+    document.getElementById('main-btn').innerText='다음 문제';
+    setHideButtonState(true);isRevealed=true;
+    if(isAutoMode)runAutoGauge(EN_CONFIRM_TIME);
+  }else{
+    currentIdx++;
+    if(currentIdx<studySequence.length)render();else finishStudy();
+  }
+}
+function setHideButtonState(available){
+  const b=document.getElementById('hide-answer-btn');
+  b.classList.toggle('is-available',available);b.classList.toggle('is-unavailable',!available);
+  b.setAttribute('aria-disabled',String(!available));
+}
+function hideAnswer(){
+  if(!isRevealed)return;
+  stopAutoGauge();
+  document.getElementById('en-box').className='answer-hidden transition-all duration-500 w-full text-center';
+  document.getElementById('main-btn').innerText='정답 확인';
+  setHideButtonState(false);isRevealed=false;
+  if(isAutoMode)runAutoGauge(KR_THINK_TIME);
+}
+function prevStep(){if(currentIdx>0){currentIdx--;render();}}
+function initProgressControl(){
+  const c=document.getElementById('progress-container');
+  const seek=e=>{
+    const r=c.getBoundingClientRect(),x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
+    const p=Math.max(0,Math.min(1,x/r.width)),n=Math.round(p*(studySequence.length-1));
+    if(n!==currentIdx){currentIdx=n;render();}
+  };
+  c.onmousedown=e=>{
+    seek(e);const move=m=>seek(m),up=()=>{
+      document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);
+    };
+    document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);
+  };
+  c.ontouchstart=e=>{
+    seek(e);const move=m=>{m.preventDefault();seek(m);},up=()=>{
+      document.removeEventListener('touchmove',move);document.removeEventListener('touchend',up);
+    };
+    document.addEventListener('touchmove',move,{passive:false});document.addEventListener('touchend',up);
+  };
+}
+function finishStudy(){
+  stopAutoGauge();
+  document.getElementById('finish-ui').classList.remove('hidden');
+  document.getElementById('prev-item-box').classList.add('hidden');
+  document.getElementById('study-banner-area').style.display='none';
+  document.getElementById('control-panel').style.display='none';
+  document.getElementById('finish-summary').innerText=`${studySequence.length}개 문장 연습을 모두 마쳤습니다. 수고하셨습니다!`;
+  document.getElementById('cal-confirm-btn').onclick=()=>{
+    const days=prompt('며칠 뒤에 복습 알림을 예약할까요? (1~30)','1');
+    if(!days)return;
+    const n=Math.max(1,Math.min(30,parseInt(days)||1)),d=new Date();d.setDate(d.getDate()+n);
+    const date=d.toISOString().replace(/-|:|\.\d+/g,'').slice(0,8);
+    const title=encodeURIComponent(`[복습] Vibe 3강 SHOULD Drill (${contentMode==='core'?'핵심':'응용'} · ${orderMode==='ordered'?'순서':'랜덤'} 모드)`);
+    const details=encodeURIComponent(`Vibe 3강 SHOULD 드릴 복습하기!\n\n🔗 주소: ${location.href}`);
+    location.href=`https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&dates=${date}T090000/${date}T100000`;
+  };
+}
+window.onload=()=>{injectBanners();setInterval(rotateBanners,4000);};
+</script>
+</body>
+</html>
